@@ -105,7 +105,7 @@ function showDataInfo() {
 function getColumns() {
   const cols = [
     { key: 'title', label: 'Journal', className: 'journal-column align-left', title: 'Open OpenAlex with the ID, or "More info" for the details' },
-    { key: 'oa_field', label: 'Field', className: 'align-left', title: 'OpenAlex field; percentiles are calculated within these fields' },
+    { key: 'oa_field', label: 'Field', className: 'align-left', title: publishedYear().field_assignment ? 'Most frequent work-based field and its share of classified works; percentiles use the field without the percentage' : 'OpenAlex source field from this historical run; percentiles are calculated within these fields' },
   ];
   cols.push(
     { key: 'publications', label: 'Publications', title: `Articles and reviews ${year - 5}–${year - 1}${state.treatment === 'raw' ? '' : ' with at least one linked reference'}` },
@@ -141,7 +141,7 @@ function cell(row, col) {
     `<a class="journal-id" href="${openAlexUrl(row)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escape(row.title)} in OpenAlex, new tab">${escape(id)} ↗</a>` +
     `<span class="journal-id"> · ${escape(row.issn_l || 'no ISSN')}</span>` +
     `<button type="button" class="text-button more-info" data-journal="${escape(id)}">More info</button></td>`;
-  if (col.key === 'oa_field') return `<td class="field-cell">${escape(value || 'Unclassified')}</td>`;
+  if (col.key === 'oa_field') return `<td class="field-cell" title="${escape(E.fieldDescription(row))}">${escape(E.fieldLabel(row))}</td>`;
   if (col.key === 'reference_coverage_pct') {
     const low = E.isNumber(value) && state.minCoverage >= 0 && value <= state.minCoverage;
     const bar = E.isNumber(value) ? `<div class="coverage-track" aria-hidden="true"><div class="coverage-fill" style="width:${Math.max(0, Math.min(100, value))}%"></div></div>` : '';
@@ -248,7 +248,8 @@ function showJournal(id) {
     ['OpenAlex ID', `<a href="${openAlexUrl(row)}" target="_blank" rel="noopener noreferrer">${escape(id)} ↗ (new tab)</a>`],
     ['ISSNs', escape(row.issns || 'Unavailable')],
     ['Publisher', escape(row.publisher || 'Unavailable')],
-    ['OpenAlex domain / field', escape([row.oa_domain, row.oa_field].filter(Boolean).join(' / ') || 'Unclassified')],
+    ['OpenAlex domain / field', escape([row.oa_domain, E.fieldLabel(row)].filter(Boolean).join(' / '))],
+    ['Field assignment', escape(E.fieldDescription(row))],
     ['Norwegian area / field', escape([row.norwegian_area, row.norwegian_field].filter(Boolean).join(' / ') || 'Unclassified')],
     [`Norwegian level ${year}`, row.norwegian_level == null ? 'Not in the register'
       : `Level ${escape(row.norwegian_level)} · ` +
@@ -340,10 +341,10 @@ function downloadView() {
     minimum_output_years: state.minYears, retained_top_pct_per_field: state.topPercent, final_pool_size: ranks.retained,
   });
   const reason = row => (state.showPercentiles ? [ranks.reasons.get(row.openalex_id) || ''] : []);
-  const header = ['openalex_id', `in_${state.universe}`, ...columns.map(c => csvHeader(c.key)),
+  const header = ['openalex_id', `in_${state.universe}`, ...columns.map(c => csvHeader(c.key)), ...E.FIELD_DETAIL_COLUMNS,
     ...(state.showPercentiles ? ['percentile_exclusion_reason'] : []), ...Object.keys(settings)];
   const lines = visible.map(row => [row.openalex_id, row[`in_${state.universe}`],
-    ...columns.map(c => E.columnValue(row, state, ranks, c.key)), ...reason(row), ...Object.values(settings)]);
+    ...columns.map(c => E.columnValue(row, state, ranks, c.key)), ...E.FIELD_DETAIL_COLUMNS.map(c => row[c]), ...reason(row), ...Object.values(settings)]);
   saveCsv(`opindx-${year}-${state.treatment}-view.csv`, [csvLines([header, ...lines])]);
 }
 
@@ -378,7 +379,7 @@ async function downloadSelection() {
   const status = text => { $('download-status').textContent = text; };
   if (!years.length || !universes.length) return status('Choose at least one score year and one universe.');
   const universeColumns = u => [`in_${u}`, ...Object.keys(METRICS).flatMap(metric => [`${metric}_${u}_raw`, `${metric}_${u}_filtered`])];
-  const columns = [...BASE_COLUMNS, ...universes.flatMap(universeColumns)];
+  const columns = [...BASE_COLUMNS, ...E.FIELD_DETAIL_COLUMNS, ...universes.flatMap(universeColumns)];
   const source = ['data_status', 'run', 'openalex_snapshot']; // where this score year's numbers come from
   const parts = [csvLines([[...columns, ...source]])];
   let total = 0;
@@ -390,7 +391,7 @@ async function downloadSelection() {
       // A year only has the universes of its own run; columns it lacks stay empty in the CSV.
       const yearEntry = index.years.find(entry => entry.year === y);
       const inYear = universes.filter(u => u in yearEntry.universes);
-      const available = [...BASE_COLUMNS, ...inYear.flatMap(universeColumns)];
+      const available = [...BASE_COLUMNS, ...(yearEntry.field_assignment ? E.FIELD_DETAIL_COLUMNS : []), ...inYear.flatMap(universeColumns)];
       const kept = (await parquetReadObjects({ file: buffer, columns: available })).filter(row => inYear.some(u => row[`in_${u}`]));
       const from = [yearEntry.status, yearEntry.run, yearEntry.openalex_snapshot];
       if (kept.length) parts.push('\r\n', csvLines(kept.map(row => [...columns.map(column => row[column]), ...from])));

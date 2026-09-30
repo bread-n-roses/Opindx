@@ -120,3 +120,32 @@ score-years.json       which score years are frozen, and from which run
 - License for the code and for the data.
 - Custom domain.
 - Small-field pooling for percentiles: the report pools fields with fewer than 100 journals, this site doesn't.
+
+## Rolling Work fields (rolling-primary-work-broad-field-v1)
+
+New runs include `field_assignment` in their manifest. For citing year t,
+`oa_field` is the modal primary-topic broad field across the corrected,
+deduplicated article/review Works published in t-5 through t-1. Use Raw works
+for both score treatments and all universes. No field pooling. Exclude unnamed
+fields from the mode and its denominator; use `Unknown` if none are classified.
+Ties select the alphabetically first field. `oa_domain` is that field's parent.
+
+Additional numeric columns:
+
+- `oa_field_modal_share`: winning count / classified works, fraction 0-1; null for Unknown.
+- `oa_field_modal_works`: winning count, or zero for Unknown.
+- `oa_field_classified_works`: count of works with a named primary-topic field.
+- `oa_field_classification_coverage`: classified works / `publications_raw`, fraction 0-1; null if no works.
+- `oa_field_tied_modes`: number of fields tied for first, or zero for Unknown.
+
+The table displays e.g. `Medicine (19.5%)`, with denominator, coverage and tie
+information in the tooltip/details. Field filters and percentile groups use the
+plain `oa_field`; percentages never become group keys. CSV downloads keep labels
+and numeric shares separate. The build retains field-method provenance in each
+published year's index entry. Historic runs without this metadata remain readable.
+The existing percentile settings and freeze-year configuration are unchanged.
+
+The integrated AIS website exporter produces these release files directly from
+the immutable score CSV plus a hash-bound annual field sidecar. Use that workflow
+for rolling-field runs; this repository's legacy CSV converter is for historic
+source-field CSVs and must not be used to drop the rolling metadata.

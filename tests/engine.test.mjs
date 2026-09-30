@@ -69,4 +69,19 @@ check('Empty pools and missing coverage stay undefined instead of becoming zero'
   equal(E.percentiles([]).size, 0);
 });
 
+check('Rolling field shares are display metadata, never group keys', () => {
+  const a = {...journal('a', 1, {field:'Medicine'}), score_year:2026, oa_field_modal_share:.195,
+    oa_field_classification_coverage:.98, oa_field_tied_modes:1};
+  const b = {...journal('b', 2, {field:'Medicine'}), oa_field_modal_share:.9};
+  equal(E.fieldLabel(a), 'Medicine (19.5%)');
+  equal(E.fieldLabel(b), 'Medicine (90.0%)');
+  equal(E.rank([a,b], base).groups, 1);
+  equal(E.fieldDescription(a).includes('2021-2025'), true);
+  equal(E.fieldDescription(a).includes('98.0%'), true);
+  equal(E.fieldLabel({oa_field:'Unknown',oa_field_modal_share:null}), 'Unknown');
+  equal(E.fieldLabel({oa_field:'Medicine'}), 'Medicine');
+  equal(E.fieldDescription({oa_field:'Medicine'}).includes('historical'), true);
+  equal(E.fieldDescription({...a,oa_field_tied_modes:2}).includes('2 fields tied'), true);
+});
+
 if (failures) throw new Error(`${failures} test(s) failed`);

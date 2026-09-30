@@ -44,6 +44,8 @@ def import_run(csv_file, output_location, run_name):
         sys.exit(f"Cannot find the CSV: {csv_file}\nSet file_path at the bottom of this script.")
     # norwegian_level is text: a journal with two register entries has a value like "1 | 2".
     df = pd.read_csv(csv_file, encoding="utf-8-sig", dtype={"norwegian_level": "string"}, low_memory=False)
+    if "oa_field_modal_share" in df.columns:
+        sys.exit("Rolling-field CSV detected: use the integrated AIS Opindx exporter to preserve field-method provenance and shares.")
     df = df.rename(columns=RENAME)
     text = df.columns[df.dtypes == "object"]
     df[text] = df[text].replace("", None)  # an empty cell is a missing value, not empty text

@@ -10,6 +10,26 @@ export const score = (row, state, universe = state.universe, metric = state.metr
 export const FIELD_COLUMN = 'oa_field';
 export const field = row => row[FIELD_COLUMN] || 'Unclassified';
 
+// Display percentages separately; ranking and filtering use the plain field.
+export const FIELD_DETAIL_COLUMNS = ['oa_field_modal_share', 'oa_field_modal_works',
+  'oa_field_classified_works', 'oa_field_classification_coverage', 'oa_field_tied_modes'];
+export function fieldLabel(row) {
+  const label = field(row), share = row.oa_field_modal_share;
+  return isNumber(share) && share >= 0 && share <= 1 && label !== 'Unknown'
+    ? `${label} (${(100 * share).toFixed(1)}%)` : label;
+}
+export function fieldDescription(row) {
+  if (!Object.hasOwn(row, 'oa_field_modal_share')) return 'OpenAlex source field from this historical data run.';
+  const window = `${row.score_year - 5}-${row.score_year - 1}`;
+  const coverage = row.oa_field_classification_coverage;
+  const classified = isNumber(coverage) ? `${(100 * coverage).toFixed(1)}% of eligible works have a field.` : 'No eligible works in this window.';
+  const mode = field(row) === 'Unknown' ? 'No classified article/review works.'
+    : 'Most frequent primary-topic broad field; percentage of classified article/review works. It does not describe the whole journal.';
+  const ties = row.oa_field_tied_modes > 1 ? ` ${row.oa_field_tied_modes} fields tied; alphabetical choice shown.` : '';
+  return `${window} publications. ${mode} ${classified}${ties}`;
+}
+
+
 export const compareText = new Intl.Collator('en').compare;
 
 // 64-bit integers are read as BigInt; the table works with ordinary numbers.

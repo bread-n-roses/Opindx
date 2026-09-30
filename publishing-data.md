@@ -50,3 +50,20 @@ The deploy stops with a clear message if the named run does not exist or does no
 - **Remove a run:** open the release and delete it. First check `score-years.json`: if a score year is frozen to that run, remove or change that line in the same go, otherwise the deploy stops with an error.
 
 After either fix, open **Actions**, select **Deploy website** and click **Run workflow**.
+
+## September 2026 corrected release
+
+On 30 September 2026, the owner authorized replacement of `2026-Q3` with the
+corrected September snapshot data for citing years 2022-2026, including rolling
+primary-work fields and modal shares. `score-years.json` pins 2022, 2023 and
+2024 to this replacement; 2025 and 2026 remain live.
+
+Use the integrated AIS exporter for these data: it already writes the complete
+manifest and yearly Parquet release files, including field-method provenance.
+Do not run the legacy CSV converter on the historical CSV to recreate this
+release; that CSV retains the older source-based field labels.
+
+Future data updates must use a new release tag and matching manifest run name.
+Do not replace `2026-Q3` again without an explicit correction decision, because
+three frozen years now depend on its assets. No automatic 12- or 18-month
+freezing rule is introduced by this manual decision.

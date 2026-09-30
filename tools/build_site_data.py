@@ -23,6 +23,10 @@ COLUMNS = ["openalex_id", "title", "publisher", "issn_l", "issns", "oa_domain", 
            "publications_filtered", "citations_raw", "citations_filtered", "reference_coverage_pct", "active_years"]
 
 
+FIELD_COLUMNS = ["oa_field_modal_share", "oa_field_modal_works", "oa_field_classified_works",
+                 "oa_field_classification_coverage", "oa_field_tied_modes"]
+
+
 def check_run(folder):
     manifest_file = folder / "manifest.json"
     if not manifest_file.exists():
@@ -36,6 +40,8 @@ def check_run(folder):
     universes = manifest["universes"]
     expected = COLUMNS + [f"in_{u}" for u in universes] + [
         f"{metric}_{u}_{treatment}" for u in universes for metric in ("share", "per_article") for treatment in ("raw", "filtered")]
+    if manifest.get("field_assignment"):
+        expected += FIELD_COLUMNS
     for year in manifest["years"]:
         path = folder / f"scores_{year}.parquet"
         if not path.exists():
@@ -95,6 +101,7 @@ def main(runs_folder, latest_run="", releases_url=None):
             "norwegian_register_snapshot": manifest.get("norwegian_register_snapshot"),
             "created": manifest["created"], "dummy": manifest.get("dummy", False),
             "universes": manifest["universes"],
+            "field_assignment": manifest.get("field_assignment"),
             "release_url": f"{releases_url}/tag/{run}" if releases_url else None,
         })
     if published:
