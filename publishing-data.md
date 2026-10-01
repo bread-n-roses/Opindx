@@ -67,3 +67,26 @@ Future data updates must use a new release tag and matching manifest run name.
 Do not replace `2026-Q3` again without an explicit correction decision, because
 three frozen years now depend on its assets. No automatic 12- or 18-month
 freezing rule is introduced by this manual decision.
+
+## Pending same-snapshot format update (2 October 2026)
+
+The user selected an update of all five `2026-Q3` annual files together using
+existing September snapshot results and a consistent extended schema. This is
+a format/metadata update, with inclusion of validated journal records whose
+metrics are all missing; existing calculated scores must remain unchanged.
+No unfreezing is needed. Keep `score-years.json` as it is: 2022-2024 frozen and
+2025-2026 live, all currently sourced from the same September snapshot.
+
+Before replacing release assets, integrate the local field breakdown and
+register details into the normal export and site-data builder, including annual
+citations and compact historical percentile inputs. Back up and hash-check the
+currently published assets. Validate all five replacement files and their
+manifest together, including preservation of existing scores, before upload and
+deployment. Record the schema/data revision and source provenance in the new
+manifest while retaining the `2026-Q3` run name. This replacement has not yet
+been prepared or published; the source changes are on
+`website-maintenance-2026-10-02`. A push of website changes to `main` triggers
+deployment, so coordinate that push with the completed release assets.
+
+This same-snapshot replacement does not set a policy for future snapshots;
+those should still receive distinct release tags to preserve frozen results.

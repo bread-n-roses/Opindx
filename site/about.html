@@ -11,8 +11,7 @@
 <body>
   <header class="masthead">
     <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">O</span> Opindx</a>
-    <span class="masthead-note">Open JNS &amp; ANS from OpenAlex</span>
-    <nav class="nav" aria-label="Pages"><a href="index.html">Journal scores</a><a href="about.html" aria-current="page">About</a></nav>
+    <nav class="nav" aria-label="Pages"><a href="index.html">Journal metrics</a><a href="about.html" aria-current="page">About</a></nav>
   </header>
   <main class="about">
     <p class="eyebrow">ABOUT</p>
@@ -44,10 +43,10 @@
     </section>
 
     <section class="panel">
-      <h2>Score years and their data</h2>
+      <div class="dialog-section-heading"><h2>Score years and their data</h2><a class="table-help" href="journal-help.html#data-versions" target="_blank" rel="noopener noreferrer" aria-label="Published years and source snapshots: What is what? (new tab)">What is what?</a></div>
       <p>Each data run recalculates score years with the OpenAlex and Norwegian Register data available at that moment. OpenAlex keeps adding and correcting references, so the same score year can differ slightly between runs.</p>
       <p>A score year is therefore published from one run. A <strong>frozen</strong> year always comes from that run and no longer changes, so it can be cited. A <strong>live</strong> year follows the newest run and can still change. Every run stays available for download.</p>
-      <div id="score-years">Loading the score years…</div>
+      <div id="score-years" role="region" aria-label="Published years and source snapshots; scroll for more columns" tabindex="0">Loading the score years…</div>
     </section>
 
     <section class="panel">
@@ -64,10 +63,10 @@
 
     <section class="panel">
       <h2>Data sources</h2>
-      <p>Journal metadata, publications and citations come from <a href="https://openalex.org">OpenAlex</a>. Norwegian fields and levels come from the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (HK-dir). In rolling-field data runs, each journal?s field is the most frequent OpenAlex primary-topic broad field among its articles and reviews in the five preceding publication years. The percentage beside the field is its share of classified works, not a claim that the whole journal belongs to that field. Classification coverage appears in the journal details. Fields remain separate, with Unknown used when no works have a field; ties are resolved alphabetically. Older data runs may retain source-based fields.</p>
+      <p>Journal metadata, publications and citations come from <a href="https://openalex.org">OpenAlex</a>. Norwegian fields and levels come from the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (HK-dir). In rolling-field data runs, each journal’s field is the most frequent OpenAlex primary-topic broad field among its articles and reviews in the five preceding publication years. The percentage beside the field is its share of classified works, not a claim that the whole journal belongs to that field. The journal details show the top three fields and Other fields; the <a href="journal-help.html#fields-covered">journal help page</a> explains their percentages. Fields remain separate, with Unknown used when no works have a field; ties are resolved alphabetically. Older data runs may retain source-based fields.</p>
     </section>
 
-    <footer class="page-footer"><span>OPINDX <span aria-hidden="true">/</span> Open journal scores</span><span>Precomputed scores. Transparent comparison groups.</span></footer>
+    <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span><span>Open Data · Open Source · Nonprofit · Made at <a href="https://vu.nl/" target="_blank" rel="noopener noreferrer">Vrije Universiteit Amsterdam</a></span></footer>
   </main>
   <script type="module">
     const escape = value => String(value ?? '—').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -77,7 +76,7 @@
       const row = entry => `<tr><th scope="row" class="align-left">${entry.year}</th>` +
         `<td class="align-left">${escape(entry.status)}</td>` +
         `<td class="align-left">${entry.release_url ? `<a href="${escape(entry.release_url)}">${escape(entry.run)}</a>` : escape(entry.run)}</td>` +
-        `<td class="align-left">${escape(entry.openalex_snapshot)}</td><td class="align-left">${escape(entry.norwegian_register_snapshot)}</td></tr>`;
+        `<td class="align-left">${escape(entry.openalex_snapshot?.slice(0, 7))}</td><td class="align-left">${escape(entry.norwegian_register_snapshot)}</td></tr>`;
       target.innerHTML = index.years.length
         ? '<table><thead><tr><th scope="col" class="align-left">Score year</th><th scope="col" class="align-left">Status</th>' +
           '<th scope="col" class="align-left">Data run</th><th scope="col" class="align-left">OpenAlex snapshot</th>' +

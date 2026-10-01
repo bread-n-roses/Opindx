@@ -30,6 +30,30 @@ export function fieldDescription(row) {
 }
 
 
+// Allocate percentage tenths by largest remainder so the displayed total is 100.0%.
+// Null means unavailable; an empty array means no classified publications.
+export function fieldBreakdown(row) {
+  const total = row?.oa_field_classified_works;
+  if (!Number.isSafeInteger(total) || total < 0) return null;
+  const parts = [];
+  for (let i = 1; i <= 3; i++) {
+    const name = row[`oa_field_${i}`], works = row[`oa_field_${i}_works`];
+    if (!Number.isSafeInteger(works) || works < 0 || (works > 0 && !name)) return null;
+    if (works > 0) parts.push({ name, works });
+  }
+  const other = row.oa_field_other_works;
+  if (!Number.isSafeInteger(other) || other < 0) return null;
+  parts.push({ name: 'Other fields', works: other });
+  if (parts.reduce((sum, p) => sum + p.works, 0) !== total) return null;
+  if (total === 0) return [];
+  for (const p of parts) p.tenths = Math.floor(p.works * 1000 / total);
+  const remaining = 1000 - parts.reduce((sum, p) => sum + p.tenths, 0);
+  const priority = parts.map((p, i) => ({ i, remainder: (p.works * 1000) % total }))
+    .sort((a, b) => b.remainder - a.remainder || a.i - b.i);
+  for (let i = 0; i < remaining; i++) parts[priority[i].i].tenths++;
+  return parts.map(({ name, works, tenths }) => ({ name, works, percent: tenths / 10 }));
+}
+
 export const compareText = new Intl.Collator('en').compare;
 
 // 64-bit integers are read as BigInt; the table works with ordinary numbers.
@@ -112,11 +136,10 @@ export function columnValue(row, state, ranks, key) {
 // never the percentiles. Empty filter lists mean "no restriction".
 export function view(rows, state, ranks) {
   const query = state.query.toLowerCase().trim();
-  const fields = new Set(state.fields), publishers = new Set(state.publishers);
+  const fields = new Set(state.fields);
   const shown = rows.filter(row =>
     row[`in_${state.universe}`] &&
     (!fields.size || fields.has(row[FIELD_COLUMN])) &&
-    (!publishers.size || publishers.has(row.publisher)) &&
     (!state.oaOnly || row.is_open_access === true) &&
     (!state.poolOnly || ranks.poolRanks.has(row.openalex_id)) &&
     (!query || searchText(row).includes(query)));

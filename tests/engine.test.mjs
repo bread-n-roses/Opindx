@@ -10,7 +10,7 @@ function equal(actual, expected) {
 }
 
 const base = { treatment: 'raw', universe: 'n', metric: 'per_article', minCoverage: 20, minYears: 4,
-  topPercent: 70, query: '', fields: [], publishers: [], oaOnly: false, poolOnly: false,
+  topPercent: 70, query: '', fields: [], oaOnly: false, poolOnly: false,
   sortKey: 'score:per_article', sortDirection: -1 };
 
 function journal(id, score, { coverage = 90, activeYears = 5, field = 'Economics', inN = true } = {}) {
@@ -43,11 +43,11 @@ check('The top-share cut is strict, and ties stay together', () => {
 });
 check('Search and filters change what is shown, not the percentiles', () => {
   const r = E.rank(fixture, base);
-  const filtered = { ...base, query: 'high', publishers: ['Test publisher'], poolOnly: true };
+  const filtered = { ...base, query: 'high', poolOnly: true };
   equal(JSON.stringify([...E.rank(fixture, filtered).poolRanks]), JSON.stringify([...r.poolRanks]));
   equal(E.view(fixture, filtered, r).length, 1);
   equal(E.view(fixture, { ...base, fields: ['Medicine'] }, r).length, 1);
-  equal(E.view(fixture, { ...base, publishers: ['Other publisher'] }, r).length, 0);
+  equal(E.view(fixture, { ...base, fields: ['Nonexistent field'] }, r).length, 0);
 });
 check('Journals outside the universe are never shown; missing scores sort last, zero stays a number', () => {
   const r = E.rank(fixture, base);
@@ -82,6 +82,30 @@ check('Rolling field shares are display metadata, never group keys', () => {
   equal(E.fieldLabel({oa_field:'Medicine'}), 'Medicine');
   equal(E.fieldDescription({oa_field:'Medicine'}).includes('historical'), true);
   equal(E.fieldDescription({...a,oa_field_tied_modes:2}).includes('2 fields tied'), true);
+});
+
+const breakdown = (counts, other = 0) => ({
+  oa_field_classified_works: counts.reduce((a, b) => a + b, other),
+  ...Object.fromEntries([0, 1, 2].flatMap(i => [[`oa_field_${i + 1}`, counts[i] ? ['A', 'B', 'C'][i] : ''], [`oa_field_${i + 1}_works`, counts[i] ?? 0]])),
+  oa_field_other_works: other,
+});
+check('Top fields plus Other allocate exactly 100 percent, including rounding ties', () => {
+  const parts = E.fieldBreakdown(breakdown([1, 1, 1]));
+  equal(JSON.stringify(parts.map(p => p.percent)), '[33.4,33.3,33.3,0]');
+  equal(E.fieldBreakdown(breakdown([45, 25, 20], 10)).at(-1).percent, 10);
+  equal(E.fieldBreakdown(breakdown([7]))[0].percent, 100);
+  for (let a = 1; a < 40; a++) for (let b = 0; b <= a; b++) {
+    const result = E.fieldBreakdown(breakdown([a, b, 0], b));
+    equal(result.reduce((sum, p) => sum + Math.round(p.percent * 10), 0), 1000);
+    equal(result.at(-1).name, 'Other fields');
+  }
+});
+check('Unknown, absent and inconsistent field data do not invent percentages', () => {
+  equal(E.fieldBreakdown(breakdown([])).length, 0);
+  equal(E.fieldBreakdown({}), null);
+  equal(E.fieldBreakdown(null), null);
+  equal(E.fieldBreakdown({...breakdown([1]), oa_field_classified_works: 5}), null);
+  equal(E.fieldBreakdown({...breakdown([1]), oa_field_other_works: -1}), null);
 });
 
 if (failures) throw new Error(`${failures} test(s) failed`);
