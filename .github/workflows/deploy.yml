@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.event_name != 'release' || !startsWith(github.event.release.tag_name, 'software-v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -40,10 +41,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          latest=$(gh release list --repo "$GITHUB_REPOSITORY" --exclude-drafts --limit 1 --json tagName --jq '.[0].tagName')
+          latest=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[] | select(.draft == false and .prerelease == false) | select(any(.assets[]; .name == "manifest.json")) | select(any(.assets[]; .name | test("^scores_[0-9]{4}\\.parquet$"))) | .tag_name' | sed -n '1p')
+          test -n "$latest" || { echo "No finalized data release found" >&2; exit 1; }
           mkdir runs
           for tag in $latest $(jq -r '.[]' score-years.json | sort -u); do
-            [ -d "runs/$tag" ] || gh release download "$tag" --repo "$GITHUB_REPOSITORY" --dir "runs/$tag"
+            [ -d "runs/$tag" ] || gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern 'manifest.json' --pattern 'scores_*.parquet' --dir "runs/$tag"
           done
           echo "LATEST_RUN=$latest" >> "$GITHUB_ENV"
 
@@ -65,6 +67,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          test "$(cat CNAME)" = "opindx.org"
           touch .nojekyll
           git init -q -b gh-pages
           git add -A

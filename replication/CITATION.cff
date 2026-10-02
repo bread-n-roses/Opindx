@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "Please cite this software; its version DOI will be added after publication."
+title: "Opindx replication: Network Factor and Article Network Score"
+type: software
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/bread-n-roses/Opindx"
+authors:
+  - family-names: "Weitzel"
+    given-names: "Utz"
+    affiliation: "VU Amsterdam; Radboud University Nijmegen"

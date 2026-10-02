@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "title": "Opindx: Open Journal Metrics - Network Factor and Article Network Score",
+    "upload_type": "dataset",
+    "description": "Complete annual Opindx journal metrics for citing years 2022-2026, based on the OpenAlex snapshot of 2026-09-23 and the Norwegian Register list of 2026-07-26. Includes NF and ANS for OpenAlex and Norwegian Register universes, Raw and Filtered variants, journal metadata and rolling publication fields, in CSV, XLSX and Parquet formats. See README, data dictionary, release notes and validation results. Recent citation years are provisional, and 2026 is incomplete. Numerical data sources are OpenAlex and Norwegian Register; documented author-curated identity corrections accompany the software.",
+    "creators": [
+      {
+        "name": "Weitzel, Utz",
+        "affiliation": "VU Amsterdam; Radboud University Nijmegen"
+      }
+    ],
+    "access_right": "open",
+    "license": "cc-by-4.0",
+    "version": "2026-09-v2"
+  }
+}

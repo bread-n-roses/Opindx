@@ -1,0 +1,23 @@
+{
+  "snapshot_date": "2026-09-23",
+  "years": [
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "norwegian_snapshot": "2026-07-26",
+  "norwegian_sha256": "a913f8670d5cb4a2bf81a5bebb90d53b7dfa622f567e0b6afb2f206b3f6e6498",
+  "manifests": {
+    "works": "a72ff4b43c9d13d0911386e1a5dd1b9d71b3c1080ac44ccfc016e11d6390a059",
+    "sources": "5b708874a9d455505191c15016de9962f1803e4d434c05d94a6bab5c6c529aff"
+  },
+  "approval_sha256": {
+    "2022": "d8f7a8bd9068a9ef5f7787a2516fc3a13bc5a5d3b3ec7e5304f1cc12bac2598a",
+    "2023": "b0a72c014d052d0a05d367a2e13edc40ed016156685ab1174473645a6369e8dc",
+    "2024": "6c64572e9dc9be80a59e54f61cf33be254d79fdc7d008073a5f01d759b484433",
+    "2025": "85b5985ed56297f9b04d6eb68861993fe986b02ee32a7106ee9ab153b8c00540",
+    "2026": "cbbfbdbb4ea0ae581ad3bdd128eb5b0f54c29246084332bd4b72ea6e98f68fd4"
+  }
+}

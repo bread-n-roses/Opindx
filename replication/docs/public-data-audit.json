@@ -1,0 +1,57 @@
+{
+  "status": "PASS",
+  "scope": "Prepared annual public exports and packaged calculation dependency inventory",
+  "numerical_inputs": [
+    "OpenAlex Works/Sources",
+    "Norwegian Register annual journal metadata"
+  ],
+  "corrections": "Author-curated approved identity and matching decisions; public bibliographic evidence references retained in provenance.",
+  "proprietary_benchmark_files_included": false,
+  "raw_register_contact_fields_included": false,
+  "method": [
+    "Canonical release hash comparison",
+    "Complete output-column allowlist and data dictionary",
+    "Runtime import closure inspection",
+    "Approved correction bundle reference scan"
+  ],
+  "limitations": [
+    "Not a legal certification of third-party websites linked as evidence. No restricted database extracts are bundled."
+  ],
+  "annual": [
+    {
+      "file": "scores_2022.parquet",
+      "rows": 101978,
+      "columns": 43,
+      "canonical_hash_unchanged": true,
+      "restricted_columns": []
+    },
+    {
+      "file": "scores_2023.parquet",
+      "rows": 107305,
+      "columns": 43,
+      "canonical_hash_unchanged": true,
+      "restricted_columns": []
+    },
+    {
+      "file": "scores_2024.parquet",
+      "rows": 111087,
+      "columns": 43,
+      "canonical_hash_unchanged": true,
+      "restricted_columns": []
+    },
+    {
+      "file": "scores_2025.parquet",
+      "rows": 114783,
+      "columns": 43,
+      "canonical_hash_unchanged": true,
+      "restricted_columns": []
+    },
+    {
+      "file": "scores_2026.parquet",
+      "rows": 117026,
+      "columns": 43,
+      "canonical_hash_unchanged": true,
+      "restricted_columns": []
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+build/
+dist/
+work/
+inputs-local/
+release-data/
+/website/runs/
+/website/site/data/
+*.zip
+*.local.json
+.env
+*[Tt]oken*

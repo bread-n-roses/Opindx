@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "opindx-replication"
+version = "0.1.0"
+authors = [{name = "Utz Weitzel"}]
+description = "Reproduce Opindx journal metrics from OpenAlex and the Norwegian Register"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = ["duckdb", "numpy", "scipy", "pandas", "pyarrow", "XlsxWriter", "openpyxl"]
+
+[project.scripts]
+opindx-replicate = "opindx_replication.pipeline:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+opindx_replication = ["core/*.py"]

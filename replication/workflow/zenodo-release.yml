@@ -1,0 +1,59 @@
+# Install at .github/workflows/zenodo-release.yml after review.
+# Publication remains disabled until ZENODO_PUBLISH_ENABLED is explicitly true.
+name: Publish finalized Opindx release to Zenodo
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing finalized data-* or software-v* GitHub release'
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: opindx-zenodo
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: >-
+      vars.ZENODO_PUBLISH_ENABLED == 'true' &&
+      (startsWith(inputs.tag || github.event.release.tag_name, 'data-') ||
+       startsWith(inputs.tag || github.event.release.tag_name, 'software-v'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - name: Download only allowlisted release assets and metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir bundle
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern 'release-manifest.json' --dir bundle
+          python replication/workflow/fetch_release_assets.py "$RELEASE_TAG" bundle
+      - name: Validate then publish the deliberate release
+        env:
+          ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$RELEASE_TAG" in
+            data-*) kind=dataset ;;
+            software-v*) kind=software ;;
+            *) exit 1 ;;
+          esac
+          python replication/workflow/zenodo_release.py --files bundle --metadata "replication/configs/zenodo-$kind.json" --kind "$kind" --tag "$RELEASE_TAG" --publish --receipt zenodo-receipt.json
+      - name: Keep the DOI and record receipt with the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" zenodo-receipt.json --repo "$GITHUB_REPOSITORY" --clobber

@@ -1,0 +1,16 @@
+{
+  "metadata": {
+    "title": "Opindx replication: Network Factor and Article Network Score",
+    "upload_type": "software",
+    "description": "Reproducible journal metrics from downloaded OpenAlex Works/Sources snapshots and the Norwegian Register, including documented identity corrections, NF/ANS calculation, field metadata, complete annual exports and the matching browser percentile implementation.",
+    "creators": [
+      {
+        "name": "Weitzel, Utz",
+        "affiliation": "VU Amsterdam; Radboud University Nijmegen"
+      }
+    ],
+    "access_right": "open",
+    "license": "mit",
+    "version": "0.1.0"
+  }
+}

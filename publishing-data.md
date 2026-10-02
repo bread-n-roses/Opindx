@@ -4,7 +4,7 @@ Each pipeline run is published as a GitHub Release. The website then updates its
 
 ## One-time setup (repository owner)
 
-**Settings → Pages**: under *Build and deployment*, set **Source** to **Deploy from a branch**, then choose the branch **gh-pages** and the folder **/ (root)**, and click **Save**. The `gh-pages` branch appears after the deploy workflow has run once; it holds the finished website and is overwritten on every deploy.
+**Settings â†’ Pages**: under *Build and deployment*, set **Source** to **Deploy from a branch**, then choose the branch **gh-pages** and the folder **/ (root)**, and click **Save**. The `gh-pages` branch appears after the deploy workflow has run once; it holds the finished website and is overwritten on every deploy.
 
 ## Steps
 
@@ -73,7 +73,7 @@ freezing rule is introduced by this manual decision.
 The user authorized replacement of all five `2026-Q3` annual files using the
 same September snapshot and schema version 2. Retain the existing 552,179
 journal-year records and every original metric value. Include a journal when
-at least one JNS or ANS is defined in an exported universe/treatment; numerical
+at least one NF or ANS is defined in an exported universe/treatment; numerical
 zero counts as defined. Do not add journals with all metrics missing.
 
 The integrated exporter now packages the top-three field breakdown and per-ID
@@ -90,3 +90,25 @@ live. Earlier years (2020 and 2021) are deferred to a separate update.
 
 This same-snapshot replacement does not set a policy for future snapshots;
 those should still receive distinct release tags to preserve frozen results.
+
+## Separate software and dataset releases (prepared 2 October 2026)
+
+The published data tag is now `2026-09-v2`, with 2022-2024 pinned to that
+revision. The current preparation adds complete annual CSV/XLSX alongside
+the unchanged Parquets. These new bundles have not been pushed or published.
+
+The full calculation and matching website are in [replication/](replication/README.md).
+Use `software-v*` for the software archive and `data-*` for complete datasets.
+Their Zenodo DOI series are separate; ordinary pushes never publish to Zenodo.
+See [release instructions](replication/docs/RELEASING.md) and the actual
+[validation status](replication/docs/VALIDATION.md) before publication.
+
+The prepared Zenodo workflow requires `ZENODO_PUBLISH_ENABLED=true`; it currently remains disabled.
+Creator metadata is complete: Utz Weitzel (VU Amsterdam; Radboud University Nijmegen). The deployment workflow now
+selects releases by their data manifest and annual Parquets, skips software
+release events and downloads only the files needed by the website. This keeps
+software releases from replacing the website's active data selection.
+
+## Custom domain preservation
+
+The public website is https://opindx.org. Keep `site/CNAME` set to `opindx.org`: the deployment rebuilds and replaces the `gh-pages` branch, so this file must travel with the site. The workflow checks it before publishing. Keep the existing GitHub Pages custom domain, HTTPS enforcement, verification TXT record and DNS records described in the local `website-runs/opindx_github_pages_handoff.md`.

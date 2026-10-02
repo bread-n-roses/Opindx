@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Search and compare Network Factor and Article Network Score from OpenAlex. Open, transparent journal metrics worldwide.">
+  <meta name="color-scheme" content="light">
+  <title>Journal Metrics · Opindx</title>
+  <link rel="icon" href="assets/favicon-round.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-round.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body class="metrics-page">
+  <header class="masthead">
+    <a class="brand" href="index.html"><img class="brand-logo" src="assets/logo.png" width="174" height="58" alt="Op__ind_x"></a>
+    <nav class="nav" aria-label="Pages"><a href="index.html" aria-current="page">Journal metrics</a><a href="about.html">About</a></nav>
+  </header>
+  <main>
+    <div class="intro"><div><h1>Journal Metrics</h1>
+      <p class="subtitle">Over 1,000,000 journal metrics. More than 100,000 journals worldwide. Open. Transparent.</p>
+    </div></div>
+
+    <section class="search-panel panel" aria-label="Find journals">
+      <label class="search-label" for="search">Find a journal</label>
+      <div class="search-box"><svg class="search-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+        <input id="search" type="search" placeholder="Search by journal title, publisher, ISSN, or OpenAlex ID" autocomplete="off" disabled>
+      </div>
+      <fieldset id="search-controls" class="search-controls" disabled>
+        <legend class="visually-hidden">Search and metric settings</legend>
+        <div class="primary-controls">
+          <label class="control">Citation year<select id="year"></select></label>
+          <div class="control"><span id="field-label">OpenAlex fields</span>
+            <details class="picker" id="field-picker"><summary aria-labelledby="field-label field-summary"><span id="field-summary">All</span></summary>
+              <div class="picker-list"><fieldset class="filter-box"><legend class="visually-hidden">OpenAlex fields</legend>
+                <label class="check-line all-fields-line"><input id="all-fields" type="checkbox" checked>All fields</label>
+                <div class="filter-list" id="field-filter"></div>
+              </fieldset></div>
+            </details>
+          </div>
+          <label class="control">Journal universe<select id="universe"></select></label>
+          <div class="control"><label for="preset">Presets</label><div class="preset-control">
+            <select id="preset"><option value="full">Max coverage (noisy)</option><option value="ef-ais">Close to EF and AIS</option><option value="vu-sbe">VU Amsterdam (SBE)</option><option value="custom">Custom</option></select>
+          </div></div>
+        </div>
+        <div class="control-links">
+          <button type="button" class="text-button advanced-toggle" id="settings-toggle" aria-expanded="false" aria-controls="settings"><span id="settings-indicator" aria-hidden="true">+</span> Advanced settings</button>
+          <a class="table-help" href="journal-help.html#search" target="_blank" rel="noopener noreferrer" aria-label="Search: What is what? (new tab)">What is what?</a>
+          <button type="button" class="text-button" id="reset">Reset</button>
+        </div>
+        <section class="settings" id="settings" aria-label="Advanced settings" hidden>
+          <div class="advanced-general">
+            <label class="check-line"><input id="oa-only" type="checkbox">Open access journals only</label>
+            <label class="check-line"><input id="include-zero" type="checkbox">Include publications without references (not recommended)</label>
+          </div>
+          <div class="percentile-band">
+            <div class="reference-controls">
+              <div class="control"><span id="percentile-label">Show percentiles</span>
+                <details class="picker" id="percentile-picker"><summary aria-labelledby="percentile-label percentile-summary"><span id="percentile-summary">Field percentiles</span></summary>
+                  <div class="picker-list"><fieldset id="percentile-choices" class="filter-box"><legend class="visually-hidden">Show percentiles</legend>
+                    <label class="check-line"><input id="percentiles-none" type="checkbox">None</label>
+                    <label class="check-line"><input id="percentiles-field" type="checkbox" checked>Field percentiles</label>
+                    <label class="check-line"><input id="percentiles-total" type="checkbox">Total percentiles</label>
+                  </fieldset></div>
+                </details>
+              </div>
+              <fieldset id="percentile-settings" class="percentile-settings"><legend class="visually-hidden">Percentile requirements</legend>
+                <label class="control">Ranking indicator<select id="metric"></select></label>
+                <label class="control">Share of publications w/out references<select id="coverage"><option value="-1">No maximum</option><option value="0">Below 100%</option><option value="10">Below 90%</option><option value="20">Below 80%</option><option value="30">Below 70%</option><option value="40">Below 60%</option><option value="50">Below 50%</option><option value="60">Below 40%</option><option value="70">Below 30%</option><option value="80">Below 20%</option><option value="90">Below 10%</option></select></label>
+                <label class="control">Years with publications<select id="min-years"><option value="0">No minimum</option><option value="1">At least 1 year</option><option value="2">At least 2 years</option><option value="3">At least 3 years</option><option value="4">At least 4 years</option><option value="5">All 5 years</option></select></label>
+                <label class="control">Retain top % per field<input id="top-percent" type="number" min="1" max="100" step="1" value="100"></label>
+              </fieldset>
+            </div>
+            <label class="check-line pool-only-line"><input id="pool-only" type="checkbox">Hide journals without percentiles</label>
+          </div>
+        </section>
+      </fieldset>
+    </section>
+
+    <div class="notice" id="notice" role="status">Loading the data…</div>
+    <section class="table-panel panel" aria-label="Journal metrics" aria-busy="true" id="results">
+      <div class="table-toolbar"><div class="selection-summary" role="status" aria-live="polite"><span id="result-count">Loading journals…</span><span id="pool-summary" title="Journals with a Total percentile across the selected universe, before search and display filters." hidden></span></div>
+        <div class="table-actions"><button type="button" class="text-button" id="restore-columns" hidden>Restore columns</button>
+          <div class="download-picker">
+            <button type="button" class="download-button" id="download-view" aria-expanded="false" aria-controls="download-options" disabled>Download this selection</button>
+            <div class="download-options" id="download-options" role="group" aria-label="Download format" hidden>
+              <button type="button" id="download-csv">CSV</button>
+              <button type="button" id="download-xlsx">XLSX</button>
+            </div>
+          </div><span id="download-status" role="status" aria-live="polite"></span></div>
+      </div>
+      <div class="table-scroll" role="region" aria-label="Journal metrics table; scroll for more columns" tabindex="0"><table><caption class="visually-hidden">Journal metrics for the selected citation year and universe</caption><thead id="table-head"></thead><tbody id="table-body"></tbody></table></div>
+      <div class="table-footer"><span id="page-status"></span><div class="pagination"><button id="previous" aria-label="Previous page" disabled>←</button><button id="next" aria-label="Next page" disabled>→</button></div></div>
+    </section>
+
+    <section class="downloads panel" aria-labelledby="downloads-title"><h2 id="downloads-title">Complete data and code</h2>
+      <p id="download-files">Complete files per year, all columns, and older versions of the data are loading…</p>
+      <p>Complete code to reproduce the metrics and this website will be available in a separate reproducibility repository (coming soon).</p>
+    </section>
+    <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span><span>Open Data · Open Source · Nonprofit · Made at <a href="https://vu.nl/" target="_blank" rel="noopener noreferrer">Vrije Universiteit Amsterdam</a></span></footer>
+  </main>
+  <dialog id="journal-dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
+  <noscript><p class="noscript">Enable JavaScript to search, filter and sort the journal table.</p></noscript>
+</body>
+</html>

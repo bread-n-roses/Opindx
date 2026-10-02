@@ -1,6 +1,6 @@
 # Opindx website
 
-A public website where anyone can browse, filter and download open journal scores: Journal Network Share (JNS), Article Network Score (ANS) and ANS percentiles, computed from OpenAlex by the Opindx back-end. JNS and ANS follow the recursive citation-network method of Bergstrom, West and Wiseman (2008). The original names of these scores are trademarks of the University of Washington and are not used. No accounts, no payments; all data is open. Expected traffic is low (a few downloads a day).
+A public website where anyone can browse, filter and download open journal scores: Network Factor (NF), Article Network Score (ANS) and ANS percentiles, computed from OpenAlex by the Opindx back-end. NF and ANS follow the recursive citation-network method of Bergstrom, West and Wiseman (2008). The original names of these scores are trademarks of the University of Washington and are not used. No accounts, no payments; all data is open. Expected traffic is low (a few downloads a day).
 
 The back-end is a separate project (currently run on a laptop, possibly Docker/cloud later). This project covers the website, the data layout the back-end delivers, and which score years are published from which run.
 
@@ -51,7 +51,7 @@ One release per run. The tag is the run name, e.g. `2026-Q3`. Each release conta
 | `reference_coverage_pct` | number | 100 × `publications_filtered` / `publications_raw` |
 | `active_years` | integer | Years (of 5) with at least one publication |
 | `in_<u>` | boolean | Journal is in universe `<u>` this year |
-| `share_<u>_raw`, `share_<u>_filtered` | number | JNS in universe `<u>`; sums to 100 over the universe; null if not computed |
+| `share_<u>_raw`, `share_<u>_filtered` | number | NF in universe `<u>`; sums to 100 over the universe; null if not computed |
 | `per_article_<u>_raw`, `per_article_<u>_filtered` | number | ANS in universe `<u>`; article-weighted mean 1; null if not computed |
 
 `<u>` is each universe listed in the manifest. Adding a universe means new columns and a manifest entry, with no website changes.
@@ -93,20 +93,21 @@ site/data/history/00…99.parquet  all years per group of journals, for the jour
 
 - Header navigation: Journal metrics and About. Main title: Journal Metrics; search is the primary control beneath the tagline.
 - Search and table share visible controls: Citation year, OpenAlex fields (multiple), Journal universe, and Presets. The default citation year is the latest available full calendar year, currently 2025; newer years remain selectable.
-- Full (default): OpenAlex universe, Filtered metrics, ANS percentiles on, including all exported members regardless of missing metrics or percentiles. Percentiles require defined ANS, coverage strictly above 20%, and at least four publication years, retaining the top 100% per field. Hide journals without percentiles is unchecked; ineligible journals remain listed with percentile dashes. Missing ANS does not hide JNS or trigger a Raw fallback.
-- VU Amsterdam (SBE): Norwegian Register, Filtered, ANS percentiles on, coverage strictly above 20%, at least four publication years, top 75% per field, pool-only on. `index.html?preset=vu-sbe` opens this preset in the latest full year; an optional `year` parameter selects an available year explicitly.
-- The cog opens current percentile settings; Custom also opens them. Metric/universe/treatment/percentile changes identify the matching preset or Custom. Search, year, field and open-access filters do not change the preset. Named presets keep these display filters where compatible. Reset clears them and restores Full, keeping the citation year.
+- Max coverage (noisy): initial OpenAlex/Filtered preset; ANS Field percentiles only. Requirements: less than 80% of publications without references (equivalent to coverage strictly above 20%), at least four publication years, top 100% per field. Hide journals without percentiles is unchecked; all exported members remain visible.
+- Close to EF and AIS: same requirements as Max coverage (noisy), using Norwegian Register and ANS Field percentiles only.
+- VU Amsterdam (SBE): Norwegian Register/Filtered ANS; Total percentiles only, less than 80% without references, at least four publication years, top 75% per field; hide journals without a Total percentile.
+- Advanced settings replaces the cog and contains open-access/reference-treatment checkboxes and a compact shaded percentile row. Custom opens it; choosing any named preset closes it. The +/minus link allows manual opening/closing. Named presets preserve search/year/field/access filters where compatible; Reset clears these display choices while preserving the citation year.
 - Open access journals only and Include publications without references (not recommended) appear in that order below the dropdowns. The latter selects Raw explicitly. There is no publisher filter or More options panel. Changing universe refreshes/reconciles field choices. The fields dropdown begins with All fields checked and individual fields unchecked. An individual choice unchecks All fields; checking All fields clears the individual selections. No repeated visible heading or field-search input.
 - If a restricted search has no results, Search all OpenAlex journals switches to Full and clears field/open-access filters, retaining query/year and Filtered treatment.
-- Table toolbar: selection/member counts and the retained count labelled "journals with percentile". No eligibility or field-group count. The help/tooltip explains that the percentile count covers the whole selected universe. Display filters do not redefine comparison pools. Download this selection saves CSV for the entire selection across all pages, including columns hidden onscreen.
+- Table toolbar: selection/member counts and the retained count labelled "journals with percentile". No eligibility or field-group count. The help/tooltip explains that the percentile count covers the whole selected universe. Display filters do not redefine comparison pools. Download this selection saves CSV/XLSX for the entire selection across all pages, using only columns visible onscreen.
 - Percentile settings place Show percentiles and Hide journals without percentiles side by side below the dropdowns, wrapping on narrow screens. Show percentiles stays usable when the calculation controls and hide-journals checkbox are disabled. Compact table cell padding, minimum widths and header controls reduce laptop horizontal scrolling without reducing text size; mobile touch targets remain larger.
-- Table header: publication window, citation year, OpenAlex snapshot month, Frozen/Live metrics, and a help link. Metric groups identify the selected universe and Percentiles with ANS or JNS. Columns: Journal title, OpenAlex field, Publications, Citations, Ref. coverage, JNS, ANS; optional Field and Total percentiles. Journal cells show title and more info only.
-- Every main-table column except Journal title has an accessible hide button (×), separate from its sort button. Grouped headers adapt to the remaining columns. Restore columns returns hidden columns. Visibility is a display preference for the visit, preserved through year/preset/filter changes and cleared by Reset or reload. It never changes presets, sort order, percentile calculations, journal filtering, popup columns or CSV content.
+- Table header: publication window, citation year, OpenAlex snapshot month, Frozen/Live metrics, and a help link. Metric groups identify the selected universe and Percentiles with ANS or NF. Columns: Journal title, OpenAlex field, Publications, Citations, Pubs. w/out refs., NF, ANS; optional Field and Total percentiles. Journal cells show title and more info only.
+- Every main-table column except Journal title has an accessible hide button (×), separate from its sort button. Grouped headers adapt to the remaining columns. Restore columns returns hidden columns. Visibility is a display preference for the visit, preserved through year/preset/filter changes and cleared by Reset or reload. It never changes presets, sort order, percentile calculations, journal filtering or popup columns; selection downloads follow the visible columns.
 - Percentiles retain the existing empirical-CDF/tie rules and use the selected universe and OpenAlex broad field. No pooling of small fields. Pool-only affects display only when percentiles are enabled. Year changes ignore stale responses and restore the prior selection on failure.
 - Journal details retain the local redesign described below. Percentiles in the popup use each historical year's own population with the current ranking settings.
-- A sticky section bar beneath the journal title links to the Details, Fields covered and Metrics by year headings, and contains the close button. Its links scroll only the dialog, focus the heading and correct overlap against the bar's actual bottom after scrolling, including dialog padding and wrapped navigation. The bar uses large touch targets and remains available while scrolling. Opening another journal starts at the top. The main-page cog, settings visibility and Show percentiles checkbox keep their existing behavior.
+- A sticky section bar beneath the journal title links to the Details, Fields covered and Metrics by year headings, and contains the close button. Its links scroll only the dialog, focus the heading and correct overlap against the bar's actual bottom after scrolling, including dialog padding and wrapped navigation. The bar uses large touch targets and remains available while scrolling. Opening another journal starts at the top. Show percentiles is a multi-select picker: None, Field percentiles, Total percentiles. The selected types apply to the main table, journal history and CSV; manual header crosses affect the main table and its selection downloads. Restore columns restores only types selected in settings. The percentile-presence filter and summary count use Total when selected, otherwise Field; None disables that filter.
 - Complete data and code: annual full Parquet files and older releases; separate reproducibility repository marked coming soon. No second CSV builder or download-selection dropdown.
-- `journal-help.html` defines every header in the main, historical, field-breakdown and About tables. Main-table help opens `#journal-table`, including Ref. coverage alongside the other column definitions; popup links use `#yearly-metrics` and `#fields-covered`; About links to `#data-versions`. Help also explains presets, percentile settings and counts. Help and external journal links open new tabs with a shared arrow indicator.
+- `journal-help.html` defines every header in the main, historical, field-breakdown and About tables. Main-table help opens `#journal-table`, including Pubs. w/out refs. alongside the other column definitions; popup links use `#yearly-metrics` and `#fields-covered`; About links to `#data-versions`. Help also explains presets, percentile settings and counts. Help and external journal links open new tabs with a shared arrow indicator.
 - Shared footer: Opindx, License CC BY 4.0 linked to https://creativecommons.org/licenses/by/4.0/; Open Data · Open Source · Nonprofit · Made at Vrije Universiteit Amsterdam, with university linked to https://vu.nl/. No public email. Contact page deferred because no protected mail backend is configured.
 - Responsive controls, readable touch targets, horizontally scrolling data tables and wrapping prose are required throughout. Browser/mobile visual QA remains pending. Dummy/error/loading notices remain visible; no routine shaded run banner.
 
@@ -122,7 +123,7 @@ score-years.json       which score years are frozen, and from which run
 
 ## Open points
 
-- Score names: JNS and ANS are our own names. Permission or legal advice on the original names is still open.
+- Score names: NF and ANS are our own names. Permission or legal advice on the original names is still open.
 - Code license choice and alignment of release metadata with the requested CC BY 4.0 data footer.
 - Custom domain.
 - Small-field pooling for percentiles: the report pools fields with fewer than 100 journals, this site doesn't.
@@ -159,13 +160,13 @@ source-field CSVs and must not be used to drop the rolling metadata.
 ## Local journal details preview (2026-10-01)
 
 The redesigned popup orders ISSN/publisher, OpenAlex and annual Norwegian Register
-links, open-access status, publication years and reference coverage. Field shares
+links, open-access status, publication years and Pubs. w/out refs. (100 minus reference coverage). Field shares
 are shown under Fields covered; per-ID Norwegian assignments occupy separate rows
 when multiple fields exist. The main register link uses a unique title match,
 with other IDs retained; ambiguous matches have no designated main entry.
 
 Metrics by year preserves the full selected universe/treatment title suffix.
-Columns are Citing year, Journal universe, Level, Publications, Citations, JNS, ANS.
+Columns are Citing year, Journal universe, Level, Publications, Citations, NF, ANS.
 Optional Field and Total percentile columns share a Pctiles heading identifying
 the selected ranking indicator. Annual populations and current ranking settings
 define each year's percentiles. Membership abbreviations OA and NR appear inside
@@ -193,7 +194,7 @@ The manifest adds `schema_version: 2`, `journal_details`, `population`,
 SHA-256, byte size and row count. Required v2 metadata is validated; additional
 columns remain compatible. The builder continues to accept schema version 1.
 
-Population is unchanged: at least one defined JNS or ANS in any exported
+Population is unchanged: at least one defined NF or ANS in any exported
 universe/treatment. Zero counts as defined; all-missing journal-years are excluded.
 All 552,179 original journal-year rows and cells are preserved. Publication years
 before 2022 remain out of scope for this update.
@@ -202,3 +203,31 @@ The data builder validates inputs before replacing site/data. It creates history
 shards and per-year/universe/metric/treatment rank files, with no local-preview
 paths. Deployments test all JavaScript suites and the Python builder tests, and
 version every local JavaScript module import and all page styles consistently.
+
+## Branding and help navigation (2026-10-02, local update)
+
+Use the supplied Op__ind_x header logo and circle/bullet favicon on all pages.
+Keep a near-black/white layout with subdued blue accents and muted rust bars for
+Pubs. w/out refs. Quicksand is locally hosted for the main title and larger
+tagline; tables retain their readable sans-serif font.
+
+Help is titled What is what? Its sticky section links leave heading titles
+visible; the cross closes the tab, returning to Journal Metrics if closing is
+blocked. NF means Network Factor; ANS remains Article Network Score. Public
+score field identifiers and calculations remain compatible with the release.
+
+## Download and label polish (2026-10-02, local update)
+
+The popup and percentile controls use Share of publications w/out references;
+the main table keeps Pubs. w/out refs. The Advanced settings plus/minus indicator
+uses centered geometric bars rather than a font glyph.
+
+Download this selection opens CSV/XLSX choices. Both formats use the same
+captured selection and displayed column order across all result pages. Hidden
+columns and popup/settings metadata are omitted. Headers match the table, with
+NF and ANS named directly and percentile headers naming their metric. The
+OpenAlex field cell becomes a name column and a numeric percentage column
+(0 to 100); hiding the field removes both. XLSX uses a local, licensed SheetJS 0.20.3
+module loaded only on demand, preserving numeric values and literal strings.
+The interface shows preparation status and allows retry/CSV after a failure.
+The complete-data introduction omits the parenthesized file-format label.

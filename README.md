@@ -1,9 +1,11 @@
 # Opindx website
 
-Website for browsing and downloading open journal scores (Journal Network Share and Article Network Score) computed from OpenAlex.
+Website for browsing and downloading open journal metrics (Network Factor and Article Network Score) computed from OpenAlex.
 
 - `SPEC.md`: what the website does and the data layout.
 - `publishing-data.md`: how to publish a new data run.
+- [replication/](replication/README.md): versioned calculation source from downloaded OpenAlex and Norwegian Register inputs, complete annual exports, provenance and validation.
+- [Replication release guide](replication/docs/RELEASING.md): separate software and dataset DOI series; publication is currently paused.
 - `site/`: the website. `engine.js` holds the ranking logic, `app.js` the journal table, `about.html` the About page.
 
 ## Preview locally

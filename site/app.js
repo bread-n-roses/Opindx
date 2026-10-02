@@ -3,11 +3,12 @@ import { parquetReadObjects } from 'https://cdn.jsdelivr.net/npm/hyparquet@1.31.
 import * as E from './engine.js';
 import * as D from './journal-details.js';
 import * as P from './presets.js';
+import { workbookBytes } from './selection-download.js';
 
 const $ = id => document.getElementById(id);
 const PAGE_SIZE = 25;
 const METRICS = {
-  share: {short: 'JNS', name: 'Journal Network Share', note: 'share of citation-network prestige; sums to 100 over the universe', digits: 5},
+  share: {short: 'NF', name: 'Network Factor', note: 'share of citation-network prestige; sums to 100 over the universe', digits: 5},
   per_article: {short: 'ANS', name: 'Article Network Score', note: 'network share per article; article-weighted mean 1', digits: 3},
 };
 const FILTERS = {
@@ -15,7 +16,7 @@ const FILTERS = {
 };
 let index, year, rows = [], state = {...P.DEFAULTS, fields: []};
 let ranks, ranksKey, visible = [], columns = [], memberCount = 0, yearRequest = 0, loading = true;
-let explicitCustom = false;
+let explicitCustom = false, downloadBusy = false;
 // A display preference for this visit; never part of a preset or ranking pool.
 const hiddenColumns = new Set();
 const filterValues = {fields: []};
@@ -46,7 +47,8 @@ function showError(error) {
 function setLoading(value) {
   loading = value;
   $('results').setAttribute('aria-busy', String(value));
-  $('download-view').disabled = value;
+  $('download-view').disabled = value || downloadBusy;
+  if (value) toggleDownloads(false);
   $('search').disabled = year == null;
   $('search-controls').disabled = year == null;
   if (value) { $('previous').disabled = true; $('next').disabled = true; }
@@ -82,7 +84,7 @@ async function loadYear(newYear) {
   } catch (error) {
     if (request !== yearRequest) return;
     setLoading(false);
-    $('download-view').disabled = year == null;
+    $('download-view').disabled = year == null || downloadBusy;
     if (year != null) { syncControls(); drawPage(); }
     showError(error);
   }
@@ -95,13 +97,13 @@ function getColumns() {
     {key:'oa_field', label:'OpenAlex field', className:'align-left', title:'Predominant field and its share of classified publications'},
     {key:'publications', label:'Publications', title:`Articles and reviews ${year - 5}–${year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
     {key:'citations', label:'Citations', title:`Citations in ${year}, excluding journal self-citations`},
-    {key:'reference_coverage_pct', label:'Ref. coverage', title:'Share of publications with at least one linked OpenAlex reference'},
+    {key:'publications_without_references_pct', label:'Pubs. w/out refs.', title:'Share of publications without a recorded OpenAlex reference'},
   ];
   for (const [metric, m] of Object.entries(METRICS)) cols.push({key:`score:${metric}`, label:m.short,
     className:metric === 'share' ? 'group-start' : '', score:true, title:`${m.name} in the ${universeName(state.universe)} universe (${m.note})`});
-  if (state.showPercentiles) cols.push(
-    {key:'fieldPct', label:'Field', className:'group-start percentile-cell', title:'Percentile within the assigned field, after eligibility requirements'},
-    {key:'poolPct', label:'Total', className:'percentile-cell', title:'Percentile among all retained journals; 100 is highest'});
+  for (const key of E.percentileKeys(state)) cols.push(key === 'fieldPct'
+    ? {key, label:'Field', className:'group-start percentile-cell', title:'Percentile within the assigned field, after eligibility requirements'}
+    : {key, label:'Total', className:'percentile-cell', title:'Percentile among all retained journals; 100 is highest'});
   return cols;
 }
 function renderHead() {
@@ -129,8 +131,8 @@ function cell(row, col) {
   if (col.key === 'title') return `<td class="journal-column"><span class="journal-title">${escape(row.title)}</span> ` +
     `<button type="button" class="text-button more-info" data-journal="${escape(id)}" aria-label="More info about ${escape(row.title)}">more info</button></td>`;
   if (col.key === 'oa_field') return `<td class="field-cell" title="${escape(E.fieldDescription(row))}">${escape(E.fieldLabel(row))}</td>`;
-  if (col.key === 'reference_coverage_pct') {
-    const low = state.showPercentiles && E.isNumber(value) && state.minCoverage >= 0 && value <= state.minCoverage;
+  if (col.key === 'publications_without_references_pct') {
+    const low = state.showPercentiles && E.isNumber(value) && state.minCoverage >= 0 && value >= 100 - state.minCoverage;
     const bar = E.isNumber(value) ? `<div class="coverage-track" aria-hidden="true"><div class="coverage-fill" style="width:${Math.max(0, Math.min(100, value))}%"></div></div>` : '';
     return `<td class="coverage-cell ${low ? 'coverage-low' : ''}"><span class="coverage-value">${fmt(value, 1)}${E.isNumber(value) ? '%' : ''}</span>${bar}</td>`;
   }
@@ -173,7 +175,8 @@ function drawPage() {
       (restricted && universeIds().includes('oa') ? '<button type="button" class="text-button" data-search-all>Search all OpenAlex journals</button>' : 'Try a broader search.') + '</td></tr>';
   $('result-count').innerHTML = `<strong>${count(visible.length)}</strong> of <strong>${count(memberCount)}</strong> journals in the ${escape(universeName(state.universe))} universe`;
   $('pool-summary').hidden = !state.showPercentiles;
-  $('pool-summary').innerHTML = state.showPercentiles ? ` · <strong>${count(ranks.retained)}</strong> journals with percentile` : '';
+  $('pool-summary').title = `Journals with a ${E.percentileKeys(state).includes('poolPct') ? 'Total' : 'Field'} percentile across the selected universe, before search and display filters.`;
+  $('pool-summary').innerHTML = state.showPercentiles ? ` · <strong>${count(E.availablePercentiles(state, ranks).size)}</strong> journals with percentile` : '';
   $('page-status').textContent = visible.length ? `${count(state.page * PAGE_SIZE + 1)}–${count(state.page * PAGE_SIZE + shown.length)} of ${count(visible.length)} journals` : '0 journals';
   $('previous').disabled = loading || state.page === 0;
   $('next').disabled = loading || (state.page + 1) * PAGE_SIZE >= visible.length;
@@ -182,7 +185,7 @@ function drawPage() {
 // ---- Controls ----
 const SELECTS = {metric:'metric', coverage:'minCoverage', 'min-years':'minYears'};
 const NUMERIC = new Set(['minCoverage','minYears']);
-const CHECKBOXES = {'oa-only':'oaOnly', 'show-percentiles':'showPercentiles', 'pool-only':'poolOnly'};
+const CHECKBOXES = {'oa-only':'oaOnly', 'pool-only':'poolOnly'};
 const uniqueValues = values => [...new Set(values.filter(Boolean))].sort(E.compareText);
 function fillFilters() {
   const inUniverse = rows.filter(row => row[`in_${state.universe}`]);
@@ -215,17 +218,25 @@ function syncControls() {
   if ($('search').value !== state.query) $('search').value = state.query;
   $('top-percent').value = state.topPercent;
   $('include-zero').checked = state.treatment === 'raw';
+  const selected = E.percentileKeys(state);
+  $('percentiles-none').checked = !selected.length;
+  $('percentiles-field').checked = selected.includes('fieldPct');
+  $('percentiles-total').checked = selected.includes('poolPct');
+  $('percentile-summary').textContent = !selected.length ? 'None' : selected.length === 2 ? 'Field and Total' : selected[0] === 'fieldPct' ? 'Field percentiles' : 'Total percentiles';
   $('percentile-settings').disabled = !state.showPercentiles;
   $('pool-only').disabled = !state.showPercentiles;
 }
 function toggleSettings(open) {
   $('settings').hidden = !open;
   $('settings-toggle').setAttribute('aria-expanded', String(open));
+  $('settings-indicator').textContent = open ? '\u2212' : '+';
 }
 function update(changes) {
   const changedUniverse = changes.universe != null && changes.universe !== state.universe;
   if (Object.keys(changes).some(key => key in P.PRESETS.full)) explicitCustom = false;
+  if (Object.hasOwn(changes, 'percentileMode')) changes = {...changes, showPercentiles:changes.percentileMode !== 'none'};
   Object.assign(state, changes, {page:0});
+  if (Object.keys(changes).some(key => key in P.PRESETS.full) && P.identifyPreset(state) === 'custom') toggleSettings(true);
   if (changedUniverse) fillFilters();
   syncControls(); render();
 }
@@ -233,6 +244,7 @@ function applyPreset(preset) {
   if (preset === 'custom') { explicitCustom = true; syncControls(); toggleSettings(true); return; }
   explicitCustom = false;
   update(P.PRESETS[preset]);
+  toggleSettings(false);
 }
 
 function showJournal(id) {
@@ -365,37 +377,65 @@ function saveCsv(filename, parts) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function csvHeader(key) {
-  if (key === 'fieldPct') return 'field_percentile';
-  if (key === 'poolPct') return 'pool_percentile';
-  if (key === 'publications' || key === 'citations') return `${key}_${state.treatment}`;
-  if (key.startsWith('score:')) return `${key.split(':')[1]}_${state.universe}_${state.treatment}`;
-  return key;
-}
-
-function downloadView() {
-  // Hiding table columns never removes data from the selection download.
-  const downloadColumns = getColumns();
-  const entry = publishedYear();
-  const settings = { score_year: year, data_status: entry.status, run: entry.run, openalex_snapshot: entry.openalex_snapshot,
-    universe: state.universe, treatment: state.treatment };
-  if (state.showPercentiles) Object.assign(settings, {
-    ranking_indicator: state.metric, percentiles_grouped_by: E.FIELD_COLUMN, coverage_strictly_above_pct: state.minCoverage < 0 ? 'none' : state.minCoverage,
-    minimum_output_years: state.minYears, retained_top_pct_per_field: state.topPercent, final_pool_size: ranks.retained,
+function selectionExport() {
+  // Follow the displayed columns, splitting the field cell into name and percentage.
+  const downloadColumns = columns.flatMap(col => {
+    if (col.key === 'oa_field') return [
+      {label:col.label, value:row => E.field(row)},
+      {label:'OpenAlex field (%)', value:row => {
+        const share = row.oa_field_modal_share;
+        return E.field(row) !== 'Unknown' && E.isNumber(share) && share >= 0 && share <= 1
+          ? 100 * share : null;
+      }},
+    ];
+    const label = col.key.endsWith('Pct')
+      ? `${col.label} percentile (${METRICS[state.metric].short})` : col.label;
+    return [{label, value:row => E.columnValue(row, state, ranks, col.key)}];
   });
-  const reason = row => (state.showPercentiles ? [ranks.reasons.get(row.openalex_id) || ''] : []);
-  const header = ['openalex_id', `in_${state.universe}`, ...downloadColumns.map(c => csvHeader(c.key)), ...E.FIELD_DETAIL_COLUMNS,
-    ...(state.showPercentiles ? ['percentile_exclusion_reason'] : []), ...Object.keys(settings)];
-  const lines = visible.map(row => [row.openalex_id, row[`in_${state.universe}`],
-    ...downloadColumns.map(c => E.columnValue(row, state, ranks, c.key)), ...E.FIELD_DETAIL_COLUMNS.map(c => row[c]), ...reason(row), ...Object.values(settings)]);
-  saveCsv(`opindx-${year}-${state.treatment}-view.csv`, [csvLines([header, ...lines])]);
+  const header = downloadColumns.map(col => col.label);
+  const lines = visible.map(row => downloadColumns.map(col => col.value(row)));
+  return {filename:`opindx-${year}-${state.treatment}-view`, matrix:[header, ...lines]};
+}
+function downloadView() {
+  const {filename, matrix} = selectionExport();
+  saveCsv(`${filename}.csv`, [csvLines(matrix)]);
+}
+function toggleDownloads(open) {
+  $('download-options').hidden = !open;
+  $('download-view').setAttribute('aria-expanded', String(open));
+}
+function saveBinary(filename, bytes) {
+  const url = URL.createObjectURL(new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  const link = Object.assign(document.createElement('a'), {href:url, download:filename});
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+async function downloadXlsx() {
+  if (loading || year == null || downloadBusy) return;
+  // Capture the selection before any asynchronous library load or later filter change.
+  const {filename, matrix} = selectionExport();
+  downloadBusy = true; toggleDownloads(false);
+  $('download-view').disabled = true;
+  $('download-status').textContent = 'Preparing XLSX...';
+  try {
+    // Let the status paint before constructing a potentially large workbook.
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const bytes = await workbookBytes(matrix);
+    saveBinary(`${filename}.xlsx`, bytes);
+    $('download-status').textContent = '';
+  } catch (error) {
+    $('download-status').textContent = 'XLSX could not be created. Please try again or choose CSV.';
+  } finally {
+    downloadBusy = false;
+    $('download-view').disabled = loading || year == null;
+  }
 }
 
 function showCompleteData() {
   const links = [...index.years].sort((a, b) => b.year - a.year)
     .map(entry => `<a href="data/scores_${entry.year}.parquet" download>${entry.year}</a>`).join(' · ');
   const older = index.releases_url ? ` · <a href="${escape(index.releases_url)}" target="_blank" rel="noopener noreferrer">older versions</a>` : '';
-  $('download-files').innerHTML = `Complete files per year, all columns, and older versions of the data (Parquet): ${links}${older}.`;
+  $('download-files').innerHTML = `Complete files per year, all columns, and older versions of the data: ${links}${older}.`;
 }
 
 // ---- Events ----
@@ -412,7 +452,11 @@ $('top-percent').addEventListener('change', event => {
 $('universe').addEventListener('change', event => update({universe:event.target.value}));
 $('preset').addEventListener('change', event => applyPreset(event.target.value));
 $('settings-toggle').addEventListener('click', () => toggleSettings($('settings').hidden));
-$('settings-close').addEventListener('click', () => { toggleSettings(false); $('settings-toggle').focus(); });
+$('percentile-choices').addEventListener('change', event => {
+  if (event.target.id === 'percentiles-none') { update({percentileMode:'none'}); return; }
+  const field = $('percentiles-field').checked, total = $('percentiles-total').checked;
+  update({percentileMode:field && total ? 'both' : field ? 'field' : total ? 'total' : 'none'});
+});
 $('table-head').addEventListener('click', event => {
   if (loading) return;
   const hideKey = event.target.closest('[data-hide-column]')?.dataset.hideColumn;
@@ -457,13 +501,26 @@ $('all-fields').addEventListener('change', () => {
 });
 $('previous').addEventListener('click', () => { state.page--; drawPage(); });
 $('next').addEventListener('click', () => { state.page++; drawPage(); });
-$('download-view').addEventListener('click', () => { if (!loading && year != null) downloadView(); });
+$('download-view').addEventListener('click', () => {
+  if (loading || year == null || downloadBusy) return;
+  toggleDownloads($('download-options').hidden);
+  if (!$('download-options').hidden) $('download-csv').focus();
+});
+$('download-csv').addEventListener('click', () => {
+  if (loading || year == null || downloadBusy) return;
+  toggleDownloads(false); $('download-status').textContent = ''; downloadView(); $('download-view').focus();
+});
+$('download-xlsx').addEventListener('click', downloadXlsx);
 document.addEventListener('click', event => {
-  if ($('field-picker').open && !$('field-picker').contains(event.target)) $('field-picker').open = false;
+  if (!$('download-options').hidden && !event.target.closest('.download-picker')) toggleDownloads(false);
+  for (const id of ['field-picker', 'percentile-picker']) {
+    if ($(id).open && !$(id).contains(event.target)) $(id).open = false;
+  }
 });
 document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && $('field-picker').open) {
-    $('field-picker').open = false; $('field-picker').querySelector('summary').focus();
+  if (event.key === 'Escape' && !$('download-options').hidden) { toggleDownloads(false); $('download-view').focus(); }
+  if (event.key === 'Escape') for (const id of ['field-picker', 'percentile-picker']) {
+    if ($(id).open) { $(id).open = false; $(id).querySelector('summary').focus(); }
   }
 });
 $('dialog-content').addEventListener('click', navigateJournalSection);
@@ -473,7 +530,7 @@ $('reset').addEventListener('click', () => {
   hiddenColumns.clear();
   state = {...P.DEFAULTS, fields:[]};
   if (!universeIds().includes(state.universe)) state.universe = universeIds()[0];
-  fillFilters(); syncControls(); render();
+  fillFilters(); syncControls(); render(); toggleSettings(false);
 });
 
 // ---- Start ----

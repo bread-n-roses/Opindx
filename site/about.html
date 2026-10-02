@@ -6,11 +6,14 @@
   <meta name="description" content="How the open journal scores on Opindx are calculated, and the research behind them.">
   <meta name="color-scheme" content="light">
   <title>About · Opindx</title>
+  <link rel="icon" href="assets/favicon-round.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-round.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="masthead">
-    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">O</span> Opindx</a>
+    <a class="brand" href="index.html"><img class="brand-logo" src="assets/logo.png" width="174" height="58" alt="Op__ind_x"></a>
     <nav class="nav" aria-label="Pages"><a href="index.html">Journal metrics</a><a href="about.html" aria-current="page">About</a></nav>
   </header>
   <main class="about">
@@ -22,8 +25,8 @@
       <h2>What the scores measure</h2>
       <p>The scores follow the recursive citation-network method of <a href="https://doi.org/10.1523/JNEUROSCI.0003-08.2008">Bergstrom, West and Wiseman (2008)</a>. Imagine a reader who keeps following references from one journal to another, and now and then jumps to a random journal. Journals that this reader visits often carry more weight, and a citation from a journal with more weight counts for more than one from a peripheral journal. Journal self-citations are left out.</p>
       <ul>
-        <li><strong>Journal Network Share (JNS)</strong>: a journal’s share of all citation flow within a journal universe, on a scale that sums to 100. It grows with the number of articles a journal publishes.</li>
-        <li><strong>Article Network Score (ANS)</strong>: the JNS divided by the journal’s share of articles, so it measures influence per article. The article-weighted average is 1; an ANS of 2 means twice the average influence per article.</li>
+        <li><strong>Network Factor (NF)</strong>: a journal’s share of all citation flow within a journal universe, on a scale that sums to 100. It grows with the number of articles a journal publishes.</li>
+        <li><strong>Article Network Score (ANS)</strong>: the NF divided by the journal’s share of articles, so it measures influence per article. The article-weighted average is 1; an ANS of 2 means twice the average influence per article.</li>
       </ul>
       <p>For score year <em>t</em>, the scores use citations made in year <em>t</em> to articles and reviews published in the five years before (<em>t</em>−5 to <em>t</em>−1). Duplicate records of the same journal in OpenAlex are combined before the calculation.</p>
     </section>
@@ -39,7 +42,7 @@
 
     <section class="panel">
       <h2>Raw and Filtered scores</h2>
-      <p>OpenAlex records no references for part of the articles and reviews. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows Filtered scores by default. Reference coverage, shown for every journal, is the share of its publications with at least one recorded reference.</p>
+      <p>OpenAlex records no references for part of the articles and reviews. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows Filtered scores by default. Pubs. w/out refs. shows the share of eligible publications without a recorded reference. It is the complement of reference coverage and is the same for Raw and Filtered metrics.</p>
     </section>
 
     <section class="panel">
