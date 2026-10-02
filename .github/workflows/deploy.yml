@@ -8,7 +8,7 @@ on:
     types: [published, deleted]
   push:
     branches: [main]
-    paths: ["site/**", "tests/**", "tools/build_site_data.py", "score-years.json", ".github/workflows/deploy.yml"]
+    paths: ["site/**", "tests/**", "tools/build_site_data.py", "tools/version_site_assets.py", "score-years.json", ".github/workflows/deploy.yml"]
   workflow_dispatch:
 
 permissions:
@@ -30,8 +30,11 @@ jobs:
         with:
           node-version: 22
 
-      - name: Test the ranking logic
-        run: node tests/engine.test.mjs
+      - name: Test ranking, journal details and search
+        run: |
+          node tests/engine.test.mjs
+          node tests/journal-details.test.mjs
+          node tests/main-page.test.mjs
 
       - name: Download the latest run and the runs that score years are frozen to
         env:
@@ -51,15 +54,11 @@ jobs:
       - name: Check the data and add it to the site
         run: |
           pip install pyarrow
+          python -m unittest discover -s tests -p 'test_*.py'
           python tools/build_site_data.py runs "$LATEST_RUN" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases"
 
       - name: Add a version to the code links, so browsers never mix old and new files
-        working-directory: site
-        run: |
-          v="${GITHUB_SHA::7}"
-          sed -i "s/href=\"styles.css\"/href=\"styles.css?v=$v\"/; s/src=\"app.js\"/src=\"app.js?v=$v\"/" index.html about.html
-          sed -i "s|from './engine.js'|from './engine.js?v=$v'|" app.js
-          grep -q "app.js?v=$v" index.html && grep -q "engine.js?v=$v" app.js
+        run: python tools/version_site_assets.py site "${GITHUB_SHA::7}"
 
       - name: Publish the site to the gh-pages branch
         working-directory: site

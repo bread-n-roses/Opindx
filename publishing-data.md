@@ -68,25 +68,25 @@ Do not replace `2026-Q3` again without an explicit correction decision, because
 three frozen years now depend on its assets. No automatic 12- or 18-month
 freezing rule is introduced by this manual decision.
 
-## Pending same-snapshot format update (2 October 2026)
+## Same-snapshot format update (2 October 2026)
 
-The user selected an update of all five `2026-Q3` annual files together using
-existing September snapshot results and a consistent extended schema. This is
-a format/metadata update, with inclusion of validated journal records whose
-metrics are all missing; existing calculated scores must remain unchanged.
-No unfreezing is needed. Keep `score-years.json` as it is: 2022-2024 frozen and
-2025-2026 live, all currently sourced from the same September snapshot.
+The user authorized replacement of all five `2026-Q3` annual files using the
+same September snapshot and schema version 2. Retain the existing 552,179
+journal-year records and every original metric value. Include a journal when
+at least one JNS or ANS is defined in an exported universe/treatment; numerical
+zero counts as defined. Do not add journals with all metrics missing.
 
-Before replacing release assets, integrate the local field breakdown and
-register details into the normal export and site-data builder, including annual
-citations and compact historical percentile inputs. Back up and hash-check the
-currently published assets. Validate all five replacement files and their
-manifest together, including preservation of existing scores, before upload and
-deployment. Record the schema/data revision and source provenance in the new
-manifest while retaining the `2026-Q3` run name. This replacement has not yet
-been prepared or published; the source changes are on
-`website-maintenance-2026-10-02`. A push of website changes to `main` triggers
-deployment, so coordinate that push with the completed release assets.
+The integrated exporter now packages the top-three field breakdown and per-ID
+register metadata. `build_site_data.py` builds enriched annual history (including
+citations) and compact historical percentile inputs directly from release files.
+The manifest carries schema version, provenance, and each file's hash, size and
+row count. The original CSV and prior scientific receipts remain unchanged.
+
+For this owner-authorized replacement, control the deployment workflow while
+performing the requested sequence: temporarily remove the freeze pins, replace
+all six release assets, restore the 2022-2024 pins to `2026-Q3`, then deploy the
+completed site. Keep a verified local copy of the prior release. 2025-2026 remain
+live. Earlier years (2020 and 2021) are deferred to a separate update.
 
 This same-snapshot replacement does not set a policy for future snapshots;
 those should still receive distinct release tags to preserve frozen results.

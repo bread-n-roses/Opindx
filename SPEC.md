@@ -75,7 +75,7 @@ A score year can be **frozen**: it is then always published from one specific ru
 - Freezing, repointing to a newer run, and unfreezing (removing the line) are changes to this file, made in a pull request, so the history shows who changed what and when.
 - The deploy fails with a clear message if a named run does not exist or does not contain that year.
 
-The runs themselves are never changed: every run stays complete and downloadable as a release.
+Normally runs remain complete and downloadable under distinct tags. Explicitly authorized same-snapshot corrections are documented in publishing-data.md.
 
 ## Published data set
 
@@ -171,9 +171,34 @@ the selected ranking indicator. Annual populations and current ranking settings
 define each year's percentiles. Membership abbreviations OA and NR appear inside
 the table. journal-help.html explains the columns without nested popups.
 
-The research-side build_journal_details_preview.py installs ignored local history
-and ranking files, selected through index.json journal_details metadata. This
-preview does not publish a new release or change score values. Regular release
-assembly still needs the additional register/field metadata before publication.
+Schema version 2 now includes the additional field/register metadata in each
+annual release file. The regular builder writes enriched history and compact
+ranking files, selected through index.json journal_details metadata. The earlier
+local preview installer remains available for historical testing.
 The whole site must be mobile friendly; popup and help layouts have responsive
 rules, but real mobile/browser visual QA remains pending.
+
+
+## Complete schema version 2 (2026-10-02)
+
+Annual Parquets retain the original columns and add `oa_field_1` through
+`oa_field_3`, their corresponding `_works` integer counts, `oa_field_other_works`,
+`norwegian_entries_json`, and `norwegian_primary_id`. Existing classified-work
+counts provide the field-share denominator. Per-ID metadata is a JSON string
+containing the true register ID, assigned field and title; the optional primary
+ID controls link presentation only.
+
+The manifest adds `schema_version: 2`, `journal_details`, `population`,
+`data_revision`, `export_provenance`, and `assets` keyed by annual filename with
+SHA-256, byte size and row count. Required v2 metadata is validated; additional
+columns remain compatible. The builder continues to accept schema version 1.
+
+Population is unchanged: at least one defined JNS or ANS in any exported
+universe/treatment. Zero counts as defined; all-missing journal-years are excluded.
+All 552,179 original journal-year rows and cells are preserved. Publication years
+before 2022 remain out of scope for this update.
+
+The data builder validates inputs before replacing site/data. It creates history
+shards and per-year/universe/metric/treatment rank files, with no local-preview
+paths. Deployments test all JavaScript suites and the Python builder tests, and
+version every local JavaScript module import and all page styles consistently.
