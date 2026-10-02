@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="How the open journal scores on Opindx are calculated, and the research behind them.">
+  <meta name="color-scheme" content="light">
+  <title>About · Opindx</title>
+  <link rel="icon" href="assets/favicon-round.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-round.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css?v=330205e">
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="index.html"><img class="brand-logo" src="assets/logo.png" width="174" height="58" alt="Op__ind_x"></a>
+    <nav class="nav" aria-label="Pages"><a href="index.html">Journal metrics</a><a href="about.html" aria-current="page">About</a></nav>
+  </header>
+  <main class="about">
+    <p class="eyebrow">ABOUT</p>
+    <h1>Open journal scores, openly calculated.</h1>
+    <p class="subtitle">Opindx publishes citation-network scores for academic journals, calculated only from open data, so they do not depend on commercial citation indexes.</p>
+
+    <section class="panel">
+      <h2>What the scores measure</h2>
+      <p>The scores follow the recursive citation-network method of <a href="https://doi.org/10.1523/JNEUROSCI.0003-08.2008">Bergstrom, West and Wiseman (2008)</a>. Imagine a reader who keeps following references from one journal to another, and now and then jumps to a random journal. Journals that this reader visits often carry more weight, and a citation from a journal with more weight counts for more than one from a peripheral journal. Journal self-citations are left out.</p>
+      <ul>
+        <li><strong>Network Factor (NF)</strong>: a journal’s share of all citation flow within a journal universe, on a scale that sums to 100. It grows with the number of articles a journal publishes.</li>
+        <li><strong>Article Network Score (ANS)</strong>: the NF divided by the journal’s share of articles, so it measures influence per article. The article-weighted average is 1; an ANS of 2 means twice the average influence per article.</li>
+      </ul>
+      <p>For score year <em>t</em>, the scores use citations made in year <em>t</em> to articles and reviews published in the five years before (<em>t</em>−5 to <em>t</em>−1). Duplicate records of the same journal in OpenAlex are combined before the calculation.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Journal universes</h2>
+      <p>Only journals in the chosen universe, and citations between them, take part in the calculation. The same journal can therefore have different scores in different universes.</p>
+      <ul>
+        <li><strong>Norwegian Register</strong>: the journals approved at Level 1 or Level 2 in the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>. The register is reviewed by disciplinary expert panels and maintained every year, which makes it an open, curated journal list.</li>
+        <li><strong>OpenAlex</strong>: all sources that <a href="https://openalex.org">OpenAlex</a> classifies as journals, a much broader list.</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Raw and Filtered scores</h2>
+      <p>OpenAlex records no references for part of the articles and reviews. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows Filtered scores by default. Pubs. w/out refs. shows the share of eligible publications without a recorded reference. It is the complement of reference coverage and is the same for Raw and Filtered metrics.</p>
+    </section>
+
+    <section class="panel">
+      <div class="dialog-section-heading"><h2>Score years and their data</h2><a class="table-help" href="journal-help.html#data-versions" target="_blank" rel="noopener noreferrer" aria-label="Published years and source snapshots: What is what? (new tab)">What is what?</a></div>
+      <p>Each data run recalculates score years with the OpenAlex and Norwegian Register data available at that moment. OpenAlex keeps adding and correcting references, so the same score year can differ slightly between runs.</p>
+      <p>A score year is therefore published from one run. A <strong>frozen</strong> year always comes from that run and no longer changes, so it can be cited. A <strong>live</strong> year follows the newest run and can still change. Every run stays available for download.</p>
+      <div id="score-years" role="region" aria-label="Published years and source snapshots; scroll for more columns" tabindex="0">Loading the score years…</div>
+    </section>
+
+    <section class="panel">
+      <h2>The research behind it</h2>
+      <p>The working paper below compares open scores calculated from OpenAlex with a benchmark from a commercial citation index, for score years 2023 and 2024. It separates two choices that open reconstructions make at the same time: which publications count (Raw or Filtered) and which journal universe is used. Its main findings:</p>
+      <ul>
+        <li>Filtered scores agree better with the benchmark in every universe. The price is coverage: in 2024, 4.1% fewer journals in the Norwegian Register universe and 13.8% fewer in the OpenAlex universe receive a score.</li>
+        <li>The Norwegian Register gives results closely similar to the benchmark’s own journal list. The much broader OpenAlex universe differs more.</li>
+        <li>The Filtered rule is not just a smaller denominator: it works through which citations count and how articles are weighted, together.</li>
+        <li>The benchmark is not a ground truth, and a missing reference count in OpenAlex is an imperfect signal. Filtered scores are best read as a sensitivity choice.</li>
+      </ul>
+      <p class="citation"><strong>How to cite</strong><br>Weitzel, U. (2026). <em>Reference Observability and Journal Universe Choice in Open Reconstructions of Recursive Journal Metrics.</em> Working paper. A link will follow once the paper is publicly available.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Data sources</h2>
+      <p>Journal metadata, publications and citations come from <a href="https://openalex.org">OpenAlex</a>. Norwegian fields and levels come from the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (HK-dir). In rolling-field data runs, each journal’s field is the most frequent OpenAlex primary-topic broad field among its articles and reviews in the five preceding publication years. The percentage beside the field is its share of classified works, not a claim that the whole journal belongs to that field. The journal details show the top three fields and Other fields; the <a href="journal-help.html#fields-covered">journal help page</a> explains their percentages. Fields remain separate, with Unknown used when no works have a field; ties are resolved alphabetically. Older data runs may retain source-based fields.</p>
+    </section>
+
+    <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span><span>Open Data · Open Source · Nonprofit · Made at <a href="https://vu.nl/" target="_blank" rel="noopener noreferrer">Vrije Universiteit Amsterdam</a></span></footer>
+  </main>
+  <script type="module">
+    const escape = value => String(value ?? '—').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const target = document.getElementById('score-years');
+    try {
+      const index = await (await fetch('data/index.json')).json();
+      const row = entry => `<tr><th scope="row" class="align-left">${entry.year}</th>` +
+        `<td class="align-left">${escape(entry.status)}</td>` +
+        `<td class="align-left">${entry.release_url ? `<a href="${escape(entry.release_url)}">${escape(entry.run)}</a>` : escape(entry.run)}</td>` +
+        `<td class="align-left">${escape(entry.openalex_snapshot?.slice(0, 7))}</td><td class="align-left">${escape(entry.norwegian_register_snapshot)}</td></tr>`;
+      target.innerHTML = index.years.length
+        ? '<table><thead><tr><th scope="col" class="align-left">Score year</th><th scope="col" class="align-left">Status</th>' +
+          '<th scope="col" class="align-left">Data run</th><th scope="col" class="align-left">OpenAlex snapshot</th>' +
+          '<th scope="col" class="align-left">Norwegian Register snapshot</th></tr></thead><tbody>' +
+          index.years.map(row).join('') + '</tbody></table>'
+        : 'No score years published yet.';
+    } catch (error) {
+      target.textContent = `The score years could not be loaded (${error.message}).`;
+    }
+  </script>
+</body>
+</html>
