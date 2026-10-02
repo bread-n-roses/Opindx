@@ -11,6 +11,13 @@
     ],
     "access_right": "open",
     "license": "cc-by-4.0",
-    "version": "2026-09-v2"
+    "version": "2026-09-v2",
+    "related_identifiers": [
+      {
+        "identifier": "10.5281/zenodo.23108424",
+        "relation": "isCompiledBy",
+        "resource_type": "software"
+      }
+    ]
   }
 }
