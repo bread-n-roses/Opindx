@@ -71,3 +71,10 @@ Publication tooling was tested against a simulated service and local release
 bundles; no live Zenodo API transaction is claimed. XLSX values, types and workbook
 structures were checked programmatically. Real Excel and browser visual inspection
 were not available in this session. Actual browser/mobile layout QA remains separate.
+
+## Publication follow-up (2026-10-02)
+
+Both releases are now public; see `publication.json`. The prepared archives were
+published without recalculation or payload changes. All public file names, sizes
+and MD5 checksums match; GitHub asset SHA256 checks also pass. The website was
+deployed first and its served assets checked against the tested commit.

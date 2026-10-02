@@ -1,8 +1,9 @@
 # Opindx replication package
 
-Version 0.1.0 is a local release candidate. Publication is paused. Creator: Utz Weitzel
-(VU Amsterdam; Radboud University Nijmegen). No DOI has been assigned yet. See `docs/VALIDATION.md` for
-what has actually been executed.
+Version 0.1.0 is published: [10.5281/zenodo.23108424](https://doi.org/10.5281/zenodo.23108424). Creator: Utz Weitzel
+(VU Amsterdam; Radboud University Nijmegen). Complete datasets: [10.5281/zenodo.23108621](https://doi.org/10.5281/zenodo.23108621).
+See `docs/VALIDATION.md` for measured validation and `docs/publication.json` for release receipts.
+The published source archive and release tags remain unchanged; this branch adds citation and publication records.
 
 This source package recreates the September 2026 journal-metrics workflow from a
 **downloaded OpenAlex Parquet snapshot and the Norwegian Register CSV**. It includes

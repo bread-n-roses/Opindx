@@ -95,7 +95,9 @@ those should still receive distinct release tags to preserve frozen results.
 
 The published data tag is now `2026-09-v2`, with 2022-2024 pinned to that
 revision. The current preparation adds complete annual CSV/XLSX alongside
-the unchanged Parquets. These new bundles have not been pushed or published.
+the unchanged Parquets. Both bundles are now published: [software v0.1.0](https://doi.org/10.5281/zenodo.23108424)
+and [complete data-2026-09-v2](https://doi.org/10.5281/zenodo.23108621). Frozen-year pins remain on the unchanged
+2026-09-v2 Parquets; live years can use the identical Parquets in data-2026-09-v2.
 
 The full calculation and matching website are in [replication/](replication/README.md).
 Use `software-v*` for the software archive and `data-*` for complete datasets.
@@ -103,7 +105,7 @@ Their Zenodo DOI series are separate; ordinary pushes never publish to Zenodo.
 See [release instructions](replication/docs/RELEASING.md) and the actual
 [validation status](replication/docs/VALIDATION.md) before publication.
 
-The prepared Zenodo workflow requires `ZENODO_PUBLISH_ENABLED=true`; it currently remains disabled.
+The Zenodo workflow requires `ZENODO_PUBLISH_ENABLED=true`; it was enabled after owner authorization on 2 October 2026. Deliberate data/software release publication triggers it; ordinary code pushes do not.
 Creator metadata is complete: Utz Weitzel (VU Amsterdam; Radboud University Nijmegen). The deployment workflow now
 selects releases by their data manifest and annual Parquets, skips software
 release events and downloads only the files needed by the website. This keeps

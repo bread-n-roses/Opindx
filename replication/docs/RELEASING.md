@@ -1,8 +1,9 @@
 # Separate software and dataset releases
 
-Status: prepared locally; neither workflow activation, Git push nor Zenodo
-publication has been performed. ZENODO_TOKEN exists as an Actions secret in
-bread-n-roses/Opindx. It is not included anywhere in this package.
+Status: first software and complete dataset releases published on 2026-10-02.
+Software: https://doi.org/10.5281/zenodo.23108424. Data: https://doi.org/10.5281/zenodo.23108621.
+ZENODO_PUBLISH_ENABLED=true is active; ordinary pushes still never publish to Zenodo.
+ZENODO_TOKEN is an Actions secret in bread-n-roses/Opindx and is not in the package.
 
 1. Creator metadata is confirmed: Utz Weitzel, affiliated with VU Amsterdam and
    Radboud University Nijmegen, in CITATION.cff and both configs/zenodo-*.json
@@ -23,8 +24,8 @@ bread-n-roses/Opindx. It is not included anywhere in this package.
    Dataset release assets are the already validated complete files; never run a
    scientific recalculation merely because a tag was created.
 5. Install workflow/zenodo-release.yml at the repository workflow location and
-   enable ZENODO_PUBLISH_ENABLED=true only after review. The current preparation
-   intentionally leaves it disabled. Ordinary pushes have no Zenodo trigger.
+   enable ZENODO_PUBLISH_ENABLED=true only after review. This gate is now enabled
+   following explicit owner authorization on 2026-10-02. Ordinary pushes have no Zenodo trigger.
 6. A deliberate published release with a software-v* or data-* tag then validates,
    uploads and publishes immediately. It uses the versioned metadata at that tag.
    Its receipt is attached to the GitHub release. Manual dispatch of the existing
@@ -38,7 +39,8 @@ Subsequent versions follow the previous record's latest_draft link. Operations a
 serialized in GitHub Actions. An interrupted request with an uncertain server
 outcome requires re-reading deposit state; ambiguous duplicate records stop the
 uploader rather than silently choosing one. Offline tests exercise these cases;
-no live Zenodo API transaction is claimed until recorded explicitly.
+the first live software and dataset transactions succeeded and are recorded in
+`publication.json`. Each GitHub release also carries its Zenodo receipt.
 
 First publish software, then insert its returned version DOI as a related identifier
 in the dataset metadata before making the deliberate dataset release. Later datasets

@@ -5,7 +5,7 @@ Website for browsing and downloading open journal metrics (Network Factor and Ar
 - `SPEC.md`: what the website does and the data layout.
 - `publishing-data.md`: how to publish a new data run.
 - [replication/](replication/README.md): versioned calculation source from downloaded OpenAlex and Norwegian Register inputs, complete annual exports, provenance and validation.
-- [Replication release guide](replication/docs/RELEASING.md): separate software and dataset DOI series; publication is currently paused.
+- [Replication release guide](replication/docs/RELEASING.md): separate software and dataset DOI series. Published [software v0.1.0](https://doi.org/10.5281/zenodo.23108424) and [complete 2022–2026 datasets](https://doi.org/10.5281/zenodo.23108621).
 - `site/`: the website. `engine.js` holds the ranking logic, `app.js` the journal table, `about.html` the About page.
 
 ## Preview locally
