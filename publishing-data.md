@@ -114,3 +114,13 @@ software releases from replacing the website's active data selection.
 ## Custom domain preservation
 
 The public website is https://opindx.org. Keep `site/CNAME` set to `opindx.org`: the deployment rebuilds and replaces the `gh-pages` branch, so this file must travel with the site. The workflow checks it before publishing. Keep the existing GitHub Pages custom domain, HTTPS enforcement, verification TXT record and DNS records described in the local `website-runs/opindx_github_pages_handoff.md`.
+
+## Twelve-month freezing policy (4 October 2026)
+
+At the end of the calendar year following a score year, freeze that score year
+to its final eligible published run in `score-years.json`. For example, 2025
+remains live through 31 December 2026 and is frozen thereafter. Before publishing
+a run in 2027, pin 2025 to the final 2026 run, so later data cannot alter it.
+The current 2022–2024 pins already meet this policy; 2025–2026 remain live.
+Apply and review the pins during release maintenance, keeping the pinned release
+available. The browser displays the actual published status from `index.json`.

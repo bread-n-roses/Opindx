@@ -94,7 +94,7 @@ site/data/history/00…99.parquet  all years per group of journals, for the jour
 - Header navigation: Journal metrics and About. Main title: Journal Metrics; search is the primary control beneath the tagline.
 - Search and table share visible controls: Citation year, OpenAlex fields (multiple), Journal universe, and Presets. The default citation year is the latest available full calendar year, currently 2025; newer years remain selectable.
 - Max coverage (noisy): initial OpenAlex/Filtered preset; ANS Field percentiles only. Requirements: less than 80% of publications without references (equivalent to coverage strictly above 20%), at least four publication years, top 100% per field. Hide journals without percentiles is unchecked; all exported members remain visible.
-- Close to EF and AIS: same requirements as Max coverage (noisy), using Norwegian Register and ANS Field percentiles only.
+- Closest to EF and AIS: same requirements as Max coverage (noisy), using Norwegian Register and ANS Field percentiles only.
 - VU Amsterdam (SBE): Norwegian Register/Filtered ANS; Total percentiles only, less than 80% without references, at least four publication years, top 75% per field; hide journals without a Total percentile.
 - Advanced settings replaces the cog and contains open-access/reference-treatment checkboxes and a compact shaded percentile row. Custom opens it; choosing any named preset closes it. The +/minus link allows manual opening/closing. Named presets preserve search/year/field/access filters where compatible; Reset clears these display choices while preserving the citation year.
 - Open access journals only and Include publications without references (not recommended) appear in that order below the dropdowns. The latter selects Raw explicitly. There is no publisher filter or More options panel. Changing universe refreshes/reconciles field choices. The fields dropdown begins with All fields checked and individual fields unchecked. An individual choice unchecks All fields; checking All fields clears the individual selections. No repeated visible heading or field-search input.
@@ -231,3 +231,12 @@ OpenAlex field cell becomes a name column and a numeric percentage column
 module loaded only on demand, preserving numeric values and literal strings.
 The interface shows preparation status and allows retry/CSV after a failure.
 The complete-data introduction omits the parenthesized file-format label.
+
+## Public wording and controls (4 October 2026)
+
+The year picker shows the published live/frozen status. Complete datasets link to
+the DOI-versioned Zenodo archive, and all page footers credit Utz Weitzel.
+The publication policy is to freeze a score year twelve months after it ends.
+Release maintainers enforce this by pinning the final eligible run in score-years.json
+before publishing a later run; frozen status is not a browser date calculation.
+Thus 2025 remains live through 2026 and must be pinned at that year-end boundary.

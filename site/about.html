@@ -19,7 +19,6 @@
   <main class="about">
     <p class="eyebrow">ABOUT</p>
     <h1>Open journal scores, openly calculated.</h1>
-    <p class="subtitle">Opindx publishes citation-network scores for academic journals, calculated only from open data, so they do not depend on commercial citation indexes.</p>
 
     <section class="panel">
       <h2>What the scores measure</h2>
@@ -42,34 +41,28 @@
 
     <section class="panel">
       <h2>Raw and Filtered scores</h2>
-      <p>OpenAlex records no references for part of the articles and reviews. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows Filtered scores by default. Pubs. w/out refs. shows the share of eligible publications without a recorded reference. It is the complement of reference coverage and is the same for Raw and Filtered metrics.</p>
+      <p>Open datasets are not perfect. Sometimes OpenAlex does not record references for publications. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows Filtered scores by default. 'Pubs. w/out refs.' shows the share of eligible publications of a journal that are recorded without a reference.</p>
     </section>
 
     <section class="panel">
       <div class="dialog-section-heading"><h2>Score years and their data</h2><a class="table-help" href="journal-help.html#data-versions" target="_blank" rel="noopener noreferrer" aria-label="Published years and source snapshots: What is what? (new tab)">What is what?</a></div>
       <p>Each data run recalculates score years with the OpenAlex and Norwegian Register data available at that moment. OpenAlex keeps adding and correcting references, so the same score year can differ slightly between runs.</p>
-      <p>A score year is therefore published from one run. A <strong>frozen</strong> year always comes from that run and no longer changes, so it can be cited. A <strong>live</strong> year follows the newest run and can still change. Every run stays available for download.</p>
+      <p>A <strong>live</strong> year follows the newest run and can still change. A <strong>frozen</strong> year always comes from the shown run and no longer changes, so it can be cited safely. Twelve months after the end of the score year its status changes from live to frozen. For example, 2025 is updated live with every run until the end of 2026. At that point its status and metrics are frozen. Every run stays available for download.</p>
       <div id="score-years" role="region" aria-label="Published years and source snapshots; scroll for more columns" tabindex="0">Loading the score years…</div>
     </section>
 
     <section class="panel">
       <h2>The research behind it</h2>
-      <p>The working paper below compares open scores calculated from OpenAlex with a benchmark from a commercial citation index, for score years 2023 and 2024. It separates two choices that open reconstructions make at the same time: which publications count (Raw or Filtered) and which journal universe is used. Its main findings:</p>
-      <ul>
-        <li>Filtered scores agree better with the benchmark in every universe. The price is coverage: in 2024, 4.1% fewer journals in the Norwegian Register universe and 13.8% fewer in the OpenAlex universe receive a score.</li>
-        <li>The Norwegian Register gives results closely similar to the benchmark’s own journal list. The much broader OpenAlex universe differs more.</li>
-        <li>The Filtered rule is not just a smaller denominator: it works through which citations count and how articles are weighted, together.</li>
-        <li>The benchmark is not a ground truth, and a missing reference count in OpenAlex is an imperfect signal. Filtered scores are best read as a sensitivity choice.</li>
-      </ul>
-      <p class="citation"><strong>How to cite</strong><br>Weitzel, U. (2026). <em>Reference Observability and Journal Universe Choice in Open Reconstructions of Recursive Journal Metrics.</em> Working paper. A link will follow once the paper is publicly available.</p>
+      <p>The working paper below compares open scores calculated from OpenAlex with a benchmark from a commercial citation index, for score years 2023 and 2024. It separates two choices that open reconstructions make at the same time: which publications count (Raw or Filtered) and which journal universe is used. Its main findings are that filtered scores agree better with the benchmark in every universe and that the Norwegian Register gives results that are closest to the benchmark.</p>
+      <p class="citation"><strong>How to cite</strong><br>Weitzel, U. (2026). <em>Reference Observability and Journal Universe Choice in Open Reconstructions of Recursive Journal Metrics.</em> Working paper.</p>
     </section>
 
     <section class="panel">
       <h2>Data sources</h2>
-      <p>Journal metadata, publications and citations come from <a href="https://openalex.org">OpenAlex</a>. Norwegian fields and levels come from the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (HK-dir). In rolling-field data runs, each journal’s field is the most frequent OpenAlex primary-topic broad field among its articles and reviews in the five preceding publication years. The percentage beside the field is its share of classified works, not a claim that the whole journal belongs to that field. The journal details show the top three fields and Other fields; the <a href="journal-help.html#fields-covered">journal help page</a> explains their percentages. Fields remain separate, with Unknown used when no works have a field; ties are resolved alphabetically. Older data runs may retain source-based fields.</p>
+      <p>Journal metadata, publications and citations come from <a href="https://openalex.org/">OpenAlex</a>. The Norwegian journal list and journal levels come from the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (HK-dir).</p>
     </section>
 
-    <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span><span>Open Data · Open Source · Nonprofit · Made at <a href="https://vu.nl/" target="_blank" rel="noopener noreferrer">Vrije Universiteit Amsterdam</a></span></footer>
+    <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a></span><span>Open Data · Open Source · Nonprofit · Made at <a href="https://vu.nl/" target="_blank" rel="noopener noreferrer">Vrije Universiteit Amsterdam</a> by Utz Weitzel</span></footer>
   </main>
   <script type="module">
     const escape = value => String(value ?? '—').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

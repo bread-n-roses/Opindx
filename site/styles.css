@@ -196,7 +196,6 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 .picker { position: relative }
 .picker summary { height: 36px; border: 1px solid #cfd7e3; border-radius: 5px; padding: 0 28px 0 10px; background: #fff; font-size: 12px; font-weight: 400; display: flex; align-items: center; cursor: pointer; list-style: none }
 .picker summary::-webkit-details-marker { display: none }
-.picker summary::after { content: '\25BE'; position: absolute; right: 10px; top: 9px; color: var(--muted) }
 .picker-list { position: absolute; z-index: 5; top: 41px; left: 0; min-width: 100%; flex-direction: column; align-items: start; gap: 9px; white-space: nowrap; background: #fff; border: 1px solid var(--line); border-radius: 5px; padding: 11px 13px; box-shadow: 0 6px 18px rgba(20,50,40,.10) }
 
 /* Journal details: wrap prose; keep horizontal scrolling inside the metrics table. */
@@ -279,7 +278,6 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 .search-options #reset { margin-left: 0; min-height: 44px; font-size: 12px }
 .check-line input { flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--accent) }
 .metrics-page .picker summary { overflow: hidden }
-.picker summary::after { content: '\25BE'; top: 12px }
 #field-summary { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .metrics-page .picker-list { width: max(100%, 280px); max-width: min(420px, calc(100vw - 68px)); top: 49px; padding: 14px; white-space: normal }
 .metrics-page .filter-box input[type=search] { height: 40px; font-size: 14px }
@@ -293,10 +291,10 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 .percentile-settings:disabled { opacity: .55 }
 .percentile-toggles { display: flex; align-items: center; flex-wrap: wrap; gap: 0 24px }
 .percentile-toggles .pool-only-line:has(input:disabled) { opacity: .55 }
-.selection-summary { flex: 1; min-width: 0; font-size: 12px; line-height: 1.8; color: var(--muted) }
-.selection-summary #result-count { font-weight: 400; color: var(--ink) }
-.selection-summary strong { font-weight: 650; color: var(--ink) }
-.download-button { border: 1px solid var(--accent); background: var(--accent); color: white; border-radius: 5px; padding: 11px 16px; min-height: 44px; font-size: 12px; font-weight: 600; white-space: nowrap }
+.selection-summary { flex: 1; min-width: 0; font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--muted) }
+.selection-summary #result-count { font-weight: inherit; color: var(--ink) }
+.selection-summary strong { font-weight: inherit; color: var(--ink) }
+.download-button { border: 1px solid var(--accent); background: var(--accent); color: white; border-radius: 5px; padding: 11px 16px; min-height: 44px; font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1.5; white-space: nowrap }
 .download-button:hover { filter: brightness(.9) }
 button:disabled { opacity: .5; cursor: default }
 .metrics-page .table-toolbar { justify-content: space-between; padding: 16px 20px }
@@ -379,7 +377,7 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
 .metrics-page .intro { margin-bottom: 20px }
 .metrics-page .control { gap: 5px }
 .control-links { display: flex; align-items: center; flex-wrap: wrap; gap: 0 18px; margin-top: 5px }
-.control-links .text-button, .control-links .table-help { min-height: 36px; font-size: 12px }
+.control-links .text-button, .control-links .table-help { display: inline-flex; align-items: center; min-height: 36px; font-family: inherit; font-size: 12px; font-weight: 400; line-height: 1.5; text-underline-offset: 3px }
 .control-links .table-help { margin-left: auto }
 .control-links #reset { margin-left: 0 }
 .advanced-toggle { display: inline-flex; align-items: center; gap: 6px; text-decoration: none }
@@ -396,7 +394,6 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
 .metrics-page #percentile-settings { display: contents }
 .metrics-page .percentile-band .control { font-size: 11.5px }
 .metrics-page .percentile-band .control select, .metrics-page .percentile-band .control input[type=number], .metrics-page .percentile-band .picker summary { height: 38px; font-size: 12px }
-.metrics-page .percentile-band .picker summary::after { top: 10px }
 .metrics-page .percentile-band .picker-list { top: 43px; width: max(100%, 220px); padding: 8px 10px }
 #percentile-summary { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 #percentile-choices { display: flex; flex-direction: column; gap: 2px }
@@ -417,7 +414,6 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
   .metrics-page .percentile-band .reference-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
   .metrics-page .percentile-band .control select, .metrics-page .percentile-band .control input[type=number], .metrics-page .percentile-band .picker summary { height: 44px; font-size: 16px }
   .metrics-page .percentile-band .picker-list { top: 49px }
-  .metrics-page .percentile-band .picker summary::after { top: 12px }
   .metrics-page .settings .check-line, .control-links .text-button, .control-links .table-help { min-height: 44px }
   .advanced-general { display: block }
   .help-section-links { flex-wrap: nowrap; overflow-x: auto }
@@ -436,3 +432,8 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
 #download-status { font-size: 12px; color: var(--muted); max-width: 250px }
 #download-status:empty { display: none }
 #journal-dialog dt { overflow-wrap: anywhere; line-height: 1.45 }
+
+/* One chevron for native selects and multi-select summaries. */
+:root { --control-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m2 4 4 4 4-4' fill='none' stroke='%23667080' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") }
+.control select, .picker summary { background-image: var(--control-chevron); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px 12px; padding-right: 30px }
+.control select { appearance: none; -webkit-appearance: none }

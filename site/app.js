@@ -431,13 +431,6 @@ async function downloadXlsx() {
   }
 }
 
-function showCompleteData() {
-  const links = [...index.years].sort((a, b) => b.year - a.year)
-    .map(entry => `<a href="data/scores_${entry.year}.parquet" download>${entry.year}</a>`).join(' · ');
-  const older = index.releases_url ? ` · <a href="${escape(index.releases_url)}" target="_blank" rel="noopener noreferrer">older versions</a>` : '';
-  $('download-files').innerHTML = `Complete files per year, all columns, and older versions of the data: ${links}${older}.`;
-}
-
 // ---- Events ----
 for (const [id, key] of Object.entries(SELECTS)) $(id).addEventListener('change', event =>
   update({[key]:NUMERIC.has(key) ? Number(event.target.value) : event.target.value}));
@@ -539,8 +532,7 @@ try {
   index = await (await fetchOk('data/index.json')).json();
   const initial = P.startingSelection(index.years, location.search);
   state = {...state, ...P.PRESETS[initial.preset]};
-  $('year').innerHTML = [...index.years].sort((a, b) => b.year - a.year).map(entry => option(entry.year, entry.year)).join('');
+  $('year').innerHTML = [...index.years].sort((a, b) => b.year - a.year).map(entry => option(entry.year, `${entry.year} (${entry.status})`)).join('');
   $('year').value = initial.year;
-  showCompleteData();
   await loadYear(initial.year);
 } catch (error) { showError(error); }
