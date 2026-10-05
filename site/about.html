@@ -18,21 +18,22 @@
   </header>
   <main class="about">
     <p class="eyebrow">ABOUT</p>
-    <h1>Open journal scores, openly calculated.</h1>
+    <h1>Open citation metrics. Openly calculated.</h1>
 
     <section class="panel">
-      <h2>What the scores measure</h2>
-      <p>The scores follow the recursive citation-network method of <a href="https://doi.org/10.1523/JNEUROSCI.0003-08.2008">Bergstrom, West and Wiseman (2008)</a>. Imagine a reader who keeps following references from one journal to another, and now and then jumps to a random journal. Journals that this reader visits often carry more weight, and a citation from a journal with more weight counts for more than one from a peripheral journal. Journal self-citations are left out.</p>
+      <h2>Metrics</h2>
+      <p>The journal scores follow the recursive citation-network method of <a href="https://doi.org/10.1523/JNEUROSCI.0003-08.2008">Bergstrom, West and Wiseman (2008)</a>. Imagine a reader who keeps following references from one journal to another, and now and then jumps to a random journal. Journals that this reader visits often carry more weight, and a citation from a journal with more weight counts for more than one from a peripheral journal. Journal self-citations are left out.</p>
       <ul>
-        <li><strong>Network Factor (NF)</strong>: a journal’s share of all citation flow within a journal universe, on a scale that sums to 100. It grows with the number of articles a journal publishes.</li>
-        <li><strong>Article Network Score (ANS)</strong>: the NF divided by the journal’s share of articles, so it measures influence per article. The article-weighted average is 1; an ANS of 2 means twice the average influence per article.</li>
+        <li><strong>Network Factor (NF)</strong>: a journal’s share of all citation flow within a journal universe, on a scale that sums to 100. It grows with the number of articles a journal publishes. The Network Factor follows an Eigenfactor®-like methodology.</li>
+        <li><strong>Article Network Score (ANS)</strong>: the NF divided by the journal’s share of articles, so it measures influence per article. The article-weighted average is 1; an ANS of 2 means twice the average influence per article. The Article Network Score follows an Article Influence® Score-like methodology.</li>
       </ul>
       <p>For score year <em>t</em>, the scores use citations made in year <em>t</em> to articles and reviews published in the five years before (<em>t</em>−5 to <em>t</em>−1). Duplicate records of the same journal in OpenAlex are combined before the calculation.</p>
+      <p>‘Eigenfactor’ and ‘Article Influence’ are registered trademarks of the University of Washington. The abbreviations EF and AIS refer to the official metrics.</p>
     </section>
 
     <section class="panel">
       <h2>Journal universes</h2>
-      <p>Only journals in the chosen universe, and citations between them, take part in the calculation. The same journal can therefore have different scores in different universes.</p>
+      <p>Only journals in the chosen universe, and citations between them, take part in the network score calculation. The same journal can therefore have different scores in different universes.</p>
       <ul>
         <li><strong>Norwegian Register</strong>: the journals approved at Level 1 or Level 2 in the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>. The register is reviewed by disciplinary expert panels and maintained every year, which makes it an open, curated journal list.</li>
         <li><strong>OpenAlex</strong>: all sources that <a href="https://openalex.org">OpenAlex</a> classifies as journals, a much broader list.</li>
@@ -41,7 +42,7 @@
 
     <section class="panel">
       <h2>Raw and Filtered scores</h2>
-      <p>Open datasets are not perfect. Sometimes OpenAlex does not record references for publications. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows Filtered scores by default. 'Pubs. w/out refs.' shows the share of eligible publications of a journal that are recorded without a reference.</p>
+      <p>Open datasets are not perfect. Sometimes OpenAlex does not record references for publications. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows filtered scores by default. 'Pubs. w/out refs.' shows the share of eligible publications of a journal that are recorded without a reference.</p>
     </section>
 
     <section class="panel">
@@ -53,13 +54,13 @@
 
     <section class="panel">
       <h2>The research behind it</h2>
-      <p>The working paper below compares open scores calculated from OpenAlex with a benchmark from a commercial citation index, for score years 2023 and 2024. It separates two choices that open reconstructions make at the same time: which publications count (Raw or Filtered) and which journal universe is used. Its main findings are that filtered scores agree better with the benchmark in every universe and that the Norwegian Register gives results that are closest to the benchmark.</p>
+      <p>The study below compares open scores calculated from OpenAlex with a benchmark from a commercial citation index, for score years 2023 and 2024. It separates two choices that open reconstructions make at the same time: which publications count (Raw or Filtered) and which journal universe is used. Its main findings are that filtered scores agree better with the benchmark in every universe and that the Norwegian Register gives results that are closest to the benchmark. This setting can be chosen as preset "Closest to EF and AIS".</p>
       <p class="citation"><strong>How to cite</strong><br>Weitzel, U. (2026). <em>Reference Observability and Journal Universe Choice in Open Reconstructions of Recursive Journal Metrics.</em> Working paper.</p>
     </section>
 
     <section class="panel">
       <h2>Data sources</h2>
-      <p>Journal metadata, publications and citations come from <a href="https://openalex.org/">OpenAlex</a>. The Norwegian journal list and journal levels come from the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (HK-dir).</p>
+      <p>Journal metadata, publications and citations come from <a href="https://openalex.org/">OpenAlex</a> (CC0 license). The Norwegian journal list and journal levels come from the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (Norwegian Licence for Open Government Data, NLOD 2.0).</p>
     </section>
 
     <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a></span><span>Open Data · Open Source · Nonprofit · Made at <a href="https://vu.nl/" target="_blank" rel="noopener noreferrer">Vrije Universiteit Amsterdam</a> by Utz Weitzel</span></footer>
