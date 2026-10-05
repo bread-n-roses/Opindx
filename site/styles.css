@@ -203,9 +203,8 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 #journal-dialog h2, #journal-dialog h3, #journal-dialog dd { overflow-wrap: anywhere }
 #journal-dialog .journal-section-nav { position: sticky; top: 0; z-index: 6; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.1fr) minmax(0, 1.45fr) 44px; gap: 4px; margin: 16px 0 0; padding: 4px; background: var(--white); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 3px 8px #2229360c }
 #journal-dialog .journal-section-nav a { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; min-height: 44px; padding: 6px; border-radius: 4px; font-size: 12px; line-height: 1.4; text-align: center; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere }
-#journal-dialog .journal-section-nav [data-journal-section="metrics-title"] { background: var(--soft); font-weight: 600 }
-#journal-dialog .journal-section-nav a:hover { background: #e8eef9 }
-#journal-dialog .journal-section-nav a span { flex-shrink: 0 }
+#journal-dialog .journal-section-nav a[aria-current="location"] { background: #dce5f3; box-shadow: inset 0 -2px var(--accent) }
+#journal-dialog .journal-section-nav a:not([aria-current="location"]):hover { background: #e8eef9 }
 #journal-dialog #details-title, #journal-dialog #fields-title, #journal-dialog #metrics-title { scroll-margin-top: 100px }
 #journal-dialog .journal-section-nav .dialog-close { position: static; display: grid; place-items: center; align-self: stretch; width: 44px; min-height: 44px; padding: 0; border-radius: 4px; line-height: 1 }
 #journal-dialog .journal-section-nav .dialog-close:hover { background: #e8eef9; color: var(--ink) }
@@ -263,7 +262,10 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 .metrics-page .intro { margin-bottom: 24px }
 .metrics-page .subtitle { line-height: 1.7; max-width: 900px }
 .search-panel { padding: 20px; margin-bottom: 16px }
-.search-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 10px }
+.search-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; margin-bottom: 6px }
+.search-label { display: block; font-size: 14px; font-weight: 600; margin: 0 }
+.search-actions { display: flex; align-items: center; gap: 16px; margin-left: auto }
+.search-actions #reset { margin-left: 0 }
 .search-panel .search-box input { height: 58px; padding: 12px 16px 12px 48px; font-size: 17px; border: 1px solid #99aacb; background: white; box-shadow: 0 2px 8px #24365108 }
 .search-symbol { position: absolute; width: 23px; height: 23px; left: 15px; top: 17px; color: var(--accent); pointer-events: none }
 .search-controls, .percentile-settings { border: 0; padding: 0; margin: 0; min-width: 0 }
@@ -377,9 +379,8 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
 .metrics-page .intro { margin-bottom: 20px }
 .metrics-page .control { gap: 5px }
 .control-links { display: flex; align-items: center; flex-wrap: wrap; gap: 0 18px; margin-top: 5px }
-.control-links .text-button, .control-links .table-help { display: inline-flex; align-items: center; min-height: 36px; font-family: inherit; font-size: 12px; font-weight: 400; line-height: 1.5; text-underline-offset: 3px }
+.search-actions .text-button, .search-actions .table-help, .control-links .text-button, .control-links .table-help { display: inline-flex; align-items: center; min-height: 36px; font-family: inherit; font-size: 12px; font-weight: 400; line-height: 1.5; text-underline-offset: 3px }
 .control-links .table-help { margin-left: auto }
-.control-links #reset { margin-left: 0 }
 .advanced-toggle { display: inline-flex; align-items: center; gap: 6px; text-decoration: none }
 .advanced-toggle:hover { text-decoration: underline; text-underline-offset: 3px }
 #settings-indicator { position: relative; flex: 0 0 12px; width: 12px; height: 12px; font-size: 0; line-height: 1 }
@@ -404,7 +405,8 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
 .help-section-nav { position: sticky; top: 8px; z-index: 8; display: flex; gap: 4px; padding: 4px; margin: 14px 0 16px; background: var(--white); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 3px 8px #2229360c }
 .help-section-links { display: flex; flex-wrap: wrap; flex: 1; min-width: 0; gap: 0 4px }
 .help-section-links a { display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 4px 8px; font-size: 12px; text-underline-offset: 3px; border-radius: 4px }
-.help-section-links a:hover { background: var(--soft) }
+.help-section-links a[aria-current="location"] { background: #dce5f3; box-shadow: inset 0 -2px var(--accent) }
+.help-section-links a:not([aria-current="location"]):hover { background: var(--soft) }
 #close-help { align-self: flex-start; flex: 0 0 44px; width: 44px; height: 44px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); font-size: 26px }
 #close-help:hover { background: var(--soft); color: var(--ink) }
 .journal-help h2 { scroll-margin-top: calc(var(--help-nav-height, 96px) + 20px) }
@@ -415,7 +417,7 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
   .metrics-page .percentile-band .reference-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px }
   .metrics-page .percentile-band .control select, .metrics-page .percentile-band .control input[type=number], .metrics-page .percentile-band .picker summary { height: 44px; font-size: 16px }
   .metrics-page .percentile-band .picker-list { top: 49px }
-  .metrics-page .settings .check-line, .control-links .text-button, .control-links .table-help { min-height: 44px }
+  .metrics-page .settings .check-line, .search-actions .text-button, .search-actions .table-help, .control-links .text-button, .control-links .table-help { min-height: 44px }
   .advanced-general { display: block }
   .help-section-links { flex-wrap: nowrap; overflow-x: auto }
   .help-section-links a { flex-shrink: 0; min-height: 44px }

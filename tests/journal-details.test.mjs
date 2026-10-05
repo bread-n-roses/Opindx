@@ -98,14 +98,14 @@ await check('Popup links reveal headings below the padded sticky bar, whose clos
     elements[id].getBoundingClientRect=()=>({top:40+1+targetContentTop-dialog.scrollTop});
     elements[id].focus=options=>{elements[id].focused=options;};
   }
-  const context={rows:[meta],D,year:2026,state:settings,$:id=>elements[id],escape:value=>value,universeName:()=> 'Norwegian Register',showHistory(){}};
+  const context={rows:[meta],D,year:2026,state:settings,$:id=>elements[id],escape:value=>value,universeName:()=> 'Norwegian Register',showHistory(){},stopJournalTracking(){},OpindxSections:{trackSections(){return () => {}; }}};
   vm.createContext(context);vm.runInContext(source,context);
   context.showJournal(meta.openalex_id);
   assert.equal(dialog.scrollTop,0);
   const html=elements['dialog-content'].innerHTML;
   assert.ok(html.indexOf('id="dialog-title"') < html.indexOf('<nav'));
   assert.ok(html.indexOf('</nav>') < html.indexOf('<dl'));
-  assert.match(html,/Metrics by year <span aria-hidden="true">↓/);
+  assert.match(html,/data-journal-section="metrics-title">Metrics by year<\/a>/);
   assert.match(html,/<h3 id="details-title" tabindex="-1">Details<\/h3>/);
   assert.match(html.split('</nav>')[0],/data-journal-close aria-label="Close journal details"/);
   for (const id of ['details-title','fields-title','metrics-title']) {

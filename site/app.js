@@ -3,6 +3,7 @@ import { parquetReadObjects } from 'https://cdn.jsdelivr.net/npm/hyparquet@1.31.
 import * as E from './engine.js';
 import * as D from './journal-details.js';
 import * as P from './presets.js';
+import {} from './section-nav.js';
 import { workbookBytes } from './selection-download.js';
 
 const $ = id => document.getElementById(id);
@@ -22,6 +23,7 @@ const hiddenColumns = new Set();
 const filterValues = {fields: []};
 const historyFiles = new Map();
 let historyRequest = 0;
+let stopJournalTracking = () => {};
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const option = (value, label) => `<option value="${escape(value)}">${escape(label)}</option>`;
@@ -51,6 +53,7 @@ function setLoading(value) {
   if (value) toggleDownloads(false);
   $('search').disabled = year == null;
   $('search-controls').disabled = year == null;
+  $('reset').disabled = year == null;
   if (value) { $('previous').disabled = true; $('next').disabled = true; }
 }
 
@@ -228,6 +231,7 @@ function syncControls() {
 }
 function toggleSettings(open) {
   $('settings').hidden = !open;
+  $('settings-help').hidden = !open;
   $('settings-toggle').setAttribute('aria-expanded', String(open));
   $('settings-indicator').textContent = open ? '\u2212' : '+';
 }
@@ -250,12 +254,13 @@ function applyPreset(preset) {
 function showJournal(id) {
   const row = rows.find(r => r.openalex_id === id);
   if (!row) return;
+  stopJournalTracking();
   const details = D.metadataRows(row);
   $('dialog-content').innerHTML = `<p class="dialog-label">JOURNAL DETAILS · ${year} · ${state.treatment.toUpperCase()}</p><h2 id="dialog-title">${escape(row.title)}</h2>` +
     '<nav id="journal-sections" class="journal-section-nav" aria-label="Journal detail sections">' +
     '<a href="#details-title" data-journal-section="details-title">Details</a>' +
     '<a href="#fields-title" data-journal-section="fields-title">Fields covered</a>' +
-    '<a href="#metrics-title" data-journal-section="metrics-title">Metrics by year <span aria-hidden="true">↓</span></a>' +
+    '<a href="#metrics-title" data-journal-section="metrics-title">Metrics by year</a>' +
     '<button type="button" id="close-dialog" class="dialog-close" data-journal-close aria-label="Close journal details" title="Close journal details" autofocus>×</button></nav>' +
     '<div class="dialog-section-heading"><h3 id="details-title" tabindex="-1">Details</h3></div>' +
     `<dl id="journal-metadata" aria-labelledby="details-title">${details.map(([key, value]) => `<dt>${key}</dt><dd>${value}</dd>`).join('')}</dl>` +
@@ -265,6 +270,7 @@ function showJournal(id) {
     '<p id="history-percentile-status" role="status"></p>';
   $('journal-dialog').showModal();
   $('journal-dialog').scrollTop = 0;
+  stopJournalTracking = globalThis.OpindxSections.trackSections($('journal-sections'), {scroller: $('journal-dialog'), content: $('dialog-content')});
   showHistory(id, row);
 }
 
@@ -517,7 +523,7 @@ document.addEventListener('keydown', event => {
   }
 });
 $('dialog-content').addEventListener('click', navigateJournalSection);
-$('journal-dialog').addEventListener('close', () => { historyRequest++; });
+$('journal-dialog').addEventListener('close', () => { historyRequest++; stopJournalTracking(); });
 $('reset').addEventListener('click', () => {
   explicitCustom = false;
   hiddenColumns.clear();

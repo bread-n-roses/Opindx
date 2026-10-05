@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import './section-nav.test.mjs';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import * as E from '../site/engine.js';
@@ -41,6 +42,7 @@ function harness(fetchOverride, workbookWriter = workbookBytes) {
     elements.set(match[1], element(match[1]));
   }
   elements.get('settings').hidden = true;
+  elements.get('settings-help').hidden = true;
   const document = {getElementById(id) { assert.ok(elements.has(id), `Missing main-page element: ${id}`); return elements.get(id); },addEventListener() {}};
   let rankCalls = 0;
   const context = {document, E:{...E,rank(...args) { rankCalls++; return E.rank(...args); }},D,P,console,URL,Blob,setTimeout,workbookBytes:workbookWriter,
@@ -82,6 +84,7 @@ await check('Full shows percentiles by default and preserves journals missing AN
   assert.equal(h.elements.get('preset').value,'full');
   assert.equal(h.elements.get('notice').hidden,true);
   assert.equal(h.elements.get('settings').hidden,true);
+  assert.equal(h.elements.get('settings-help').hidden,true);
   assert.equal(h.api.getState().minCoverage,20);
   assert.equal(h.api.getState().minYears,4);
   assert.equal(h.api.getState().topPercent,100);
@@ -113,9 +116,11 @@ await check('Advanced settings opens; presets close it; VU SBE applies 75%, four
   const h = harness(); await h.api.loadYear(2025);
   h.elements.get('settings-toggle').emit('click');
   assert.equal(h.elements.get('settings').hidden,false);
+  assert.equal(h.elements.get('settings-help').hidden,false);
   assert.equal(h.elements.get('percentile-settings').disabled,false);
   h.elements.get('preset').emit('change',{value:'vu-sbe'});
   assert.equal(h.elements.get('settings').hidden,true);
+  assert.equal(h.elements.get('settings-help').hidden,true);
   const state = h.api.getState();
   for (const [key,value] of Object.entries(P.PRESETS['vu-sbe'])) assert.equal(state[key],value,key);
   assert.equal(h.api.getVisible().length,15);
@@ -289,9 +294,12 @@ await check('Help covers main, historical, field-breakdown and About headers', a
   const help = readFileSync(new URL('../site/journal-help.html',import.meta.url),'utf8');
   const section = id => help.split(`<h2 id="${id}">`)[1]?.split('</section>')[0] ?? '';
   const mainHelp = section('journal-table');
-  for (const col of h.api.getColumns()) assert.ok(mainHelp.includes(`<dt>${col.label}`),col.label);
+  for (const col of h.api.getColumns().filter(col => col.key !== 'title')) {
+    const label = col.key.endsWith('Pct') ? `Percentiles \u00b7 ${col.label}` : col.label;
+    assert.ok(mainHelp.replaceAll('&middot;', '\u00b7').includes(`<dt>${label}`),col.label);
+  }
   for (const header of ['Citing year','Journal universe','Level','Publications','Citations','NF','ANS']) assert.ok(section('yearly-metrics').includes(`<dt>${header}`),header);
-  for (const header of ['OpenAlex primary fields of','100% / Unavailable','Norwegian Register field']) assert.ok(section('fields-covered').includes(`<dt>${header}`),header);
+  for (const header of ['OpenAlex primary fields','Norwegian Register field']) assert.ok(section('fields-covered').includes(`<dt>${header}`),header);
   for (const header of ['Score year','Status','Data run','OpenAlex snapshot','Norwegian Register snapshot']) assert.ok(section('data-versions').includes(`<dt>${header}`),header);
   assert.match(h.elements.get('table-head').innerHTML,/journal-help.html#journal-table/);
   assert.match(html,/>Download this selection<\/button>/);
@@ -326,8 +334,10 @@ await check('Custom opens settings; named presets close them and restore only th
   for (const [preset, expected] of [['full','fieldPct'],['ef-ais','fieldPct'],['vu-sbe','poolPct']]) {
     h.api.applyPreset('custom');
     assert.equal(h.elements.get('settings').hidden,false);
+    assert.equal(h.elements.get('settings-help').hidden,false);
     h.api.applyPreset(preset);
     assert.equal(h.elements.get('settings').hidden,true);
+    assert.equal(h.elements.get('settings-help').hidden,true);
     assert.equal(h.api.getState().universe,preset === 'full' ? 'oa' : 'n');
     assert.deepEqual(Array.from(h.api.getColumns().filter(c=>c.key.endsWith('Pct')),c=>c.key),[expected]);
     hide(h,expected); hide(h,'score:share');
@@ -336,6 +346,7 @@ await check('Custom opens settings; named presets close them and restore only th
     assert.deepEqual(Array.from(h.api.getDisplayColumns().filter(c=>c.key.endsWith('Pct')),c=>c.key),[expected]);
     assert.equal(h.elements.get('restore-columns').hidden,true);
     assert.equal(h.elements.get('settings').hidden,true);
+    assert.equal(h.elements.get('settings-help').hidden,true);
   }
 });
 await check('Without-reference values are inverted in cells and CSV with the same strict eligibility boundary', async () => {
@@ -357,6 +368,7 @@ await check('Help close falls back to Journal Metrics and anchors account for th
     documentElement:{style:{setProperty:(key,value)=>{offset=value;}}}},
     ResizeObserver:class {constructor(fn){this.fn=fn;} observe(value){observed=value;}},
     window:{close(){closed=true;},closed:false,location:{assign(value){destination=value;}}},setTimeout(fn){delayed=fn;}};
+  context.OpindxSections = {trackSections: () => {}};
   vm.runInNewContext(js,context);
   assert.equal(observed,nav); assert.equal(offset,'92px');
   action(); assert.equal(closed,true); delayed(); assert.equal(destination,'index.html');

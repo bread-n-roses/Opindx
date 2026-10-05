@@ -23,7 +23,13 @@
     </div></div>
 
     <section class="search-panel panel" aria-label="Find journals">
-      <label class="search-label" for="search">Find a journal</label>
+      <div class="search-heading">
+        <label class="search-label" for="search">Find a journal</label>
+        <div class="search-actions">
+          <a class="table-help" href="journal-help.html#search" target="_blank" rel="noopener noreferrer" aria-label="Search: What is what? (new tab)">What is what?</a>
+          <button type="button" class="text-button" id="reset" disabled>Reset</button>
+        </div>
+      </div>
       <div class="search-box"><svg class="search-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
         <input id="search" type="search" placeholder="Search by journal title, publisher, ISSN, or OpenAlex ID" autocomplete="off" disabled>
       </div>
@@ -46,8 +52,7 @@
         </div>
         <div class="control-links">
           <button type="button" class="text-button advanced-toggle" id="settings-toggle" aria-expanded="false" aria-controls="settings"><span id="settings-indicator" aria-hidden="true">+</span> Advanced settings</button>
-          <a class="table-help" href="journal-help.html#search" target="_blank" rel="noopener noreferrer" aria-label="Search: What is what? (new tab)">What is what?</a>
-          <button type="button" class="text-button" id="reset">Reset</button>
+          <a id="settings-help" class="table-help" hidden href="journal-help.html#advanced-settings" target="_blank" rel="noopener noreferrer" aria-label="Advanced settings: What is what? (new tab)">What is what?</a>
         </div>
         <section class="settings" id="settings" aria-label="Advanced settings" hidden>
           <div class="percentile-band">

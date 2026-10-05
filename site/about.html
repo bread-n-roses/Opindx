@@ -36,12 +36,12 @@
       <p>Only journals in the chosen universe, and citations between them, take part in the network score calculation. The same journal can therefore have different scores in different universes.</p>
       <ul>
         <li><strong>Norwegian Register</strong>: the journals approved at Level 1 or Level 2 in the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>. The register is reviewed by disciplinary expert panels and maintained every year, which makes it an open, curated journal list.</li>
-        <li><strong>OpenAlex</strong>: all sources that <a href="https://openalex.org">OpenAlex</a> classifies as journals, a much broader list.</li>
+        <li><strong>OpenAlex</strong>: all sources that <a href="https://openalex.org">OpenAlex</a> classifies as journals and where at least one open score is available. This is a much broader list.</li>
       </ul>
     </section>
 
     <section class="panel">
-      <h2>Raw and Filtered scores</h2>
+      <h2>Filtered and Raw scores</h2>
       <p>Open datasets are not perfect. Sometimes OpenAlex does not record references for publications. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows filtered scores by default. 'Pubs. w/out refs.' shows the share of eligible publications of a journal that are recorded without a reference.</p>
     </section>
 
@@ -53,7 +53,7 @@
     </section>
 
     <section class="panel">
-      <h2>The research behind it</h2>
+      <h2 id="research">The research behind it</h2>
       <p>The study below compares open scores calculated from OpenAlex with a benchmark from a commercial citation index, for score years 2023 and 2024. It separates two choices that open reconstructions make at the same time: which publications count (Raw or Filtered) and which journal universe is used. Its main findings are that filtered scores agree better with the benchmark in every universe and that the Norwegian Register gives results that are closest to the benchmark. This setting can be chosen as preset "Closest to EF and AIS".</p>
       <p class="citation"><strong>How to cite</strong><br>Weitzel, U. (2026). <em>Reference Observability and Journal Universe Choice in Open Reconstructions of Recursive Journal Metrics.</em> Working paper.</p>
     </section>
