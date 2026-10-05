@@ -70,6 +70,7 @@ async function loadYear(newYear) {
   $('notice-message').textContent = `Loading citation year ${newYear}…`;
   $('selection-summary').hidden = true;
   try {
+    if (year == null) renderInitialTable(newYear);
     const buffer = await (await fetchOk(`data/scores_${newYear}.parquet`)).arrayBuffer();
     if (request !== yearRequest) return;
     const data = await parquetReadObjects({file: buffer});
@@ -100,31 +101,32 @@ async function loadYear(newYear) {
 }
 
 // ---- Table ----
-function getColumns() {
+function getColumns(entry = publishedYear()) {
   const cols = [
     {key:'title', label:'Journal title', className:'journal-column align-left', title:'Open more info for journal details'},
     {key:'oa_field', label:'OpenAlex field', className:'align-left', title:'Predominant field and its share of classified publications'},
-    {key:'publications', label:'Publications', title:`Articles and reviews ${year - 5}–${year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
-    {key:'citations', label:'Citations', title:`Citations in ${year}, excluding journal self-citations`},
+    {key:'publications', label:'Publications', title:`Articles and reviews ${entry.year - 5}–${entry.year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
+    {key:'citations', label:'Citations', title:`Citations in ${entry.year}, excluding journal self-citations`},
     {key:'publications_without_references_pct', label:'Pubs. w/out refs.', title:'Share of publications without a recorded OpenAlex reference'},
   ];
   for (const [metric, m] of Object.entries(METRICS)) cols.push({key:`score:${metric}`, label:m.short,
-    className:metric === 'share' ? 'group-start' : '', score:true, title:`${m.name} in the ${universeName(state.universe)} universe (${m.note})`});
+    className:metric === 'share' ? 'group-start' : '', score:true, title:`${m.name} in the ${entry.universes[state.universe] ?? state.universe.toUpperCase()} universe (${m.note})`});
   for (const key of E.percentileKeys(state)) cols.push(key === 'fieldPct'
     ? {key, label:'Field', className:'group-start percentile-cell', title:'Percentile within the assigned field, after eligibility requirements'}
     : {key, label:'Total', className:'percentile-cell', title:'Percentile among all retained journals; 100 is highest'});
   return cols;
 }
-function renderHead() {
-  const entry = publishedYear(), month = (entry.openalex_snapshot ?? '').slice(0, 7) || 'unknown';
-  const scoreCount = columns.filter(col => col.score).length;
-  const pctCount = columns.filter(col => col.key.endsWith('Pct')).length;
-  const profileCount = columns.length - scoreCount - pctCount;
-  const groups = `<th scope="colgroup" colspan="${profileCount}" class="meta-group"><span>Publications in ${year - 5}–${year - 1} · Cited in ${year} · OpenAlex snapshot ${escape(month)} · ${entry.status === 'frozen' ? 'Frozen' : 'Live'} metrics</span> ` +
+function renderHead(entry = publishedYear(), headerColumns = columns, interactive = true) {
+  const month = (entry.openalex_snapshot ?? '').slice(0, 7) || 'unknown';
+  const scoreCount = headerColumns.filter(col => col.score).length;
+  const pctCount = headerColumns.filter(col => col.key.endsWith('Pct')).length;
+  const profileCount = headerColumns.length - scoreCount - pctCount;
+  const groups = `<th scope="colgroup" colspan="${profileCount}" class="meta-group"><span>Publications in ${entry.year - 5}–${entry.year - 1} · Cited in ${entry.year} · OpenAlex snapshot ${escape(month)} · ${entry.status === 'frozen' ? 'Frozen' : 'Live'} metrics</span> ` +
     '<a class="table-help" href="journal-help.html#journal-table" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a></th>' +
-    (scoreCount ? `<th scope="colgroup" colspan="${scoreCount}" class="score-group ${escape(state.universe)}">${escape(universeName(state.universe))}</th>` : '') +
+    (scoreCount ? `<th scope="colgroup" colspan="${scoreCount}" class="score-group ${escape(state.universe)}">${escape(entry.universes[state.universe] ?? state.universe.toUpperCase())}</th>` : '') +
     (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">Percentiles · ${METRICS[state.metric].short}</th>` : '');
-  const headers = columns.map(col => {
+  const headers = headerColumns.map(col => {
+    if (!interactive) return `<th scope="col" class="${col.className || ''}">${col.label}</th>`;
     const sorted = state.sortKey === col.key;
     const direction = state.sortDirection === 1 ? 'ascending' : 'descending';
     const arrow = sorted ? (state.sortDirection === 1 ? '↑' : '↓') : '↕';
@@ -134,6 +136,13 @@ function renderHead() {
       `<div class="column-heading"><button type="button" class="sort-button" data-sort="${col.key}">${col.label}<span class="sort-indicator" aria-hidden="true">${arrow}</span></button>${hide}</div></th>`;
   }).join('');
   $('table-head').innerHTML = `<tr class="group-row">${groups}</tr><tr>${headers}</tr>`;
+}
+function renderInitialTable(newYear) {
+  const entry = index.years.find(item => item.year === newYear);
+  const initialColumns = getColumns(entry);
+  renderHead(entry, initialColumns, false);
+  $('table-body').innerHTML = '<tr class="loading-row" aria-hidden="true">' +
+    initialColumns.map(col => `<td class="${col.className || ''}">&nbsp;</td>`).join('') + '</tr>';
 }
 function cell(row, col) {
   const value = E.columnValue(row, state, ranks, col.key), id = row.openalex_id;

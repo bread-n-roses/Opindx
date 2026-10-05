@@ -70,6 +70,36 @@ await check('Calendar defaults and VU bookmark choose an available complete year
   assert.equal(P.startingSelection([{year:2026}],'',now).year,2026);
   assert.throws(()=>P.startingSelection([]),/no data/);
 });
+await check('First load shows headers and one blank row; later loads preserve the populated table', async () => {
+  const initialHead = html.match(/<thead id="table-head">([\s\S]*?)<\/thead>/)[1];
+  const initialBody = html.match(/<tbody id="table-body">([\s\S]*?)<\/tbody>/)[1];
+  assert.equal((initialHead.match(/<tr\b/g) || []).length,2);
+  assert.equal((initialBody.match(/<tr\b/g) || []).length,1);
+  for (const title of ['Journal title','OpenAlex field','Publications','Citations','NF','ANS','Field']) assert.ok(initialHead.includes(title));
+  assert.match(initialBody,/class="loading-row" aria-hidden="true"/);
+  assert.equal((initialBody.match(/<td\b/g) || []).length,8);
+  assert.ok(html.indexOf('</tbody>') < html.indexOf('class="table-footer"'));
+  const pending = new Map();
+  const h = harness(url => new Promise(resolve => pending.set(url,resolve)));
+  const first = h.api.loadYear(2024);
+  assert.equal(h.api.getYear(),undefined);
+  assert.match(h.elements.get('table-head').innerHTML,/Cited in 2024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Frozen metrics/);
+  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/data-sort=|data-hide-column=/);
+  assert.equal((h.elements.get('table-body').innerHTML.match(/<tr\b/g)||[]).length,1);
+  assert.equal(h.elements.get('selection-actions').hidden,true);
+  pending.get('data/scores_2024.parquet')({ok:true,arrayBuffer:async()=>records}); await first;
+  assert.doesNotMatch(h.elements.get('table-body').innerHTML,/loading-row/);
+  assert.equal((h.elements.get('table-body').innerHTML.match(/<tr\b/g)||[]).length,25);
+  const loadedHead = h.elements.get('table-head').innerHTML;
+  const loadedBody = h.elements.get('table-body').innerHTML;
+  const next = h.api.loadYear(2025);
+  assert.equal(h.elements.get('table-head').innerHTML,loadedHead);
+  assert.equal(h.elements.get('table-body').innerHTML,loadedBody);
+  pending.get('data/scores_2025.parquet')({ok:true,arrayBuffer:async()=>records}); await next;
+  assert.match(h.elements.get('table-head').innerHTML,/Cited in 2025/);
+  assert.doesNotMatch(h.elements.get('table-body').innerHTML,/loading-row/);
+});
 await check('Full shows percentiles by default and preserves journals missing ANS', async () => {
   const h = harness(); await h.api.loadYear(2025);
   assert.equal(h.api.getVisible().length,40);
