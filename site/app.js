@@ -44,7 +44,9 @@ async function fetchOk(url) {
 function showError(error) {
   $('notice').hidden = false;
   $('notice').className = 'notice error';
-  $('notice').textContent = `The data could not be loaded (${error.message}).`;
+  $('notice-message').hidden = false;
+  $('notice-message').textContent = `The data could not be loaded (${error.message}).`;
+  $('selection-summary').hidden = true;
 }
 function setLoading(value) {
   loading = value;
@@ -63,7 +65,9 @@ async function loadYear(newYear) {
   setLoading(true);
   $('notice').hidden = false;
   $('notice').className = 'notice';
-  $('notice').textContent = `Loading citation year ${newYear}…`;
+  $('notice-message').hidden = false;
+  $('notice-message').textContent = `Loading citation year ${newYear}…`;
+  $('selection-summary').hidden = true;
   try {
     const buffer = await (await fetchOk(`data/scores_${newYear}.parquet`)).arrayBuffer();
     if (request !== yearRequest) return;
@@ -81,9 +85,10 @@ async function loadYear(newYear) {
     syncControls();
     render();
     const entry = publishedYear();
-    $('notice').hidden = !entry.dummy;
-    $('notice').className = 'notice dummy';
-    $('notice').textContent = entry.dummy ? 'Dummy data: these journals and numbers are made up for testing.' : '';
+    $('notice').className = entry.dummy ? 'notice dummy' : 'notice';
+    $('notice-message').hidden = !entry.dummy;
+    $('notice-message').textContent = entry.dummy ? 'Dummy data: these journals and numbers are made up for testing.' : '';
+    $('selection-summary').hidden = false;
   } catch (error) {
     if (request !== yearRequest) return;
     setLoading(false);

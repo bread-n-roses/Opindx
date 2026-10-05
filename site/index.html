@@ -83,9 +83,12 @@
       </fieldset>
     </section>
 
-    <div class="notice" id="notice" role="status">Loading the data…</div>
+    <div class="notice" id="notice" role="status" aria-live="polite" aria-atomic="true">
+      <div id="notice-message">Loading the data…</div>
+      <div class="selection-summary" id="selection-summary" hidden><span id="result-count"></span><span id="pool-summary" title="Journals with a Total percentile across the selected universe, before search and display filters." hidden></span></div>
+    </div>
     <section class="table-panel panel" aria-label="Journal metrics" aria-busy="true" id="results">
-      <div class="table-toolbar"><div class="selection-summary" role="status" aria-live="polite"><span id="result-count">Loading journals…</span><span id="pool-summary" title="Journals with a Total percentile across the selected universe, before search and display filters." hidden></span></div>
+      <div class="table-toolbar">
         <div class="table-actions"><button type="button" class="text-button" id="restore-columns" hidden>Restore columns</button>
           <div class="download-picker">
             <button type="button" class="download-button" id="download-view" aria-expanded="false" aria-controls="download-options" disabled>Download selection</button>

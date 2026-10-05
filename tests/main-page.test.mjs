@@ -82,7 +82,9 @@ await check('Full shows percentiles by default and preserves journals missing AN
   assert.equal(h.elements.get('pool-only').checked,false);
   assert.match(h.elements.get('table-head').innerHTML,/Percentiles · ANS/);
   assert.equal(h.elements.get('preset').value,'full');
-  assert.equal(h.elements.get('notice').hidden,true);
+  assert.equal(h.elements.get('notice').hidden,false);
+  assert.equal(h.elements.get('notice-message').hidden,true);
+  assert.equal(h.elements.get('selection-summary').hidden,false);
   assert.equal(h.elements.get('settings').hidden,true);
   assert.equal(h.elements.get('settings-help').hidden,true);
   assert.equal(h.api.getState().minCoverage,20);
@@ -181,6 +183,8 @@ await check('A late year response or error cannot replace the latest selected ye
   const pending = new Map();
   const h = harness(url => new Promise((resolve,reject)=>pending.set(url,{resolve,reject})));
   const old = h.api.loadYear(2026), latest = h.api.loadYear(2024);
+  assert.match(h.elements.get('notice-message').textContent,/Loading citation year 2024/);
+  assert.equal(h.elements.get('selection-summary').hidden,true);
   pending.get('data/scores_2024.parquet').resolve({ok:true,arrayBuffer:async()=>records});
   await latest;
   pending.get('data/scores_2026.parquet').resolve({ok:true,arrayBuffer:async()=>[{...records[0],title:'Stale'}]});
@@ -188,10 +192,20 @@ await check('A late year response or error cannot replace the latest selected ye
   const oldError = h.api.loadYear(2026), newer = h.api.loadYear(2025);
   pending.get('data/scores_2025.parquet').resolve({ok:true,arrayBuffer:async()=>records}); await newer;
   pending.get('data/scores_2026.parquet').reject(new Error('stale error')); await oldError;
-  assert.equal(h.api.getYear(),2025); assert.equal(h.elements.get('notice').hidden,true);
+  assert.equal(h.api.getYear(),2025); assert.equal(h.elements.get('notice').hidden,false);
+  assert.equal(h.elements.get('notice-message').hidden,true);
+  assert.equal(h.elements.get('selection-summary').hidden,false);
   const failed = h.api.loadYear(2026); pending.get('data/scores_2026.parquet').reject(new Error('offline')); await failed;
   assert.equal(h.elements.get('year').value,2025); assert.equal(h.elements.get('download-view').disabled,false);
-  assert.match(h.elements.get('notice').textContent,/offline/);
+  assert.match(h.elements.get('notice-message').textContent,/offline/);
+  assert.equal(h.elements.get('notice-message').hidden,false);
+  assert.equal(h.elements.get('selection-summary').hidden,true);
+  const retry = h.api.loadYear(2026);
+  pending.get('data/scores_2026.parquet').resolve({ok:true,arrayBuffer:async()=>records}); await retry;
+  assert.equal(h.elements.get('notice-message').hidden,true);
+  assert.equal(h.elements.get('selection-summary').hidden,false);
+  h.api.update({query:'Journal 01'});
+  assert.match(h.elements.get('result-count').innerHTML,/^<strong>1<\/strong> of <strong>40<\/strong>/);
 });
 await check('Selection CSV matches visible headers and includes NF, ANS and separate field percentages across every page', async () => {
   const h = harness(); await h.api.loadYear(2025);
