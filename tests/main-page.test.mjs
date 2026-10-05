@@ -18,7 +18,7 @@ function selectPercentiles(h, mode) {
   h.elements.get('percentile-choices').events.change({target:h.elements.get(mode === 'none' ? 'percentiles-none' : 'percentiles-field')});
 }
 const main = source.slice(0, source.indexOf('// ---- Start ----')).replace(/^import .*;\r?\n/gm, '');
-const years = [2026,2025,2024].map(year => ({year,universes:{n:'Norwegian Register',oa:'OpenAlex'},status:year === 2024 ? 'frozen':'live',openalex_snapshot:'2026-09-23'}));
+const years = [2026,2025,2024].map(year => ({year,universes:{n:'Norwegian Register',oa:'OpenAlex'},fields:{n:['Economics'],oa:['Economics','Medicine']},status:year === 2024 ? 'frozen':'live',openalex_snapshot:'2026-09-23'}));
 const records = Array.from({length:40}, (_,i) => ({openalex_id:`S${i}`,title:`Journal ${String(i).padStart(2,'0')}`,in_oa:true,in_n:i < 20,
   publisher:i < 20 ? 'Shared Publisher':'Outside Publisher',oa_field:i < 20 ? 'Economics':'Medicine',is_open_access:i % 2 === 0,
   oa_field_modal_share:0.625,reference_coverage_pct:90,active_years:5,share_oa_filtered:i/100,per_article_oa_filtered:i === 39 ? null:i,
@@ -73,6 +73,10 @@ await check('Calendar defaults and VU bookmark choose an available complete year
 await check('First load shows headers and one blank row; later loads preserve the populated table', async () => {
   const initialHead = html.match(/<thead id="table-head">([\s\S]*?)<\/thead>/)[1];
   const initialBody = html.match(/<tbody id="table-body">([\s\S]*?)<\/tbody>/)[1];
+  assert.match(html, /<select id="year"><option value="2025" selected>2025 \(live\)<\/option>/);
+  assert.match(html, /<select id="universe"><option value="oa" selected>OpenAlex<\/option>/);
+  assert.match(initialHead, /Cited in 2025/);
+  assert.match(initialHead, /Publications in 2020&ndash;2024/);
   assert.equal((initialHead.match(/<tr\b/g) || []).length,2);
   assert.equal((initialBody.match(/<tr\b/g) || []).length,1);
   for (const title of ['Journal title','OpenAlex field','Publications','Citations','NF','ANS','Field']) assert.ok(initialHead.includes(title));
@@ -99,6 +103,48 @@ await check('First load shows headers and one blank row; later loads preserve th
   pending.get('data/scores_2025.parquet')({ok:true,arrayBuffer:async()=>records}); await next;
   assert.match(h.elements.get('table-head').innerHTML,/Cited in 2025/);
   assert.doesNotMatch(h.elements.get('table-body').innerHTML,/loading-row/);
+});
+await check('Year and universe can change before the first table; late responses cannot override them', async () => {
+  const pending = new Map();
+  const h = harness(url => new Promise(resolve => pending.set(url,resolve)));
+  const first = h.api.loadYear(2025);
+  assert.equal(h.elements.get('search-controls').disabled,false);
+  assert.equal(h.elements.get('year').disabled,false);
+  assert.equal(h.elements.get('universe').disabled,false);
+  assert.equal(h.elements.get('preset').disabled,false);
+  assert.equal(h.elements.get('search').disabled,false);
+  h.elements.get('universe').emit('change',{value:'n'});
+  assert.match(h.elements.get('table-head').innerHTML,/Norwegian Register/);
+  const second = h.elements.get('year').emit('change',{value:'2024'});
+  assert.match(h.elements.get('table-head').innerHTML,/Cited in 2024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Norwegian Register/);
+  pending.get('data/scores_2024.parquet')({ok:true,arrayBuffer:async()=>records}); await second;
+  assert.equal(h.api.getYear(),2024);
+  assert.equal(h.api.getState().universe,'n');
+  assert.equal(h.api.getVisible().length,20);
+  assert.equal(h.elements.get('preset').disabled,false);
+  pending.get('data/scores_2025.parquet')({ok:true,arrayBuffer:async()=>records}); await first;
+  assert.equal(h.api.getYear(),2024);
+  assert.match(h.elements.get('table-head').innerHTML,/Cited in 2024/);
+});
+await check('Presets, fields and search apply before the first journal table arrives', async () => {
+  let resolve;
+  const h = harness(() => new Promise(done => {resolve=done;}));
+  const first = h.api.loadYear(2025);
+  assert.equal(h.elements.get('field-picker').querySelector('fieldset').disabled,false);
+  assert.match(h.elements.get('field-filter').innerHTML,/Medicine/);
+  h.elements.get('preset').emit('change',{value:'vu-sbe'});
+  assert.equal(h.api.getState().universe,'n');
+  assert.equal(h.api.getState().percentileMode,'total');
+  assert.doesNotMatch(h.elements.get('field-filter').innerHTML,/Medicine/);
+  assert.match(h.elements.get('table-head').innerHTML,/>Total<\/th>/);
+  h.elements.get('field-filter').events.change({target:{value:'Economics',checked:true}});
+  assert.equal(h.elements.get('field-summary').textContent,'Economics');
+  h.api.update({query:'Journal 01'});
+  resolve({ok:true,arrayBuffer:async()=>records}); await first;
+  assert.deepEqual(Array.from(h.api.getState().fields),['Economics']);
+  assert.equal(h.api.getState().query,'Journal 01');
+  assert.equal(h.api.getState().percentileMode,'total');
 });
 await check('Full shows percentiles by default and preserves journals missing ANS', async () => {
   const h = harness(); await h.api.loadYear(2025);

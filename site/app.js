@@ -54,15 +54,23 @@ function setLoading(value) {
   $('download-view').disabled = value || downloadBusy;
   $('selection-actions').hidden = value || year == null;
   if (value) toggleDownloads(false);
-  $('search').disabled = year == null;
-  $('search-controls').disabled = year == null;
-  $('reset').disabled = year == null;
+  $('search').disabled = !index;
+  $('search-controls').disabled = !index;
+  $('field-picker').querySelector('fieldset').disabled = year == null && !index?.years.find(entry => entry.year === Number($('year').value))?.fields;
+  $('reset').disabled = !index;
   if (value) { $('previous').disabled = true; $('next').disabled = true; }
 }
 
 // Only the most recent year request may replace the table, including on failure.
 async function loadYear(newYear) {
   const request = ++yearRequest;
+  if (year == null) {
+    const entry = index.years.find(item => item.year === newYear);
+    $('year').value = newYear;
+    $('universe').innerHTML = Object.entries(entry.universes).map(([id, name]) => option(id, name)).join('');
+    if (!(state.universe in entry.universes)) state.universe = Object.keys(entry.universes)[0];
+    $('universe').value = state.universe;
+  }
   setLoading(true);
   $('notice').hidden = false;
   $('notice').className = 'notice';
@@ -70,7 +78,7 @@ async function loadYear(newYear) {
   $('notice-message').textContent = `Loading citation year ${newYear}…`;
   $('selection-summary').hidden = true;
   try {
-    if (year == null) renderInitialTable(newYear);
+    if (year == null) { fillFilters(); syncControls(); renderInitialTable(newYear); }
     const buffer = await (await fetchOk(`data/scores_${newYear}.parquet`)).arrayBuffer();
     if (request !== yearRequest) return;
     const data = await parquetReadObjects({file: buffer});
@@ -208,7 +216,8 @@ const uniqueValues = values => [...new Set(values.filter(Boolean))].sort(E.compa
 function fillFilters() {
   const inUniverse = rows.filter(row => row[`in_${state.universe}`]);
   for (const [key, filter] of Object.entries(FILTERS)) {
-    filterValues[key] = uniqueValues(inUniverse.map(row => row[filter.column]));
+    const initialFields = index?.years.find(entry => entry.year === Number($('year').value))?.fields;
+    filterValues[key] = uniqueValues(year == null ? (initialFields?.[state.universe] ?? []) : inUniverse.map(row => row[filter.column]));
     state[key] = state[key].filter(value => filterValues[key].includes(value));
     drawFilter(key);
   }
@@ -229,7 +238,7 @@ function drawFilter(key) {
 function syncControls() {
   for (const [id, key] of Object.entries(SELECTS)) $(id).value = state[key];
   for (const [id, key] of Object.entries(CHECKBOXES)) $(id).checked = state[key];
-  if (!loading) $('year').value = year;
+  if (!loading && year != null) $('year').value = year;
   $('universe').value = state.universe;
   $('preset').value = explicitCustom ? 'custom' : P.identifyPreset(state);
   // Do not replace the search input's value while typing: keep caret/IME state.
@@ -256,6 +265,12 @@ function update(changes) {
   if (Object.hasOwn(changes, 'percentileMode')) changes = {...changes, showPercentiles:changes.percentileMode !== 'none'};
   Object.assign(state, changes, {page:0});
   if (Object.keys(changes).some(key => key in P.PRESETS.full) && P.identifyPreset(state) === 'custom') toggleSettings(true);
+  if (year == null) {
+    fillFilters();
+    syncControls();
+    renderInitialTable(Number($('year').value));
+    return;
+  }
   if (changedUniverse) fillFilters();
   syncControls(); render();
 }
@@ -543,8 +558,11 @@ $('reset').addEventListener('click', () => {
   explicitCustom = false;
   hiddenColumns.clear();
   state = {...P.DEFAULTS, fields:[]};
-  if (!universeIds().includes(state.universe)) state.universe = universeIds()[0];
-  fillFilters(); syncControls(); render(); toggleSettings(false);
+  const ids = Object.keys(index.years.find(entry => entry.year === (year ?? Number($('year').value))).universes);
+  if (!ids.includes(state.universe)) state.universe = ids[0];
+  fillFilters(); syncControls();
+  if (year == null) renderInitialTable(Number($('year').value)); else render();
+  toggleSettings(false);
 });
 
 // ---- Start ----

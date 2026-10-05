@@ -7,6 +7,9 @@ The deploy workflow runs this on the downloaded releases; locally, run it on exp
 Stops with an error if a run doesn't match the layout, so nothing broken gets published. Needs pyarrow.
 """
 import json
+import re
+from datetime import date
+from html import escape
 import hashlib
 import shutil
 import sys
@@ -144,8 +147,10 @@ def write_ranks(published, data):
     for year in published:
         table = pq.read_table(data / f"scores_{year['year']}.parquet")
         common = ["openalex_id", "oa_field", "reference_coverage_pct", "active_years"]
+        year["fields"] = {}
         for universe in year["universes"]:
             selected = table.filter(table[f"in_{universe}"])
+            year["fields"][universe] = sorted({value for value in selected["oa_field"].to_pylist() if value})
             for metric in ("share", "per_article"):
                 for treatment in ("raw", "filtered"):
                     columns = common + [f"in_{universe}", f"{metric}_{universe}_{treatment}"]
@@ -187,8 +192,28 @@ def main(runs_folder, latest_run="", releases_url=None):
             if old.exists():
                 old.rename(SITE_DATA)
             raise
+    write_initial_selection(SITE_DATA.parent / "index.html", published)
     frozen_count = sum(1 for year in published if year["status"] == "frozen")
     print(f"Published {len(published)} score year(s), {frozen_count} frozen, to {SITE_DATA}")
+
+
+def write_initial_selection(page, published, current_year=None):
+    """Show the default selection before JavaScript or journal data finishes loading."""
+    if not page.exists() or not published:
+        return
+    current_year = current_year if current_year is not None else date.today().year
+    available = sorted(published, key=lambda entry: entry["year"], reverse=True)
+    entry = next((entry for entry in available if entry["year"] < current_year), available[0])
+    year = entry["year"]
+    source = page.read_text(encoding="utf-8")
+    source = re.sub(r'(<select id="year">).*?(</select>)',
+                    lambda m: m[1] + f'<option value="{year}" selected>{year} ({escape(entry["status"])})</option>' + m[2], source)
+    context = (f'Publications in {year-5}&ndash;{year-1} &middot; Cited in {year}'
+               f' &middot; OpenAlex snapshot {escape((entry.get("openalex_snapshot") or "Unknown")[:7])}'
+               f' &middot; {escape(entry["status"].capitalize())} metrics')
+    source = re.sub(r'(<span id="initial-table-context">).*?(</span>)',
+                    lambda m: m[1] + context + m[2], source)
+    page.write_text(source, encoding="utf-8")
 
 
 def assemble(years, manifest_of, runs, data, frozen, releases_url):
