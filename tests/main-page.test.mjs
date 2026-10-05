@@ -376,14 +376,32 @@ await check('All fields and individual choices are mutually consistent without a
   select('Medicine',true); h.api.applyPreset('vu-sbe');
   assert.equal(h.elements.get('all-fields').checked,true);
 });
-await check('Summary shows only the retained percentile count and stays independent of display filters', async () => {
+await check('Percentile summary counts matching journals across all pages without changing comparison pools', async () => {
   const h = harness(); await h.api.loadYear(2025);
-  const summary = h.elements.get('pool-summary').innerHTML;
+  const count = () => Number(h.elements.get('pool-summary').innerHTML.match(/<strong>([0-9]+)<\/strong>/)[1]);
+  assert.equal(count(),39); // Includes results beyond the first 25-row page.
+  const rankCalls = h.rankCalls();
   h.api.update({fields:['Medicine']});
-  assert.match(h.elements.get('result-count').innerHTML,/<strong>20<\/strong>/);
-  assert.equal(h.elements.get('pool-summary').innerHTML,summary);
-  assert.equal(summary,' · <strong>39</strong> journals with percentile');
-  assert.doesNotMatch(summary,/ fields|meet the requirements|whole OpenAlex universe/);
+  assert.equal(h.api.getVisible().length,20);
+  assert.equal(count(),19); // One matching journal has no ANS percentile.
+  h.api.update({oaOnly:true});
+  assert.equal(h.api.getVisible().length,10);
+  assert.equal(count(),10);
+  h.api.update({oaOnly:false,query:'Journal 39'});
+  assert.equal(h.api.getVisible().length,1);
+  assert.equal(count(),0);
+  h.api.update({query:'no matching journal'});
+  assert.equal(h.api.getVisible().length,0);
+  assert.equal(count(),0);
+  assert.equal(h.rankCalls(),rankCalls);
+  h.api.update({query:'',fields:[]});
+  assert.equal(count(),39);
+  h.api.update({topPercent:75});
+  selectPercentiles(h,'total');
+  h.api.update({fields:['Medicine']});
+  const eligible = E.availablePercentiles(h.api.getState(), E.rank(E.prepareRows(records.map(row=>({...row}))),h.api.getState()));
+  assert.equal(count(),h.api.getVisible().filter(row=>eligible.has(row.openalex_id)).length);
+  assert.ok(count() <= h.api.getVisible().length);
 });
 await check('Help covers main, historical, field-breakdown and About headers', async () => {
   const h = harness(); await h.api.loadYear(2025);

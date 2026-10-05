@@ -201,8 +201,10 @@ function drawPage() {
       (restricted && universeIds().includes('oa') ? '<button type="button" class="text-button" data-search-all>Search all OpenAlex journals</button>' : 'Try a broader search.') + '</td></tr>';
   $('result-count').innerHTML = `<strong>${count(visible.length)}</strong> of <strong>${count(memberCount)}</strong> journals in the ${escape(universeName(state.universe))} universe`;
   $('pool-summary').hidden = !state.showPercentiles;
-  $('pool-summary').title = `Journals with a ${E.percentileKeys(state).includes('poolPct') ? 'Total' : 'Field'} percentile across the selected universe, before search and display filters.`;
-  $('pool-summary').innerHTML = state.showPercentiles ? ` · <strong>${count(E.availablePercentiles(state, ranks).size)}</strong> journals with percentile` : '';
+  $('pool-summary').title = `Journals with a ${E.percentileKeys(state).includes('poolPct') ? 'Total' : 'Field'} percentile among the journals matching the current search and filters (all result pages).`;
+  const percentileJournals = state.showPercentiles ? E.availablePercentiles(state, ranks) : null;
+  const percentileCount = percentileJournals ? visible.reduce((total, row) => total + Number(percentileJournals.has(row.openalex_id)), 0) : 0;
+  $('pool-summary').innerHTML = state.showPercentiles ? ` · <strong>${count(percentileCount)}</strong> journals with percentile` : '';
   $('page-status').textContent = visible.length ? `${count(state.page * PAGE_SIZE + 1)}–${count(state.page * PAGE_SIZE + shown.length)} of ${count(visible.length)} journals` : '0 journals';
   $('previous').disabled = loading || state.page === 0;
   $('next').disabled = loading || (state.page + 1) * PAGE_SIZE >= visible.length;
