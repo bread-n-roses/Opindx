@@ -3,7 +3,7 @@ export const PRESETS = Object.freeze({
   full: Object.freeze({universe: 'oa', treatment: 'filtered', showPercentiles: true, percentileMode: 'field',
     metric: 'per_article', minCoverage: 20, minYears: 4, topPercent: 100, poolOnly: false}),
   'ef-ais': Object.freeze({universe: 'n', treatment: 'filtered', showPercentiles: true, percentileMode: 'field',
-    metric: 'per_article', minCoverage: 20, minYears: 4, topPercent: 100, poolOnly: false}),
+    metric: 'per_article', minCoverage: 20, minYears: 4, topPercent: 100, poolOnly: true}),
   'vu-sbe': Object.freeze({universe: 'n', treatment: 'filtered', showPercentiles: true, percentileMode: 'total',
     metric: 'per_article', minCoverage: 20, minYears: 4, topPercent: 75, poolOnly: true}),
 });
