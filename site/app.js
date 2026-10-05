@@ -262,7 +262,7 @@ function showJournal(id) {
     '<a href="#fields-title" data-journal-section="fields-title">Fields covered</a>' +
     '<a href="#metrics-title" data-journal-section="metrics-title">Metrics by year</a>' +
     '<button type="button" id="close-dialog" class="dialog-close" data-journal-close aria-label="Close journal details" title="Close journal details" autofocus>×</button></nav>' +
-    '<div class="dialog-section-heading"><h3 id="details-title" tabindex="-1">Details</h3></div>' +
+    '<div class="dialog-section-heading"><h3 id="details-title" tabindex="-1">Details</h3><a class="table-help" href="journal-help.html#journal-details" target="_blank" rel="noopener noreferrer" aria-label="Details: What is what? (new tab)">What is what?</a></div>' +
     `<dl id="journal-metadata" aria-labelledby="details-title">${details.map(([key, value]) => `<dt>${key}</dt><dd>${value}</dd>`).join('')}</dl>` +
     '<div class="dialog-section-heading"><h3 id="fields-title" tabindex="-1">Fields covered</h3><a class="table-help" href="journal-help.html#fields-covered" target="_blank" rel="noopener noreferrer" aria-label="Fields covered: What is what? (new tab)">What is what?</a></div><div id="field-breakdown" aria-live="polite"><p>Loading fields…</p></div>' +
     `<div class="dialog-section-heading"><h3 id="metrics-title" tabindex="-1">Metrics by year · ${escape(universeName(state.universe))} universe · ${state.treatment === 'raw' ? 'Raw' : 'Filtered'}</h3><a class="table-help" href="journal-help.html#yearly-metrics" target="_blank" rel="noopener noreferrer" aria-label="Metrics by year: What is what? (new tab)">What is what?</a></div>` +

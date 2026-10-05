@@ -22,21 +22,22 @@
 
     <section class="panel">
       <h2>Metrics</h2>
-      <p>The journal scores follow the recursive citation-network method of <a href="https://doi.org/10.1523/JNEUROSCI.0003-08.2008">Bergstrom, West and Wiseman (2008)</a>. Imagine a reader who keeps following references from one journal to another, and now and then jumps to a random journal. Journals that this reader visits often carry more weight, and a citation from a journal with more weight counts for more than one from a peripheral journal. Journal self-citations are left out.</p>
+      <p>The journal scores follow the recursive citation-network method of Bergstrom, West and Wiseman (2008). Imagine a reader who keeps following references from one journal to another, and now and then jumps to a random journal. Journals that this reader visits often carry more weight, and a citation from a journal with more weight counts for more than one from a peripheral journal. Journal self-citations are left out.</p>
       <ul>
         <li><strong>Network Factor (NF)</strong>: a journal’s share of all citation flow within a journal universe, on a scale that sums to 100. It grows with the number of articles a journal publishes. The Network Factor follows an Eigenfactor®-like methodology.</li>
         <li><strong>Article Network Score (ANS)</strong>: the NF divided by the journal’s share of articles, so it measures influence per article. The article-weighted average is 1; an ANS of 2 means twice the average influence per article. The Article Network Score follows an Article Influence® Score-like methodology.</li>
       </ul>
       <p>For score year <em>t</em>, the scores use citations made in year <em>t</em> to articles and reviews published in the five years before (<em>t</em>−5 to <em>t</em>−1). Duplicate records of the same journal in OpenAlex are combined before the calculation.</p>
       <p>‘Eigenfactor’ and ‘Article Influence’ are registered trademarks of the University of Washington. The abbreviations EF and AIS refer to the official metrics.</p>
+      <p class="citation"><strong>Reference</strong><br>Bergstrom, C. T., West, J. D., &amp; Wiseman, M. A. (2008). The Eigenfactor&trade; metrics. <em>Journal of Neuroscience, 28</em>(45), 11433&ndash;11434. DOI: 10.1523/JNEUROSCI.0003-08.2008.</p>
     </section>
 
     <section class="panel">
       <h2>Journal universes</h2>
       <p>Only journals in the chosen universe, and citations between them, take part in the network score calculation. The same journal can therefore have different scores in different universes.</p>
       <ul>
-        <li><strong>Norwegian Register</strong>: the journals approved at Level 1 or Level 2 in the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>. The register is reviewed by disciplinary expert panels and maintained every year, which makes it an open, curated journal list.</li>
-        <li><strong>OpenAlex</strong>: all sources that <a href="https://openalex.org">OpenAlex</a> classifies as journals and where at least one open score is available. This is a much broader list.</li>
+        <li><strong>Norwegian Register</strong>: the journals approved at Level 1 or Level 2 in the <a href="https://kanalregister.hkdir.no/en" target="_blank" rel="noopener noreferrer">Norwegian Register for Scientific Journals, Series and Publishers</a>. The register is reviewed by disciplinary expert panels and maintained every year, which makes it an open, curated journal list.</li>
+        <li><strong>OpenAlex</strong>: all sources that <a href="https://openalex.org" target="_blank" rel="noopener noreferrer">OpenAlex</a> classifies as journals and where at least one open score is available. This is a much broader list.</li>
       </ul>
     </section>
 
@@ -60,7 +61,7 @@
 
     <section class="panel">
       <h2>Data sources</h2>
-      <p>Journal metadata, publications and citations come from <a href="https://openalex.org/">OpenAlex</a> (CC0 license). The Norwegian journal list and journal levels come from the <a href="https://kanalregister.hkdir.no/en">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (Norwegian Licence for Open Government Data, NLOD 2.0).</p>
+      <p>Journal metadata, publications and citations come from <a href="https://openalex.org/" target="_blank" rel="noopener noreferrer">OpenAlex</a> (CC0 license). The Norwegian journal list and journal levels come from the <a href="https://kanalregister.hkdir.no/en" target="_blank" rel="noopener noreferrer">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (Norwegian Licence for Open Government Data, NLOD 2.0).</p>
     </section>
 
     <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a></span><span>Open Data · Open Source · Nonprofit · Made at <a href="https://vu.nl/" target="_blank" rel="noopener noreferrer">Vrije Universiteit Amsterdam</a> by Utz Weitzel</span></footer>
@@ -72,7 +73,7 @@
       const index = await (await fetch('data/index.json')).json();
       const row = entry => `<tr><th scope="row" class="align-left">${entry.year}</th>` +
         `<td class="align-left">${escape(entry.status)}</td>` +
-        `<td class="align-left">${entry.release_url ? `<a href="${escape(entry.release_url)}">${escape(entry.run)}</a>` : escape(entry.run)}</td>` +
+        `<td class="align-left">${entry.release_url ? `<a href="${escape(entry.release_url)}" target="_blank" rel="noopener noreferrer">${escape(entry.run)}</a>` : escape(entry.run)}</td>` +
         `<td class="align-left">${escape(entry.openalex_snapshot?.slice(0, 7))}</td><td class="align-left">${escape(entry.norwegian_register_snapshot)}</td></tr>`;
       target.innerHTML = index.years.length
         ? '<table><thead><tr><th scope="col" class="align-left">Score year</th><th scope="col" class="align-left">Status</th>' +

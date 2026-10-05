@@ -20,7 +20,7 @@
   </header>
   <main class="about">
     <h1>What is what?</h1>
-    <nav class="help-section-nav" id="help-sections" aria-label="Help sections"><div class="help-section-links"><a href="#search">Search</a><a href="#advanced-settings">Advanced settings</a><a href="#journal-table">Journal table</a><a href="#fields-covered">Fields covered</a><a href="#yearly-metrics">Metrics by year</a><a href="#data-versions">Data versions</a></div><button type="button" id="close-help" aria-label="Close help" title="Close help">&times;</button></nav>
+    <nav class="help-section-nav" id="help-sections" aria-label="Help sections"><div class="help-section-links"><a href="#search">Search</a><a href="#advanced-settings">Advanced settings</a><a href="#journal-table">Journal table</a><a href="#journal-details">Details</a><a href="#fields-covered">Fields covered</a><a href="#yearly-metrics">Metrics by year</a><a href="#data-versions">Data versions</a></div><button type="button" id="close-help" aria-label="Close help" title="Close help">&times;</button></nav>
     <section class="panel" aria-labelledby="search">
       <h2 id="search">Search</h2>
       <dl>
@@ -59,6 +59,16 @@
         <dt>Percentiles &middot; Field</dt><dd>The journal's percentile among eligible journals assigned to the same OpenAlex field (after applying the percentile settings). See <a href="#advanced-settings">Advanced Settings</a> for the calculation and tie rules.</dd>
         <dt>Percentiles &middot; Total</dt><dd>The journal's percentile among all journals retained after applying the percentile settings. See <a href="#advanced-settings">Advanced Settings</a> for the calculation and tie rules.</dd>
         <dt>General</dt><dd>A dash means that a value is unavailable; a numeric zero is a defined value. Use × beside a column header to hide it in the main table. Journal title always remains visible. Restore columns brings back hidden columns. Hiding columns also removes them from selection downloads. It keeps the preset, sort order, filters, percentile calculation and journal popup unchanged. These display choices last for this visit. Reset or reloading the page restores the columns.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="journal-details">
+      <h2 id="journal-details">Details</h2>
+      <dl>
+        <dt>OpenAlex details</dt><dd>A link to the journal's dedicated OpenAlex page, with its OpenAlex data and ID.</dd>
+        <dt>Norwegian Register details</dt><dd>A link to the journal's dedicated Norwegian Register page, with its register data and ID.</dd>
+        <dt>Open access journal</dt><dd>Whether the journal is recorded as open access in the OpenAlex database.</dd>
+        <dt>Publication years</dt><dd>The number of years in the five years preceding the citation year in which at least one publication is recorded for the journal.</dd>
+        <dt>Share of publications w/out references</dt><dd>The percentage of publications (articles and reviews) without a recorded OpenAlex reference in the five-year publication window. Missing recorded references can reflect incomplete OpenAlex data as well as publications with no references in reality. A dash indicates an unavailable percentage, including when there are no eligible publications. The percentage is: 100 &times; (Raw publications &minus; Filtered publications) &divide; Raw publications.</dd>
       </dl>
     </section>
     <section class="panel" aria-labelledby="fields-covered">
