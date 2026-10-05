@@ -30,7 +30,7 @@ export function registerEntries(row, detail) {
 
 export function registerLinks(row, detail) {
   const ids = registerIds(row);
-  if (!ids.length) return 'Unavailable';
+  if (!ids.length) return 'Not in Norwegian Register';
   const entries = registerEntries(row, detail);
   const idLink = id => link(registerUrl(id), id,
     `Norwegian Register entry ${id}${entries.find(e => e.id === id)?.title ? ': ' + entries.find(e => e.id === id).title : ''} (new tab)`);
@@ -47,7 +47,7 @@ export function metadataRows(row) {
     ['ISSN / Publisher', `${escape(issns || 'Unavailable')} / ${escape(row.publisher || 'Unavailable')}`],
     ['OpenAlex details', link(`https://openalex.org/${encodeURIComponent(row.openalex_id)}`, 'Journal page', 'OpenAlex journal page (new tab)') + ` for ID: ${escape(row.openalex_id)}`],
   ];
-  if (row.in_n) result.push(['Norwegian Register details', `<span id="register-details">${registerLinks(row)}</span>`]);
+  result.push(['Norwegian Register details', `<span id="register-details">${registerLinks(row)}</span>`]);
   result.push(
     ['Open access journal', row.is_open_access == null ? 'Unknown' : row.is_open_access ? 'Yes' : 'No'],
     ['Publication years', `${fmt(row.active_years)} of 5 with eligible output`],

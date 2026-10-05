@@ -18,12 +18,14 @@ const detail = {oa_field_classified_works:3,oa_field_1:'A',oa_field_1_works:1,oa
   oa_field_3:'C',oa_field_3_works:1,oa_field_other_works:0,norwegian_primary_id:'20',
   norwegian_entries_json:JSON.stringify([{id:'10',field:'Economics',title:'Previous title'}, {id:'20',field:'Business and Finance',title:'Example'}])};
 
-await check('Metadata order, comma-separated ISSNs, and selected-year register visibility', () => {
+await check('Metadata order, comma-separated ISSNs, and persistent selected-year register row', () => {
   const rows = D.metadataRows(meta);
   assert.deepEqual(rows.map(r=>r[0]),['ISSN / Publisher','OpenAlex details','Norwegian Register details','Open access journal','Publication years','Share of publications w/out references']);
   assert.equal(rows[0][1],'1111-1111, 2222-2222 / Publisher');
   assert.match(rows[1][1],/>Journal page<\/a> for ID: S20/);
-  assert.equal(D.metadataRows({...meta,in_n:false}).some(r=>r[0].includes('Norwegian')),false);
+  const absent = D.metadataRows({...meta,in_n:false});
+  assert.deepEqual(absent.map(r=>r[0]), rows.map(r=>r[0]));
+  assert.equal(absent[2][1], '<span id="register-details">Not in Norwegian Register</span>');
 });
 await check('A unique primary link preserves plain primary ID and linked alternative IDs', () => {
   const html = D.registerLinks(meta,detail);
@@ -32,7 +34,8 @@ await check('A unique primary link preserves plain primary ID and linked alterna
   assert.match(html,/>10<\/a>/);
   const equal = D.registerLinks(meta,{...detail,norwegian_primary_id:''});
   assert.match(equal,/Register entries:/); assert.doesNotMatch(equal,/Journal page/);
-  assert.equal(D.registerLinks({...meta,in_n:false},detail),'Unavailable');
+  assert.equal(D.registerLinks({...meta,in_n:false},detail),'Not in Norwegian Register');
+  assert.equal(D.registerLinks({...meta,norwegian_register_url:''},detail),'Not in Norwegian Register');
 });
 await check('Field shares total in the header; each Norwegian assignment keeps its correct ID', () => {
   const html = D.fieldsTable(meta,detail,2026);
