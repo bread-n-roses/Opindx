@@ -19,7 +19,9 @@ main { max-width: 1800px; margin: 0 auto; padding: 35px 4vw 20px }
 .eyebrow { font-size: 10px; letter-spacing: 2px; color: var(--accent); font-weight: 700; margin: 0 0 10px }
 h1 { font-family: Georgia,"Times New Roman",serif; font-size: 36px; font-weight: 400; letter-spacing: -1.1px; margin: 0 0 10px }
 .subtitle { font-size: 14px; color: var(--muted); margin: 0 }
-.notice { margin: 20px 0 16px; font-size: 14px; line-height: 1.5; border-left: 3px solid var(--accent); padding: 12px 16px; background: var(--soft); color: var(--accent) }
+.notice { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin: 20px 0 16px; font-size: 14px; line-height: 1.5; border-left: 3px solid var(--accent); padding: 12px 16px; background: var(--soft); color: var(--accent) }
+.notice-copy { flex: 1 1 420px; min-width: 0 }
+.notice .table-actions { margin-left: auto; justify-content: flex-end }
 #notice-message:not([hidden]) + .selection-summary { margin-top: 6px }
 .panel { background: var(--white); border: 1px solid var(--line); border-radius: 9px }
 .score-controls { padding: 18px 22px; display: flex; align-items: center; gap: 28px; flex-wrap: wrap }
@@ -54,9 +56,6 @@ thead { position: sticky; top: 0; z-index: 3 }
 thead th { background: #f1f4f9; font-size: 10px; font-weight: 600; color: #58677d }
 .group-row th { border-bottom: 1px solid #dbe2ed; text-transform: uppercase; letter-spacing: .6px; font-size: 9px; padding: 10px 13px; text-align: center }
 .group-row .meta-group { text-align: left }
-.score-group.n { background: #eaf0f8; color: #3c5172 }
-.score-group.oa { background: #edf1f8; color: #45588a }
-.percentile-group { background: #edf1f8!important; color: #526383 }
 .sort-button { display: flex; align-items: center; justify-content: flex-end; gap: 7px; width: 100%; background: none; border: 0; padding: 0; font: inherit; color: inherit; min-height: 18px }
 .align-left, .align-left .sort-button { text-align: left; justify-content: flex-start }
 .sort-indicator { font-size: 11px; color: #8c9aad; min-width: 10px }
@@ -70,10 +69,9 @@ thead .journal-column { background: #f1f4f9; z-index: 4 }
 .metric-cell { min-width: 73px }
 .per-article-cell { font-weight: 650 }
 .group-start { border-left: 1px solid var(--line) }
-.percentile-cell { background: #f9fafe; min-width: 85px; font-weight: 600; color: #526383 }
+.percentile-cell { min-width: 85px }
 .missing { color: #9ca7ab; font-weight: 400 }
 tbody tr:hover td { background: #f1f4fa }
-tbody tr:hover .percentile-cell { background: #edf1f9 }
 .coverage-cell { min-width: 100px }
 .coverage-value { display: block; margin-bottom: 5px }
 .coverage-track { width: 54px; height: 3px; background: #ede8e5; margin-left: auto; border-radius: 3px }
@@ -299,7 +297,8 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 .download-button:hover { filter: brightness(.9) }
 button:disabled { opacity: .5; cursor: default }
 .metrics-page .table-toolbar { justify-content: flex-end; padding: 16px 20px }
-.metrics-page .group-row th { font-size: 11px; letter-spacing: 0; text-transform: none }
+.metrics-page .table-scroll .group-row th { font-size: 12px; line-height: 1.65; letter-spacing: 0; text-transform: none }
+.metrics-page .table-panel > .table-scroll { border-top: 0; border-radius: 8px 8px 0 0 }
 .metrics-page .group-row .meta-group { font-size: 12px; line-height: 1.65; white-space: normal }
 .meta-group .table-help { min-height: 30px; margin-left: 10px; font-weight: 400 }
 .metrics-page .table-scroll tbody td { padding: 9px 8px }

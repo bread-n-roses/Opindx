@@ -52,6 +52,7 @@ function setLoading(value) {
   loading = value;
   $('results').setAttribute('aria-busy', String(value));
   $('download-view').disabled = value || downloadBusy;
+  $('selection-actions').hidden = value || year == null;
   if (value) toggleDownloads(false);
   $('search').disabled = year == null;
   $('search-controls').disabled = year == null;
