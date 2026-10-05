@@ -302,7 +302,7 @@ await check('Help covers main, historical, field-breakdown and About headers', a
   for (const header of ['OpenAlex primary fields','Norwegian Register field']) assert.ok(section('fields-covered').includes(`<dt>${header}`),header);
   for (const header of ['Score year','Status','Data run','OpenAlex snapshot','Norwegian Register snapshot']) assert.ok(section('data-versions').includes(`<dt>${header}`),header);
   assert.match(h.elements.get('table-head').innerHTML,/journal-help.html#journal-table/);
-  assert.match(html,/>Download this selection<\/button>/);
+  assert.match(html,/>Download selection<\/button>/);
   assert.match(html,/>Hide journals without percentiles<\/label>/);
   assert.match(html,/>VU Amsterdam \(SBE\)<\/option>/);
   assert.match(html,/>Include publications without references \(not recommended\)<\/label>/);

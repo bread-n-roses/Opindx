@@ -45,7 +45,7 @@ h1 { font-family: Georgia,"Times New Roman",serif; font-size: 36px; font-weight:
 .results-line { display: flex; align-items: center; gap: 18px; padding: 0 20px 13px; color: var(--muted); font-size: 11px }
 #result-count { color: var(--ink); font-weight: 600 }
 #reset { margin-left: auto }
-.text-button { background: none; border: 0; padding: 0; font-size: 11px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px }
+.text-button { background: none; border: 0; padding: 0; font-size: 12px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px }
 .table-scroll { width: 100%; max-height: 670px; overflow: auto; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line) }
 table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; font-variant-numeric: tabular-nums }
 th, td { text-align: right; white-space: nowrap; border-bottom: 1px solid #e7ebf2; padding: 12px 13px }
@@ -174,10 +174,9 @@ dialog th, dialog td { padding: 8px 10px }
 .nav a { text-decoration: none; color: var(--muted) }
 .nav a:hover, .nav a[aria-current=page] { color: var(--accent); font-weight: 600 }
 .about { max-width: 820px }
-.about .subtitle { margin-bottom: 26px; line-height: 1.6 }
 .about .panel { padding: 4px 26px 8px; margin-bottom: 16px }
-.about h2 { font-size: 15px; margin: 20px 0 10px }
-.about p, .about li { font-size: 13px; line-height: 1.75; color: #34464f }
+.about h2 { font-size: 15px; font-weight: 600; margin: 20px 0 10px }
+.about .panel p, .about .panel li, .downloads p, .downloads li { font-size: 13px; line-height: 1.75; color: #34464f }
 .about li { margin-bottom: 6px }
 .about .citation { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px }
 .data-status { margin-left: 4px; font-weight: 600; color: var(--accent) }
@@ -224,7 +223,7 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 .register-field-id { display: inline-block; color: var(--muted) }
 .dialog-section-heading { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 16px; margin: 24px 0 10px }
 #journal-dialog .dialog-section-heading h3 { margin: 0; min-width: 0; max-width: 100% }
-.table-help { display: inline-flex; align-items: center; min-height: 44px; font-size: 11px; line-height: 1.5 }
+.table-help { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; font-weight: 400; line-height: 1.5; text-underline-offset: 3px }
 .journal-help h2 { scroll-margin-top: 20px }
 #history-percentile-status:empty { display: none }
 #journal-dialog .dialog-close { min-width: 44px; min-height: 44px }
@@ -259,8 +258,7 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 [hidden] { display: none!important }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px }
 .masthead .nav a { min-height: 44px; display: inline-flex; align-items: center }
-.metrics-page .intro { margin-bottom: 24px }
-.metrics-page .subtitle { line-height: 1.7; max-width: 900px }
+.subtitle { max-width: 900px }
 .search-panel { padding: 20px; margin-bottom: 16px }
 .search-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px; margin-bottom: 6px }
 .search-label { display: block; font-size: 14px; font-weight: 600; margin: 0 }
@@ -293,10 +291,10 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 .percentile-settings:disabled { opacity: .55 }
 .percentile-toggles { display: flex; align-items: center; flex-wrap: wrap; gap: 0 24px }
 .percentile-toggles .pool-only-line:has(input:disabled) { opacity: .55 }
-.selection-summary { flex: 1; min-width: 0; font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1.5; color: var(--muted) }
-.selection-summary #result-count { font-weight: inherit; color: var(--ink) }
-.selection-summary strong { font-weight: inherit; color: var(--ink) }
-.download-button { border: 1px solid var(--accent); background: var(--accent); color: white; border-radius: 5px; padding: 11px 16px; min-height: 44px; font-family: inherit; font-size: 12px; font-weight: 600; line-height: 1.5; white-space: nowrap }
+.selection-summary { flex: 1; min-width: 0; font-family: inherit; font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--muted) }
+.selection-summary #result-count { font-weight: inherit; color: inherit }
+.selection-summary strong { font-weight: 600; color: var(--ink) }
+.download-button { border: 1px solid var(--accent); background: var(--accent); color: white; border-radius: 5px; padding: 11px 16px; min-height: 44px; font-family: inherit; font-size: 14px; font-weight: 600; line-height: 1.5; white-space: nowrap }
 .download-button:hover { filter: brightness(.9) }
 button:disabled { opacity: .5; cursor: default }
 .metrics-page .table-toolbar { justify-content: space-between; padding: 16px 20px }
@@ -318,9 +316,9 @@ button:disabled { opacity: .5; cursor: default }
 .metrics-page .pagination button { width: 40px; height: 40px }
 .metrics-page .table-footer { font-size: 12px }
 .metrics-page .empty-cell .text-button { min-height: 44px; font-size: 12px }
-.metrics-page .downloads h2 { font-size: 15px; margin-bottom: 8px }
-.metrics-page .downloads p + p { margin-top: 8px }
-.downloads a { display: inline-block; padding: 4px 0 }
+.metrics-page .downloads h2 { font-size: 15px; font-weight: 600; margin-bottom: 10px }
+.metrics-page .downloads p + p { margin-top: 13px }
+.downloads a { display: inline; padding: 0 }
 .page-footer { font-size: 11px; letter-spacing: 0; line-height: 1.9; flex-wrap: wrap; align-items: baseline }
 .page-footer a { display: inline-block; padding: 5px 0 }
 .page-footer > span:last-child { text-align: right }
@@ -375,8 +373,8 @@ button:disabled { opacity: .5; cursor: default }
 @font-face { font-family: Quicksand; src: url('assets/Quicksand.ttf') format('truetype'); font-weight: 300 700; font-style: normal; font-display: swap }
 .brand-logo { display: block; width: 174px; height: 58px; object-fit: contain }
 h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spacing: -.8px }
-.subtitle { font-family: Quicksand,"Segoe UI",sans-serif; font-size: 17px; font-weight: 500; line-height: 1.55 }
-.metrics-page .intro { margin-bottom: 20px }
+.subtitle { font-family: Quicksand,"Segoe UI",sans-serif; font-size: 17px; font-weight: 500; line-height: 1.7 }
+.intro { margin-bottom: 20px }
 .metrics-page .control { gap: 5px }
 .control-links { display: flex; align-items: center; flex-wrap: wrap; gap: 0 18px; margin-top: 5px }
 .search-actions .text-button, .search-actions .table-help, .control-links .text-button, .control-links .table-help { display: inline-flex; align-items: center; min-height: 36px; font-family: inherit; font-size: 12px; font-weight: 400; line-height: 1.5; text-underline-offset: 3px }

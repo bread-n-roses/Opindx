@@ -91,6 +91,7 @@ site/data/history/00…99.parquet  all years per group of journals, for the jour
 
 ## Website
 
+- **Typography (2026-10-05):** About and Journal Metrics share Quicksand page headings and taglines. Keep the About/help reading column narrower than the main journal table. About/help prose and Complete data and code use 13px body text with 1.75 line height; box headings use 15px/600 and help/reset links 12px. The selection summary and Download selection button use 14px; summary numbers are near-black, surrounding text muted grey. Keep metric-table typography compact.
 - **Link behavior (2026-10-05):** Links to another web page, whether on Opindx or an external website, open in a new tab unless the user specifies otherwise. Use `target="_blank" rel="noopener noreferrer"` and the shared arrow indicator. Same-page section links continue to scroll within the current page or popup.
 - Header navigation: Journal metrics and About. Main title: Journal Metrics; search is the primary control beneath the tagline.
 - Search and table share visible controls: Citation year, OpenAlex fields (multiple), Journal universe, and Presets. The default citation year is the latest available full calendar year, currently 2025; newer years remain selectable.
@@ -223,7 +224,7 @@ The popup and percentile controls use Share of publications w/out references;
 the main table keeps Pubs. w/out refs. The Advanced settings plus/minus indicator
 uses centered geometric bars rather than a font glyph.
 
-Download this selection opens CSV/XLSX choices. Both formats use the same
+Download selection opens CSV/XLSX choices. Both formats use the same
 captured selection and displayed column order across all result pages. Hidden
 columns and popup/settings metadata are omitted. Headers match the table, with
 NF and ANS named directly and percentile headers naming their metric. The
