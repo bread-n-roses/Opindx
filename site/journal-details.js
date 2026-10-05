@@ -79,7 +79,7 @@ export function fieldsTable(row, detail, year) {
     }
     html += '</tbody>';
   }
-  return html + '</table><p>For OpenAlex fields, all articles and reviews are included, except for unclassified publications.</p>';
+  return html + '</table>';
 }
 
 export function universeMembership(row) {
