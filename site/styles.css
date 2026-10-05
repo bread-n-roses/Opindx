@@ -387,7 +387,7 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
 #settings-indicator::before { width: 10px; height: 2px; left: 1px; top: 5px }
 #settings-toggle[aria-expanded=false] #settings-indicator::after { width: 2px; height: 10px; left: 5px; top: 1px }
 .metrics-page .settings { margin: 2px 0 0; padding: 0; background: transparent; border: 0 }
-.advanced-general { display: flex; flex-wrap: wrap; align-items: center; column-gap: 24px; margin-top: 5px }
+.advanced-general { display: flex; flex-wrap: wrap; align-items: center; column-gap: 24px; margin-top: 5px; padding-inline: 13px }
 .metrics-page .settings .check-line { min-height: 32px; font-size: 12px }
 .percentile-band { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px 4px }
 .metrics-page .percentile-band .reference-controls { grid-template-columns: 1.15fr .65fr 1.5fr 1fr .9fr; gap: 10px; margin: 0; align-items: end }
