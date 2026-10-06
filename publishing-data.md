@@ -124,3 +124,13 @@ a run in 2027, pin 2025 to the final 2026 run, so later data cannot alter it.
 The current 2022–2024 pins already meet this policy; 2025–2026 remain live.
 Apply and review the pins during release maintenance, keeping the pinned release
 available. The browser displays the actual published status from `index.json`.
+
+## Publication follow-up: 2026-10-06
+
+Software v0.2.0: https://doi.org/10.5281/zenodo.23187011 .
+Dataset 2026-09-v3: https://doi.org/10.5281/zenodo.23187363 .
+Both are new versions in the existing DOI series. Public file checksums,
+creator/affiliations, licenses and the dataset-to-software DOI link passed.
+The website was deployed and verified first. Frozen years 2022-2024 use the
+new schema with unchanged metrics; 2025-2026 remain live. Validation used the
+owner-approved additive exception, preserving the original full replay.

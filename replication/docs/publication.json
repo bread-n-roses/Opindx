@@ -1,28 +1,37 @@
 {
-  "date": "2026-10-02",
+  "date": "2026-10-06",
   "website": "https://opindx.org",
-  "initial_website_commit": "fe72fdb6d592ac7f243c40a07915cc18e6e6bff8",
+  "initial_website_commit": "50bf2744cb0b16e1aa8ebf893b6fdea9d1ad4102",
   "software": {
     "kind": "software",
-    "tag": "software-v0.1.0",
-    "record_id": 23108424,
-    "doi": "10.5281/zenodo.23108424",
+    "tag": "software-v0.2.0",
+    "record_id": 23187011,
+    "doi": "10.5281/zenodo.23187011",
     "submitted": true,
     "state": "done",
-    "record_url": "https://zenodo.org/record/23108424",
-    "github": "https://github.com/bread-n-roses/Opindx/releases/tag/software-v0.1.0"
+    "record_url": "https://zenodo.org/record/23187011",
+    "github": "https://github.com/bread-n-roses/Opindx/releases/tag/software-v0.2.0"
   },
   "dataset": {
     "kind": "dataset",
-    "tag": "data-2026-09-v2",
-    "record_id": 23108621,
-    "doi": "10.5281/zenodo.23108621",
+    "tag": "data-2026-09-v3",
+    "record_id": 23187363,
+    "doi": "10.5281/zenodo.23187363",
     "submitted": true,
     "state": "done",
-    "record_url": "https://zenodo.org/record/23108621",
-    "github": "https://github.com/bread-n-roses/Opindx/releases/tag/data-2026-09-v2"
+    "record_url": "https://zenodo.org/record/23187363",
+    "github": "https://github.com/bread-n-roses/Opindx/releases/tag/data-2026-09-v3"
   },
-  "public_file_checks": "Every file name, size and MD5 matches the prepared bundle; GitHub SHA256 also verified.",
+  "validation": "Owner-approved additive checks; original calculation core and all prior values unchanged. No new completed raw-input replay.",
+  "public_file_checks": "All GitHub SHA256 and Zenodo MD5/size checks passed; software DOI linked from dataset metadata; same DOI series as prior versions.",
   "website_visual_browser_qa": false,
-  "ordinary_pushes_publish_zenodo": false
+  "ordinary_pushes_publish_zenodo": false,
+  "upload_recovery": {
+    "initial_workflow_cancelled_for_slow_transfer": 37459080614,
+    "local_transfer_interrupted": true,
+    "interrupted_recovery_workflow": 37461342352,
+    "successful_recovery_workflow": 37462978174,
+    "same_dataset_record_reused": 23187363,
+    "payload_changed": false
+  }
 }

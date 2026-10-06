@@ -102,3 +102,13 @@ the owner's request; it is not claimed as validation. The release gate binds thi
 exception to version 0.2.0, the current source hashes, unchanged calculation core,
 and both annual count and format reports. See release-validation.json.
 Browser visual QA remains outstanding: no browser connection was available.
+
+## Publication follow-up: 2026-10-06
+
+Software v0.2.0: https://doi.org/10.5281/zenodo.23187011 .
+Dataset 2026-09-v3: https://doi.org/10.5281/zenodo.23187363 .
+Both are new versions in the existing DOI series. Public file checksums,
+creator/affiliations, licenses and the dataset-to-software DOI link passed.
+The website was deployed and verified first. Frozen years 2022-2024 use the
+new schema with unchanged metrics; 2025-2026 remain live. Validation used the
+owner-approved additive exception, preserving the original full replay.

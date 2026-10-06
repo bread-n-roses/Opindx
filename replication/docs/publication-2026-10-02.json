@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-02",
+  "website": "https://opindx.org",
+  "initial_website_commit": "fe72fdb6d592ac7f243c40a07915cc18e6e6bff8",
+  "software": {
+    "kind": "software",
+    "tag": "software-v0.1.0",
+    "record_id": 23108424,
+    "doi": "10.5281/zenodo.23108424",
+    "submitted": true,
+    "state": "done",
+    "record_url": "https://zenodo.org/record/23108424",
+    "github": "https://github.com/bread-n-roses/Opindx/releases/tag/software-v0.1.0"
+  },
+  "dataset": {
+    "kind": "dataset",
+    "tag": "data-2026-09-v2",
+    "record_id": 23108621,
+    "doi": "10.5281/zenodo.23108621",
+    "submitted": true,
+    "state": "done",
+    "record_url": "https://zenodo.org/record/23108621",
+    "github": "https://github.com/bread-n-roses/Opindx/releases/tag/data-2026-09-v2"
+  },
+  "public_file_checks": "Every file name, size and MD5 matches the prepared bundle; GitHub SHA256 also verified.",
+  "website_visual_browser_qa": false,
+  "ordinary_pushes_publish_zenodo": false
+}
