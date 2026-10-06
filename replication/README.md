@@ -3,7 +3,7 @@
 Version 0.1.0 is published: [10.5281/zenodo.23108424](https://doi.org/10.5281/zenodo.23108424). Creator: Utz Weitzel
 (VU Amsterdam; Radboud University Nijmegen). Complete datasets: [10.5281/zenodo.23108621](https://doi.org/10.5281/zenodo.23108621).
 See `docs/VALIDATION.md` for measured validation and `docs/publication.json` for release receipts.
-The published source archive and release tags remain unchanged; this branch adds citation and publication records.
+The published source archive and release tags remain unchanged; this branch adds calculation-input citation counts and recorded/used count displays.
 
 This source package recreates the September 2026 journal-metrics workflow from a
 **downloaded OpenAlex Parquet snapshot and the Norwegian Register CSV**. It includes
@@ -91,6 +91,12 @@ they pass. It requires the source inventory recorded as described in
   `per_article_*` is ANS. Dictionary definitions spell out names and units.
 - `work/checks/`: input and completion records.
 - `work/intermediates/`: local, reproducible checkpoints; not release files.
+
+Schema 3 adds `citations_n_raw`, `citations_n_filtered`, `citations_oa_raw` and
+`citations_oa_filtered`: non-self citations entering each calculation universe.
+The existing `citations_raw` and `citations_filtered` remain broader recorded
+counts. Journal details use raw recorded totals beside the selected used counts.
+The calculation and export generate these columns directly from the same graph.
 
 Every included journal-year has at least one defined NF or ANS across the four
 universe/treatment combinations. Zero is defined; null is unavailable.

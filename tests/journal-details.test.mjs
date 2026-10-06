@@ -12,7 +12,7 @@ const entry = year => ({year,status:'live',openalex_snapshot:'2026-09-23'});
 const journal = (id, score) => ({openalex_id:id, title:'Example', issns:'1111-1111; 2222-2222',publisher:'Publisher',
   oa_field:'Psychology',in_n:true,in_oa:true,active_years:5,reference_coverage_pct:90,norwegian_level:'1',
   norwegian_field:'Business and Finance | Economics',norwegian_register_url:'https://kanalregister.hkdir.no/tidsskrift?id=10; https://kanalregister.hkdir.no/tidsskrift?id=20',
-  publications_filtered:80,citations_filtered:0,per_article_n_filtered:score,share_n_filtered:score/10});
+  publications_raw:100,publications_filtered:80,citations_raw:7,citations_filtered:3,citations_n_filtered:0,citations_oa_filtered:2,per_article_n_filtered:score,share_n_filtered:score/10});
 const meta = journal('S20',20);
 const detail = {oa_field_classified_works:3,oa_field_1:'A',oa_field_1_works:1,oa_field_2:'B',oa_field_2_works:1,
   oa_field_3:'C',oa_field_3_works:1,oa_field_other_works:0,norwegian_primary_id:'20',
@@ -20,7 +20,7 @@ const detail = {oa_field_classified_works:3,oa_field_1:'A',oa_field_1_works:1,oa
 
 await check('Metadata order, comma-separated ISSNs, and persistent selected-year register row', () => {
   const rows = D.metadataRows(meta);
-  assert.deepEqual(rows.map(r=>r[0]),['ISSN / Publisher','OpenAlex details','Norwegian Register details','Open access journal','Publication years','Share of publications w/out references']);
+  assert.deepEqual(rows.map(r=>r[0]),['ISSN / Publisher','OpenAlex details','Norwegian Register details','Open access journal','Publications recorded','Citations recorded','Publication years','Share of publications w/out references']);
   assert.equal(rows[0][1],'1111-1111, 2222-2222 / Publisher');
   assert.match(rows[1][1],/>Journal page<\/a> for ID: S20/);
   const absent = D.metadataRows({...meta,in_n:false});
@@ -191,4 +191,21 @@ await check('Every history row has only the selected percentile columns, includi
   assert.equal(D.metadataRows(meta).at(-1)[1],'10.00%');
   assert.equal(D.metadataRows({...meta,reference_coverage_pct:null}).at(-1)[1],'Unavailable');
 });
+
+
+await check('Recorded and used counts follow universe and treatment without a broad-count fallback', () => {
+  const row={...meta,publications_raw:326,publications_filtered:1,citations_raw:224,citations_filtered:27,
+    citations_n_filtered:21,citations_n_raw:181,citations_oa_filtered:25};
+  const values=Object.fromEntries(D.metadataRows(row,settings));
+  assert.match(values['Publications recorded'],/326.*Used in filtered metrics: 1/);
+  assert.match(values['Citations recorded'],/224.*Used in filtered metrics: 21/);
+  const raw=Object.fromEntries(D.metadataRows(row,{...settings,treatment:'raw'}));
+  assert.match(raw['Citations recorded'],/224.*Used in raw metrics: 181/);
+  assert.equal(E.columnValue(row,settings,null,'citations'),21);
+  assert.equal(E.columnValue(row,{...settings,universe:'oa'},null,'citations'),25);
+  assert.equal(E.usedCount({...row,in_n:false},settings,'publications'),null);
+  delete row.citations_n_filtered;
+  assert.equal(E.usedCount(row,settings,'citations'),null);
+});
+
 console.log(`${passed} journal-details tests passed`);

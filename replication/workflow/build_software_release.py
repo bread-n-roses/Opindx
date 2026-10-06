@@ -27,17 +27,54 @@ def validated_files(root):
     return {p.relative_to(root).as_posix(): digest(p) for p in sorted(paths)}
 
 
+def release_validation(root):
+    """Accept a source-bound replay or the explicitly approved additive release."""
+    completion = json.loads((root / 'docs/full-replay.json').read_text(encoding='utf-8'))
+    if completion.get('status') != 'PASS' or len(completion.get('annual', [])) != 5:
+        raise ValueError('A completed baseline five-year replay is required')
+    if any(not (r.get('reference_parity') or '').startswith('PASS:') for r in completion['annual']):
+        raise ValueError('Every baseline annual output must match its reference')
+    current = validated_files(root)
+    if completion.get('validated_source_sha256') == current:
+        return 'Five-year raw-input replay, reference table parity, unit checks and archive byte integrity'
+    path = root / 'docs/release-validation.json'
+    if not path.exists():
+        raise ValueError('Changed source requires a new replay or an approved additive validation record')
+    record = json.loads(path.read_text(encoding='utf-8'))
+    version = json.loads((root / 'configs/zenodo-software.json').read_text())['metadata']['version']
+    if (record.get('status') != 'PASS' or record.get('mode') != 'approved-additive-update'
+            or record.get('software_version') != version or not record.get('owner_approved')):
+        raise ValueError('Additive exception is not approved for this software version')
+    if record.get('validated_source_sha256') != current:
+        raise ValueError('Source changed after additive validation')
+    if record.get('baseline_replay_sha256') != digest(root / 'docs/full-replay.json'):
+        raise ValueError('Baseline replay changed')
+    baseline = completion['validated_source_sha256']
+    protected = [k for k in current if k.startswith(('src/opindx_replication/core/', 'corrections/'))]
+    protected += ['configs/september-2026.json', 'configs/source-code-provenance.json', 'environment.lock', '.python-version']
+    if any(current[k] != baseline.get(k) for k in protected):
+        raise ValueError('Calculation core, corrections or pinned inputs changed; additive exception is insufficient')
+    for name in ['metric-counts-validation.json', 'format-validation-v3.json']:
+        if record['evidence_sha256'].get(name) != digest(root / 'docs' / name):
+            raise ValueError('Additive evidence changed: ' + name)
+    counts = json.loads((root / 'docs/metric-counts-validation.json').read_text())
+    formats = json.loads((root / 'docs/format-validation-v3.json').read_text())
+    years = list(range(2022, 2027))
+    if any(report.get('status') != 'PASS' or sorted(x['year'] for x in report['annual']) != years for report in [counts, formats]):
+        raise ValueError('Incomplete additive annual validation')
+    checks = ['original_columns_exact', 'scores_exact', 'recorded_counts_exact', 'used_count_solver_totals_exact']
+    if any(row.get('status') != 'PASS' or not all(row.get(k) is True for k in checks) for row in counts['annual']):
+        raise ValueError('Additive counts or unchanged-score checks failed')
+    if any(not row.get('csv_all_cells_exact') or not row.get('xlsx_all_cells_verified') for row in formats['annual']):
+        raise ValueError('Annual format verification failed')
+    return 'Owner-approved additive update: unchanged baseline calculation core and all prior values, graph/solver count reconciliation, all-cell formats, tests and archive integrity; no new raw-input replay'
+
+
 def build(root, output):
     root, output = Path(root).resolve(), Path(output).resolve()
     if output == root or root in output.parents:
         raise ValueError('Keep release output outside the source tree')
-    completion = json.loads((root / 'docs' / 'full-replay.json').read_text(encoding='utf-8'))
-    if completion.get('status') != 'PASS' or len(completion.get('annual', [])) != 5:
-        raise ValueError('A completed five-year replay is required')
-    if any(not (r.get('reference_parity') or '').startswith('PASS:') for r in completion['annual']):
-        raise ValueError('Every annual output must match the reference release')
-    if completion.get('validated_source_sha256') != validated_files(root):
-        raise ValueError('Calculation, website or dependency files differ from the validated source')
+    validation_scope = release_validation(root)
     version = json.loads((root / 'configs' / 'zenodo-software.json').read_text(encoding='utf-8'))['metadata']['version']
     tag = 'software-v' + version
     selected = []
@@ -78,16 +115,16 @@ def build(root, output):
         '# Opindx software ' + version + '\n\n'
         'Unpack the source archive, then follow replication/README.md.\n'
         'The archive includes source, pinned environment, reviewed identity corrections,\n'
-        'website source, tests, provenance, licenses and actual replay validation.\n'
+        'website source, tests, provenance, licenses and documented validation scope.\n'
         'Raw snapshots and register lists are supplied separately. No proprietary\n'
         'benchmark files, credentials or raw register contact details are included.\n\n'
-        'Prepared locally. Publication is paused. Creator: Utz Weitzel (VU Amsterdam; Radboud University Nijmegen).\n', encoding='utf-8')
+        'Creator: Utz Weitzel (VU Amsterdam; Radboud University Nijmegen).\n', encoding='utf-8')
     (output / 'RELEASE_NOTES.md').write_bytes((root / 'CHANGELOG.md').read_bytes())
     (output / 'LICENSE.txt').write_bytes((root / 'LICENSE').read_bytes())
     (output / 'SHA256SUMS').write_text(''.join(
         digest(p) + '  ' + p.name + '\n' for p in sorted(output.iterdir())), encoding='utf-8')
     manifest = {'kind': 'software', 'tag': tag, 'validation_status': 'PASS',
-                'validation_scope': 'Five-year raw-input replay, reference table parity, unit checks and archive byte integrity',
+                'validation_scope': validation_scope,
                 'files': {p.name: {'sha256': digest(p), 'bytes': p.stat().st_size} for p in sorted(output.iterdir())}}
     (output / 'release-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
     print(f'Prepared {tag}: {len(selected)} source files; archive integrity PASS; no publication')

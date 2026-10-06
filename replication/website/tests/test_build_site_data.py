@@ -36,7 +36,7 @@ class SiteBuildTests(unittest.TestCase):
         for year in self.manifest["years"]:
             columns = {c:["",""] for c in builder.COLUMNS}
             columns.update(openalex_id=["S101","S102"], score_year=[year,year],
-                           is_open_access=[True,False], in_n=[True,False], in_oa=[True,True],
+                           is_open_access=[True,False], in_n=[True,False], in_oa=[True,True], oa_field=["Economics","Medicine"],
                            publications_raw=[0,4], publications_filtered=[0,3],
                            citations_raw=[0,8], citations_filtered=[0,7],
                            reference_coverage_pct=[None,75.0], active_years=[0,4])
@@ -65,6 +65,7 @@ class SiteBuildTests(unittest.TestCase):
         index = json.loads((self.data / "index.json").read_text())
         self.assertEqual([(y["year"],y["status"]) for y in index["years"]], [(2025,"live"),(2024,"frozen")])
         self.assertNotIn("local_preview", index["journal_details"])
+        self.assertEqual(index["years"][0]["fields"], {"n":["Economics"], "oa":["Economics","Medicine"]})
         history = pq.read_table(self.data / "history/02.parquet")
         self.assertEqual(history["oa_field_1"].to_pylist(), ["Medicine","Medicine"])
         self.assertEqual(history["citations_filtered"].to_pylist(), [7,7])
@@ -73,6 +74,39 @@ class SiteBuildTests(unittest.TestCase):
         self.assertEqual(ranks["per_article_n_filtered"].to_pylist(), [None])
         self.assertNotIn("title", ranks.column_names)
         self.assertEqual(builder.digest(self.data / "scores_2025.parquet"), builder.digest(self.run / "scores_2025.parquet"))
+
+    def test_initial_selection_tracks_latest_full_year_and_metadata(self):
+        page = self.root / "index.html"
+        page.write_text('<select id="year"></select><span id="initial-table-context"></span><table>unchanged</table>')
+        entries = [{"year":2026,"status":"live","openalex_snapshot":"2026-09-23"},
+                   {"year":2024,"status":"frozen","openalex_snapshot":"2026-09-23"},
+                   {"year":2025,"status":"live","openalex_snapshot":"2026-09-23"}]
+        for current, chosen, status in [(2026,2025,"Live"),(2027,2026,"Live"),(2025,2024,"Frozen"),(2024,2026,"Live")]:
+            builder.write_initial_selection(page, entries, current)
+            text = page.read_text()
+            self.assertIn(f'value="{chosen}" selected>{chosen} ({status.lower()})', text)
+            self.assertIn(f'Publications in {chosen-5}&ndash;{chosen-1}', text)
+            self.assertIn(f'Cited in {chosen}', text)
+            self.assertIn(f'OpenAlex snapshot 2026-09 &middot; {status} metrics', text)
+            self.assertIn('<table>unchanged</table>', text)
+
+    def test_schema_three_counts_validate_and_reach_history(self):
+        self.manifest['schema_version']=3
+        for year in self.manifest['years']:
+            table=pq.read_table(self.run/f'scores_{year}.parquet')
+            for u in ('n','oa'):
+                for t in ('raw','filtered'):
+                    table=table.append_column(f'citations_{u}_{t}',pa.array([0,None if u=='n' else 5],type=pa.int64()))
+            self.save(year,table)
+        builder.main(self.run.parent,'2026-Q3')
+        history=pq.read_table(self.data/'history/02.parquet')
+        self.assertEqual(history['citations_n_filtered'].to_pylist(),[None,None])
+        self.assertEqual(history['citations_oa_filtered'].to_pylist(),[5,5])
+        table=pq.read_table(self.run/'scores_2025.parquet')
+        table=table.set_column(table.schema.get_field_index('citations_n_raw'),'citations_n_raw',pa.array([0,0],type=pa.int64()))
+        self.save(2025,table)
+        with self.assertRaisesRegex(ValueError,'missingness'):
+            builder.check_run(self.run)
 
     def test_corrupt_release_preserves_previous_site(self):
         self.data.mkdir(parents=True)

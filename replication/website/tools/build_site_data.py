@@ -7,6 +7,9 @@ The deploy workflow runs this on the downloaded releases; locally, run it on exp
 Stops with an error if a run doesn't match the layout, so nothing broken gets published. Needs pyarrow.
 """
 import json
+import re
+from datetime import date
+from html import escape
 import hashlib
 import shutil
 import sys
@@ -89,14 +92,16 @@ def check_run(folder):
         sys.exit(f"{folder.name}: manifest.json says run '{manifest['run']}', but the release is called '{folder.name}'")
     universes = manifest["universes"]
     version = manifest.get("schema_version", 1)
-    if version not in (1, 2):
+    if version not in (1, 2, 3):
         raise ValueError(f"Unsupported data schema version {version}")
     expected = COLUMNS + [f"in_{u}" for u in universes] + [
         f"{metric}_{u}_{treatment}" for u in universes for metric in ("share", "per_article") for treatment in ("raw", "filtered")]
     if manifest.get("field_assignment"):
         expected += FIELD_COLUMNS
-    if version == 2:
+    if version >= 2:
         expected += FIELD_COLUMNS + DETAIL_COLUMNS
+    if version >= 3:
+        expected += [f"citations_{u}_{t}" for u in universes for t in ("raw", "filtered")]
     for year in manifest["years"]:
         path = folder / f"scores_{year}.parquet"
         if not path.exists():
@@ -105,12 +110,25 @@ def check_run(folder):
         if missing:
             sys.exit(f"{folder.name}/{path.name}: missing columns {missing}")
         table = pq.read_table(path)
-        if version == 2:
+        if version >= 2:
             asset = manifest.get("assets", {}).get(path.name, {})
             if (asset.get("sha256") != digest(path) or asset.get("bytes") != path.stat().st_size
                     or asset.get("rows") != len(table)):
                 raise ValueError(f"{folder.name}/{path.name}: manifest integrity check failed")
-        validate_table(table, year, universes, details=version == 2)
+        validate_table(table, year, universes, details=version >= 2)
+        if version >= 3:
+            for u in universes:
+                member = table[f'in_{u}']
+                for t in ('raw','filtered'):
+                    values = table[f'citations_{u}_{t}']
+                    if not pa.types.is_integer(values.type):
+                        raise ValueError('Used citation counts must be integers')
+                    if not pc.all(pc.equal(pc.is_valid(values), member)).as_py():
+                        raise ValueError('Used count missingness must match universe membership')
+                    if not pc.all(pc.fill_null(pc.and_(pc.greater_equal(values, 0), pc.less_equal(values, table[f'citations_{t}'])), True)).as_py():
+                        raise ValueError('Used counts must be nonnegative and no greater than recorded counts')
+                if not pc.all(pc.fill_null(pc.less_equal(table[f'citations_{u}_filtered'], table[f'citations_{u}_raw']), True)).as_py():
+                    raise ValueError('Filtered used citations exceed Raw')
     return manifest
 
 
@@ -128,7 +146,7 @@ def write_history(published, data):
             columns += [f"in_{u}", f"share_{u}_raw", f"share_{u}_filtered", f"per_article_{u}_raw", f"per_article_{u}_filtered"]
         path = data / f"scores_{year['year']}.parquet"
         available = set(pq.read_schema(path).names)
-        columns += [c for c in FIELD_COLUMNS + DETAIL_COLUMNS if c in available]
+        columns += [c for c in FIELD_COLUMNS + DETAIL_COLUMNS + [f"citations_{u}_{t}" for u in year["universes"] for t in ("raw", "filtered")] if c in available]
         tables.append(pq.read_table(path, columns=columns))
     history = pa.concat_tables(tables, promote_options="default")  # years can have different universes
     group = pc.utf8_slice_codeunits(history["openalex_id"], -2)
@@ -144,8 +162,10 @@ def write_ranks(published, data):
     for year in published:
         table = pq.read_table(data / f"scores_{year['year']}.parquet")
         common = ["openalex_id", "oa_field", "reference_coverage_pct", "active_years"]
+        year["fields"] = {}
         for universe in year["universes"]:
             selected = table.filter(table[f"in_{universe}"])
+            year["fields"][universe] = sorted({value for value in selected["oa_field"].to_pylist() if value})
             for metric in ("share", "per_article"):
                 for treatment in ("raw", "filtered"):
                     columns = common + [f"in_{universe}", f"{metric}_{universe}_{treatment}"]
@@ -187,8 +207,28 @@ def main(runs_folder, latest_run="", releases_url=None):
             if old.exists():
                 old.rename(SITE_DATA)
             raise
+    write_initial_selection(SITE_DATA.parent / "index.html", published)
     frozen_count = sum(1 for year in published if year["status"] == "frozen")
     print(f"Published {len(published)} score year(s), {frozen_count} frozen, to {SITE_DATA}")
+
+
+def write_initial_selection(page, published, current_year=None):
+    """Show the default selection before JavaScript or journal data finishes loading."""
+    if not page.exists() or not published:
+        return
+    current_year = current_year if current_year is not None else date.today().year
+    available = sorted(published, key=lambda entry: entry["year"], reverse=True)
+    entry = next((entry for entry in available if entry["year"] < current_year), available[0])
+    year = entry["year"]
+    source = page.read_text(encoding="utf-8")
+    source = re.sub(r'(<select id="year">).*?(</select>)',
+                    lambda m: m[1] + f'<option value="{year}" selected>{year} ({escape(entry["status"])})</option>' + m[2], source)
+    context = (f'Publications in {year-5}&ndash;{year-1} &middot; Cited in {year}'
+               f' &middot; OpenAlex snapshot {escape((entry.get("openalex_snapshot") or "Unknown")[:7])}'
+               f' &middot; {escape(entry["status"].capitalize())} metrics')
+    source = re.sub(r'(<span id="initial-table-context">).*?(</span>)',
+                    lambda m: m[1] + context + m[2], source)
+    page.write_text(source, encoding="utf-8")
 
 
 def assemble(years, manifest_of, runs, data, frozen, releases_url):

@@ -30,7 +30,7 @@ export function registerEntries(row, detail) {
 
 export function registerLinks(row, detail) {
   const ids = registerIds(row);
-  if (!ids.length) return 'Unavailable';
+  if (!ids.length) return 'Not in Norwegian Register';
   const entries = registerEntries(row, detail);
   const idLink = id => link(registerUrl(id), id,
     `Norwegian Register entry ${id}${entries.find(e => e.id === id)?.title ? ': ' + entries.find(e => e.id === id).title : ''} (new tab)`);
@@ -41,15 +41,17 @@ export function registerLinks(row, detail) {
     ` for ID: ${escape(primary)}` + (others.length ? `<br><span class="register-alternates">Other register IDs: ${others.map(idLink).join(', ')}</span>` : '');
 }
 
-export function metadataRows(row) {
+export function metadataRows(row, state = {universe:'oa',treatment:'filtered'}) {
   const issns = [...new Set(String(row.issns ?? '').split(/[;,]/).map(s => s.trim()).filter(Boolean))].join(', ');
   const result = [
     ['ISSN / Publisher', `${escape(issns || 'Unavailable')} / ${escape(row.publisher || 'Unavailable')}`],
     ['OpenAlex details', link(`https://openalex.org/${encodeURIComponent(row.openalex_id)}`, 'Journal page', 'OpenAlex journal page (new tab)') + ` for ID: ${escape(row.openalex_id)}`],
   ];
-  if (row.in_n) result.push(['Norwegian Register details', `<span id="register-details">${registerLinks(row)}</span>`]);
+  result.push(['Norwegian Register details', `<span id="register-details">${registerLinks(row)}</span>`]);
   result.push(
     ['Open access journal', row.is_open_access == null ? 'Unknown' : row.is_open_access ? 'Yes' : 'No'],
+    ['Publications recorded', `${fmt(row.publications_raw)} &middot; Used in ${escape(state.treatment)} metrics: ${fmt(E.usedCount(row, state, 'publications'))}`],
+    ['Citations recorded', `${fmt(row.citations_raw)} &middot; Used in ${escape(state.treatment)} metrics: ${fmt(E.usedCount(row, state, 'citations'))}`],
     ['Publication years', `${fmt(row.active_years)} of 5 with eligible output`],
     ['Share of publications w/out references', E.isNumber(E.withoutReferences(row)) ? `${fmt(E.withoutReferences(row), 2)}%` : 'Unavailable'],
   );
@@ -79,7 +81,7 @@ export function fieldsTable(row, detail, year) {
     }
     html += '</tbody>';
   }
-  return html + '</table><p>For OpenAlex fields, all articles and reviews are included, except for unclassified publications.</p>';
+  return html + '</table>';
 }
 
 export function universeMembership(row) {
@@ -88,7 +90,7 @@ export function universeMembership(row) {
 
 export function metricsTable(history, year, state, metrics, annualRanks = new Map()) {
   const metricKeys = Object.keys(metrics), pctKeys = E.percentileKeys(state), pct = pctKeys.length;
-  const headings = ['Citing year', 'Journal universe', 'Level', 'Publications', 'Citations',
+  const headings = ['Citing year', 'Journal universe', 'Level', 'Publications used', 'Citations used',
     ...Object.values(metrics).map(m => m.short)];
   const percentileCells = (r, entry) => {
     if (!r[`in_${state.universe}`]) return '<td>&mdash;</td>'.repeat(pct);
@@ -105,7 +107,7 @@ export function metricsTable(history, year, state, metrics, annualRanks = new Ma
   const cells = (r, entry) => {
     if (!r) return `<td colspan="${headings.length - 1 + pct}" class="missing">Not in the data for this year</td>`;
     let html = `<td>${universeMembership(r)}</td><td>${escape(r.norwegian_level ?? '—')}</td>` +
-      `<td>${fmt(r[`publications_${state.treatment}`])}</td><td>${fmt(r[`citations_${state.treatment}`])}</td>`;
+      `<td>${fmt(E.usedCount(r, state, 'publications'))}</td><td>${fmt(E.usedCount(r, state, 'citations'))}</td>`;
     html += metricKeys.map(metric => {
       const value = E.score(r, state, state.universe, metric), digits = metrics[metric].digits;
       const formatted = E.isNumber(value) && value > 0 && value < 10 ** -digits ? value.toExponential(2) : fmt(value, digits);

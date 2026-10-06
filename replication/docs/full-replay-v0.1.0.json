@@ -1,0 +1,464 @@
+{
+  "status": "PASS",
+  "annual": [
+    {
+      "corrections_sha256": "d8f7a8bd9068a9ef5f7787a2516fc3a13bc5a5d3b3ec7e5304f1cc12bac2598a",
+      "field_counts_sha256": "00e5a35020f1648d6d3e37bebef2b69378e10ee80f54ac6da4a475df3fc61a2d",
+      "inputs": {
+        "counts": "b8f0ae304c57819f6928abf219f7ef7ba32a84ba51babe976c4773d78eab2269",
+        "edges": "9126de719579c848bab045e94a8d239f16860821f4b102e9b023271f05a84429",
+        "pairs": "743c627005496c221a36b08cae0c57304913bb0849b61650aae6f90b80b1f883",
+        "retention": "0e941687008f3094831086a9d43961aa5b7d0bb28660aee52796f7f9b1b3d123",
+        "sources": "364d65a7c3c8e2863a34bf12a166561a0455762eca99b151c6e54800368f4a24"
+      },
+      "output_sha256": "19b2ba17108d139a3f191db176b0a5c92b6b5e29d7d5beabe262309a845d1b79",
+      "reference_parity": "PASS: complete identity/metadata/count parity; score relative tolerance 1e-12",
+      "rows": 101978,
+      "solver": [
+        {
+          "article_mass": 13331466,
+          "ef_sum": 100.0,
+          "iterations": 98,
+          "nonself_edge_weight": 40073083,
+          "residual_l1": 0.0,
+          "score_year": 2022,
+          "self_citation_rows_removed": 17094,
+          "state_identity_sha256": "66c18b9e220d1e40e0e01647a633300014ff946103fd88aee5e00c1988966f9d",
+          "state_size": 23068,
+          "treatment": "Raw",
+          "universe": "N"
+        },
+        {
+          "article_mass": 11141587,
+          "ef_sum": 100.0,
+          "iterations": 99,
+          "nonself_edge_weight": 39665988,
+          "residual_l1": 0.0,
+          "score_year": 2022,
+          "self_citation_rows_removed": 17094,
+          "state_identity_sha256": "66c18b9e220d1e40e0e01647a633300014ff946103fd88aee5e00c1988966f9d",
+          "state_size": 23068,
+          "treatment": "Filtered",
+          "universe": "N"
+        },
+        {
+          "article_mass": 22467501,
+          "ef_sum": 100.0,
+          "iterations": 96,
+          "nonself_edge_weight": 49303576,
+          "residual_l1": 0.0,
+          "score_year": 2022,
+          "self_citation_rows_removed": 39061,
+          "state_identity_sha256": "d64d3494d6ddee041789c1a00f6fb147d2fea591cb0d70ee99917e98bd0a31c1",
+          "state_size": 101978,
+          "treatment": "Raw",
+          "universe": "OA"
+        },
+        {
+          "article_mass": 15524586,
+          "ef_sum": 100.0,
+          "iterations": 96,
+          "nonself_edge_weight": 48065947,
+          "residual_l1": 0.0,
+          "score_year": 2022,
+          "self_citation_rows_removed": 39061,
+          "state_identity_sha256": "d64d3494d6ddee041789c1a00f6fb147d2fea591cb0d70ee99917e98bd0a31c1",
+          "state_size": 101978,
+          "treatment": "Filtered",
+          "universe": "OA"
+        }
+      ],
+      "status": "PASS",
+      "year": 2022
+    },
+    {
+      "corrections_sha256": "b0a72c014d052d0a05d367a2e13edc40ed016156685ab1174473645a6369e8dc",
+      "field_counts_sha256": "00e5a35020f1648d6d3e37bebef2b69378e10ee80f54ac6da4a475df3fc61a2d",
+      "inputs": {
+        "counts": "ec12270ff5b7e5e3bf451485257dbff16aee8f4b927a83368445c9300a511a48",
+        "edges": "76f852175cfb2d640ec68dcd82f670b921c97aaca973b1ca0997631810c7f7ef",
+        "pairs": "b1c2aa7a8eec498f79ade6e6025eb6f39c83f55af096eb42f9a9503229330eab",
+        "retention": "0e941687008f3094831086a9d43961aa5b7d0bb28660aee52796f7f9b1b3d123",
+        "sources": "364d65a7c3c8e2863a34bf12a166561a0455762eca99b151c6e54800368f4a24"
+      },
+      "output_sha256": "cf86b1877711dfbeb9b315f35e5bc4a616d043bcf4e2e00df865bfc42181a34d",
+      "reference_parity": "PASS: complete identity/metadata/count parity; score relative tolerance 1e-12",
+      "rows": 107305,
+      "solver": [
+        {
+          "article_mass": 13850038,
+          "ef_sum": 100.0,
+          "iterations": 98,
+          "nonself_edge_weight": 39854129,
+          "residual_l1": 0.0,
+          "score_year": 2023,
+          "self_citation_rows_removed": 17336,
+          "state_identity_sha256": "3fdc2d498ab4fce81d0c384f12e3c48984af3e2c87ee78ce2fd1a7f7c0ba2334",
+          "state_size": 23355,
+          "treatment": "Raw",
+          "universe": "N"
+        },
+        {
+          "article_mass": 11808493,
+          "ef_sum": 100.0,
+          "iterations": 98,
+          "nonself_edge_weight": 39474839,
+          "residual_l1": 0.0,
+          "score_year": 2023,
+          "self_citation_rows_removed": 17336,
+          "state_identity_sha256": "3fdc2d498ab4fce81d0c384f12e3c48984af3e2c87ee78ce2fd1a7f7c0ba2334",
+          "state_size": 23355,
+          "treatment": "Filtered",
+          "universe": "N"
+        },
+        {
+          "article_mass": 23560088,
+          "ef_sum": 100.0,
+          "iterations": 95,
+          "nonself_edge_weight": 51109544,
+          "residual_l1": 0.0,
+          "score_year": 2023,
+          "self_citation_rows_removed": 41586,
+          "state_identity_sha256": "d513d06218f68e94bbd6811c109f6c24f694b6af1af0f64876f9feac900227aa",
+          "state_size": 107305,
+          "treatment": "Raw",
+          "universe": "OA"
+        },
+        {
+          "article_mass": 16838687,
+          "ef_sum": 100.0,
+          "iterations": 111,
+          "nonself_edge_weight": 49824426,
+          "residual_l1": 0.0,
+          "score_year": 2023,
+          "self_citation_rows_removed": 41586,
+          "state_identity_sha256": "d513d06218f68e94bbd6811c109f6c24f694b6af1af0f64876f9feac900227aa",
+          "state_size": 107305,
+          "treatment": "Filtered",
+          "universe": "OA"
+        }
+      ],
+      "status": "PASS",
+      "year": 2023
+    },
+    {
+      "corrections_sha256": "6c64572e9dc9be80a59e54f61cf33be254d79fdc7d008073a5f01d759b484433",
+      "field_counts_sha256": "00e5a35020f1648d6d3e37bebef2b69378e10ee80f54ac6da4a475df3fc61a2d",
+      "inputs": {
+        "counts": "962f2fa5107384079e4fd4ed5dc8d6e85160642971121d59413fec7fbe916afa",
+        "edges": "6407dba7df2889774cb1deca0a63c6f8dc4bae8a0448694c735d1eacd0273322",
+        "pairs": "a825c84b9439fc790f79b0e36a37e9244f835be83249ed2791aca662f2b3939d",
+        "retention": "0e941687008f3094831086a9d43961aa5b7d0bb28660aee52796f7f9b1b3d123",
+        "sources": "364d65a7c3c8e2863a34bf12a166561a0455762eca99b151c6e54800368f4a24"
+      },
+      "output_sha256": "2b040d6a96cbe87998a6c7309d63b03f5078fc398b206705179fa75753e106ef",
+      "reference_parity": "PASS: complete identity/metadata/count parity; score relative tolerance 1e-12",
+      "rows": 111087,
+      "solver": [
+        {
+          "article_mass": 14168362,
+          "ef_sum": 100.0,
+          "iterations": 98,
+          "nonself_edge_weight": 43733776,
+          "residual_l1": 0.0,
+          "score_year": 2024,
+          "self_citation_rows_removed": 16948,
+          "state_identity_sha256": "d9a3ea9395a40e161485698a8ba6330c329dc3f69880eecd08530abe0d3fd744",
+          "state_size": 22902,
+          "treatment": "Raw",
+          "universe": "N"
+        },
+        {
+          "article_mass": 12232329,
+          "ef_sum": 100.0,
+          "iterations": 98,
+          "nonself_edge_weight": 43366765,
+          "residual_l1": 0.0,
+          "score_year": 2024,
+          "self_citation_rows_removed": 16948,
+          "state_identity_sha256": "d9a3ea9395a40e161485698a8ba6330c329dc3f69880eecd08530abe0d3fd744",
+          "state_size": 22902,
+          "treatment": "Filtered",
+          "universe": "N"
+        },
+        {
+          "article_mass": 24694605,
+          "ef_sum": 100.0,
+          "iterations": 94,
+          "nonself_edge_weight": 54898675,
+          "residual_l1": 0.0,
+          "score_year": 2024,
+          "self_citation_rows_removed": 37950,
+          "state_identity_sha256": "38cd12fdd5f3b3ea2702f3e73b0000ca227e3326b0c4869d34dbdef8ad45e9b1",
+          "state_size": 111087,
+          "treatment": "Raw",
+          "universe": "OA"
+        },
+        {
+          "article_mass": 18087685,
+          "ef_sum": 100.0,
+          "iterations": 95,
+          "nonself_edge_weight": 53820374,
+          "residual_l1": 0.0,
+          "score_year": 2024,
+          "self_citation_rows_removed": 37950,
+          "state_identity_sha256": "38cd12fdd5f3b3ea2702f3e73b0000ca227e3326b0c4869d34dbdef8ad45e9b1",
+          "state_size": 111087,
+          "treatment": "Filtered",
+          "universe": "OA"
+        }
+      ],
+      "status": "PASS",
+      "year": 2024
+    },
+    {
+      "corrections_sha256": "85b5985ed56297f9b04d6eb68861993fe986b02ee32a7106ee9ab153b8c00540",
+      "field_counts_sha256": "00e5a35020f1648d6d3e37bebef2b69378e10ee80f54ac6da4a475df3fc61a2d",
+      "inputs": {
+        "counts": "477ec8773390ee6c2ddbe5c5b127636b42efc35209d8d65127356501d0e54188",
+        "edges": "d25391227bb007072daaedaa21827f8726785ed972181ac0fdf77fd997635f88",
+        "pairs": "1395a247d1ad48a229d084a12975af10c575ffec1e7dee6a296f3fcd52dc544b",
+        "retention": "0e941687008f3094831086a9d43961aa5b7d0bb28660aee52796f7f9b1b3d123",
+        "sources": "364d65a7c3c8e2863a34bf12a166561a0455762eca99b151c6e54800368f4a24"
+      },
+      "output_sha256": "15bd2deb4cd3ebc795aae11f63e5b59a8290f92489eff39ad92a02329752ce23",
+      "reference_parity": "PASS: complete identity/metadata/count parity; score relative tolerance 1e-12",
+      "rows": 114783,
+      "solver": [
+        {
+          "article_mass": 14509700,
+          "ef_sum": 100.0,
+          "iterations": 93,
+          "nonself_edge_weight": 46390868,
+          "residual_l1": 0.0,
+          "score_year": 2025,
+          "self_citation_rows_removed": 16155,
+          "state_identity_sha256": "5fba00fb74b0437ee03716545e594425a8eaefdcd47d79c21c4a40b1f9d6034e",
+          "state_size": 23102,
+          "treatment": "Raw",
+          "universe": "N"
+        },
+        {
+          "article_mass": 12556534,
+          "ef_sum": 100.0,
+          "iterations": 95,
+          "nonself_edge_weight": 46001053,
+          "residual_l1": 0.0,
+          "score_year": 2025,
+          "self_citation_rows_removed": 16155,
+          "state_identity_sha256": "5fba00fb74b0437ee03716545e594425a8eaefdcd47d79c21c4a40b1f9d6034e",
+          "state_size": 23102,
+          "treatment": "Filtered",
+          "universe": "N"
+        },
+        {
+          "article_mass": 26067012,
+          "ef_sum": 100.0,
+          "iterations": 100,
+          "nonself_edge_weight": 58851428,
+          "residual_l1": 0.0,
+          "score_year": 2025,
+          "self_citation_rows_removed": 31202,
+          "state_identity_sha256": "871abc85c9f950cdc9218cb55cf3183fac51f44fa3b384407cd8bf0ddea0d27c",
+          "state_size": 114783,
+          "treatment": "Raw",
+          "universe": "OA"
+        },
+        {
+          "article_mass": 18932407,
+          "ef_sum": 100.0,
+          "iterations": 107,
+          "nonself_edge_weight": 57790597,
+          "residual_l1": 0.0,
+          "score_year": 2025,
+          "self_citation_rows_removed": 31202,
+          "state_identity_sha256": "871abc85c9f950cdc9218cb55cf3183fac51f44fa3b384407cd8bf0ddea0d27c",
+          "state_size": 114783,
+          "treatment": "Filtered",
+          "universe": "OA"
+        }
+      ],
+      "status": "PASS",
+      "year": 2025
+    },
+    {
+      "corrections_sha256": "cbbfbdbb4ea0ae581ad3bdd128eb5b0f54c29246084332bd4b72ea6e98f68fd4",
+      "field_counts_sha256": "00e5a35020f1648d6d3e37bebef2b69378e10ee80f54ac6da4a475df3fc61a2d",
+      "inputs": {
+        "counts": "6e1b66cb463ffd914694a2efd3b35a9683b0d5c15b1a4bee52b3b8cb7c587533",
+        "edges": "a363bd9114da61ec2f1b09e7c12050bef63376b0fb68d31ec0d460917c07e805",
+        "pairs": "6b4c9fee34378e86cf93ac0cc3dc5f05e2f3511f2cceea32ab0820629315a280",
+        "retention": "0e941687008f3094831086a9d43961aa5b7d0bb28660aee52796f7f9b1b3d123",
+        "sources": "364d65a7c3c8e2863a34bf12a166561a0455762eca99b151c6e54800368f4a24"
+      },
+      "output_sha256": "795527211b4e1a16cafe391143b4f74c3f32d2e700448ee6e469960870cac3be",
+      "reference_parity": "PASS: complete identity/metadata/count parity; score relative tolerance 1e-12",
+      "rows": 117026,
+      "solver": [
+        {
+          "article_mass": 14614581,
+          "ef_sum": 100.0,
+          "iterations": 91,
+          "nonself_edge_weight": 29493921,
+          "residual_l1": 0.0,
+          "score_year": 2026,
+          "self_citation_rows_removed": 14415,
+          "state_identity_sha256": "c19602f631815d6345a0d4632e7f7a36e21c50cb077a777b4d5a6509137049dd",
+          "state_size": 22632,
+          "treatment": "Raw",
+          "universe": "N"
+        },
+        {
+          "article_mass": 12559205,
+          "ef_sum": 100.0,
+          "iterations": 94,
+          "nonself_edge_weight": 29190415,
+          "residual_l1": 0.0,
+          "score_year": 2026,
+          "self_citation_rows_removed": 14415,
+          "state_identity_sha256": "c19602f631815d6345a0d4632e7f7a36e21c50cb077a777b4d5a6509137049dd",
+          "state_size": 22632,
+          "treatment": "Filtered",
+          "universe": "N"
+        },
+        {
+          "article_mass": 27549533,
+          "ef_sum": 100.0,
+          "iterations": 102,
+          "nonself_edge_weight": 39653229,
+          "residual_l1": 0.0,
+          "score_year": 2026,
+          "self_citation_rows_removed": 24794,
+          "state_identity_sha256": "9556ab00fcba57c348cf9d1111f059c36c2489dbdbec51d19f4b02bf07a5e8ea",
+          "state_size": 117026,
+          "treatment": "Raw",
+          "universe": "OA"
+        },
+        {
+          "article_mass": 19204950,
+          "ef_sum": 100.0,
+          "iterations": 88,
+          "nonself_edge_weight": 38782497,
+          "residual_l1": 0.0,
+          "score_year": 2026,
+          "self_citation_rows_removed": 24794,
+          "state_identity_sha256": "9556ab00fcba57c348cf9d1111f059c36c2489dbdbec51d19f4b02bf07a5e8ea",
+          "state_size": 117026,
+          "treatment": "Filtered",
+          "universe": "OA"
+        }
+      ],
+      "status": "PASS",
+      "year": 2026
+    }
+  ],
+  "publication_performed": false,
+  "completion_method": "Verified format-step resume after completed annual calculations",
+  "format_resume_seconds": 273.8662651999912,
+  "format_resume_completed_utc": "2026-10-02T17:43:03.242956+00:00",
+  "format_resume_helper_sha256": "3f5c417e35e0bbab0458db118377004208a3380dace38238ad20ec7caa0adeff",
+  "xlsxwriter_version": "3.2.9",
+  "validated_source_sha256": {
+    ".python-version": "eec784960b01d8cd8d46c9c4f943d0a5bbdce8f2a861d5a6478b1034bc6e14ad",
+    "configs/september-2026.json": "db4fb32164134da5cf47aa76fd261389d3ee5239b4657e232c3e7ffd32bb6a2f",
+    "configs/source-code-provenance.json": "952a1377f70c1c83de890b9dd3b4f0267503a33cced769ab3d329bb4f7d5c89e",
+    "corrections/annual-2022.json": "d8f7a8bd9068a9ef5f7787a2516fc3a13bc5a5d3b3ec7e5304f1cc12bac2598a",
+    "corrections/annual-2023.json": "b0a72c014d052d0a05d367a2e13edc40ed016156685ab1174473645a6369e8dc",
+    "corrections/annual-2024.json": "6c64572e9dc9be80a59e54f61cf33be254d79fdc7d008073a5f01d759b484433",
+    "corrections/annual-2025.json": "85b5985ed56297f9b04d6eb68861993fe986b02ee32a7106ee9ab153b8c00540",
+    "corrections/annual-2026.json": "cbbfbdbb4ea0ae581ad3bdd128eb5b0f54c29246084332bd4b72ea6e98f68fd4",
+    "environment.lock": "50080623c552f9f903b87a98b2905adca6b6214f6823b61334d0ac5a405f4536",
+    "src/opindx_replication/__init__.py": "41362a5ea4931c546433d4c48290c5707bf02dbbea1c3aafa9f43d1225e47003",
+    "src/opindx_replication/core/assemble.py": "2baae812334abfe79166ae4a2139be63d97b56dd40a11cdb19d921dcd08652da",
+    "src/opindx_replication/core/audit_pairs.py": "3b3e2d9abe3e6aa04f020af427c3c2c5558f7401f9fc00c72e0bbfcd9c3e4e77",
+    "src/opindx_replication/core/bmc_continuity.py": "9bb110a53ce93bcb8ff1ae11f477f41db2d2ccb9812ea3ddcf76c61f52b855d1",
+    "src/opindx_replication/core/build_field_breakdown.py": "39459c3862777a68ac90fdfb145a7a884ca5510040cb90384b2d351092050430",
+    "src/opindx_replication/core/build_journal_details_preview.py": "c1e7ca1084831cf480e31eba173b0e12301fc8bcad07eb2c5cd5d37a1caaede8",
+    "src/opindx_replication/core/build_rolling_fields.py": "cd05215d337a3635af7ef1f8e3804b4a3e26b55f7f583b14df858c3c5e3e9fc5",
+    "src/opindx_replication/core/extract.py": "5f504564aa2163ed62e3265786ba3ef2b6b37ce7180beff1eb6ea0fdfa649286",
+    "src/opindx_replication/core/handoff.py": "8402b3d278dc3a2e5a106faf4b6876a5d7c4afe5f0f38ae1a75d3cf5f7d5ec26",
+    "src/opindx_replication/core/identity.py": "167add9d3f1e6a7ba23058ade71fd021f9c9778d811953ca8d3835ae854df544",
+    "src/opindx_replication/core/import_run.py": "5614548b46e6f28b8ba556bae8849de31bf772026478f21204446859e1dcba26",
+    "src/opindx_replication/core/match_norwegian.py": "ebf517d13ae83c4b5af702b55d5e095fbc722bfa821c2695db2954bdf39bfeaf",
+    "src/opindx_replication/core/norwegian.py": "92bb4f3c2184078112336f2ba7ecfc4323c50e71a7bd03425ff2915a4f1b95ad",
+    "src/opindx_replication/core/rebuild_source_repair_graph.py": "d0aa271354e27e85f9372b1a44b165de6dc55225ce53a4a4d5e953c7e9511ded",
+    "src/opindx_replication/core/run_source_repair_preflight.py": "3294685dd77fc0da3e89307de1160585355aac63a6a6736e2f863ca7a8b71219",
+    "src/opindx_replication/core/score.py": "a0a64c141f1cb6ec602cccaa050932eaa8934cff8a3680c78f392fed7ddc2003",
+    "src/opindx_replication/core/select_canonical_source.py": "6bf1a671cb454afc764fda5f84f2ad7bdf59d87eff11bd00b63efe4e01fc4811",
+    "src/opindx_replication/core/source_checkpoint.py": "af8cec9c51d9ce489387e0a6abb6d54614ab9084b232c5fb0285d6f8b61d9061",
+    "src/opindx_replication/core/source_repairs_eurasian.py": "362ad6043a7ed746586423b36af22d796823196950f7347c1a2422b46a9820c5",
+    "src/opindx_replication/core/source_repairs_jgr.py": "6d75885ab3209a93813581db916f4d17a1ee89e5f4f031fe1b80fd9439785ba1",
+    "src/opindx_replication/core/sources.py": "74aa61a0edf14b99a616d6eb10a38d0c0df5f60b15ae5cf507a9393c7f2aa56b",
+    "src/opindx_replication/core/sparse_recursive.py": "48470dc6ae6066f027a5db8bc435ad53280a9fc495a82e2e4afe21f9e8836910",
+    "src/opindx_replication/core/square_solver.py": "9e2432b791d445a13b5d8e1a3f9810c8c5dafaff9d4928893fc0f42b4e3b296a",
+    "src/opindx_replication/core/targeted_work_metadata.py": "b5a96a4c8ffb0a27fbbf13793f5557f424dd73629ef3e37ab3841fb5e64e97a7",
+    "src/opindx_replication/datasets.py": "41828500255c7c7595cbd1ebabf66dbb18b1c66223437dc38bd0c54efee49cfe",
+    "src/opindx_replication/pipeline.py": "897f10d274f38b043b744a334faa60e1fea5b6cc28aacb8c5a7de407d7462794",
+    "website/site/app.js": "8a7f985417923269773fab16fce6b48a24a53d7004c07b255a5e9b5feddec17b",
+    "website/site/engine.js": "9ac65b3923956d9538a6f25c2d14436995330fb130820cbd8e0bfe0ff81beccb",
+    "website/site/help.js": "a9d4395667f431c860739df8cb532f7f5a1752246475641af55bd621cbf64add",
+    "website/site/journal-details.js": "ac7906f8c431da4d830a187c7259473a8add49461f4d4e260310efb0c4b8d987",
+    "website/site/presets.js": "6627b65914f00c30b4117e3334d28deef3c5d602e39322c483faa592aa032c46",
+    "website/site/selection-download.js": "c6e7992af85354498bb5e4852d28233921e7cfc23a519a3ff6900abe399c9f81",
+    "website/tools/build_site_data.py": "57a0d0e0f70e8a647dbe21a434e4d116f5f4c9529b15cd27d5bde0b2f3a86b5c",
+    "website/tools/serve_site.py": "1fa6d78868d509d443797e5131c15937baa5efe6790e9d57a74c074eca761c93",
+    "website/tools/version_site_assets.py": "dfcba880abd410f7f1ff156ba845e9909bd2ad06a521e74672d817d1f66ef765"
+  },
+  "original_completion_sha256": "4440e465a2ab513b4b6a187ffe7238f515be0d5591e92f0d481ba3a80a7cee0f",
+  "source_inventory_recorded_utc": "2026-10-02T15:47:11.017232+00:00",
+  "recorded_utc": "2026-10-02T17:45:23.760499+00:00",
+  "execution_resume": {
+    "checkpoint_rows": 11814542,
+    "resumed_after": "2022 baseline graph",
+    "next_memory": "24GB",
+    "reason": "Increase memory while preserving verified checkpoints from this fresh replay",
+    "initial_memory": "12GB",
+    "stopped_utc": "2026-10-02T14:53:51.1348014Z",
+    "initial_started_utc": "2026-10-02T13:29:39.4378810Z",
+    "additional_resumes": [
+      {
+        "time_utc": "2026-10-02T15:33:18.819086+00:00",
+        "reason": "DuckDB OutOfMemoryException building baseline 2025 edges at 24GB, four threads",
+        "next_memory": "40GB",
+        "next_threads": 2,
+        "available_physical_gib": 50.5,
+        "completed_baseline_years": [
+          2022,
+          2023,
+          2024
+        ]
+      },
+      {
+        "time_utc": "2026-10-02T15:47:11.025019+00:00",
+        "reason": "Preparation rewrote identical run configuration and manifest files, invalidating timestamp-bound preflight; preserve unchanged files on resume",
+        "implementation_change": {
+          "src/opindx_replication/pipeline.py": {
+            "before": "db678bbbb2a44c4e42a476639533aa3c4d803937b3b03cdbce53984c764dc7e6",
+            "after": "897f10d274f38b043b744a334faa60e1fea5b6cc28aacb8c5a7de407d7462794"
+          }
+        },
+        "verification": "New restart regression passes; all 43 other bound files unchanged; complete pipeline checks will rerun using its freshly built checkpoints",
+        "memory": "40GB",
+        "threads": 2
+      }
+    ],
+    "parallel_field_extraction": {
+      "status": "PASS",
+      "completed_utc": "2026-10-02T16:10:59.117101+00:00",
+      "memory": "10GB",
+      "threads": 1,
+      "inputs": "Raw snapshot plus hard links to the immutable fresh replay Work and deduplication checkpoints",
+      "output_sha256": "00e5a35020f1648d6d3e37bebef2b69378e10ee80f54ac6da4a475df3fc61a2d",
+      "classified_and_unclassified_works": 44987056,
+      "integration": "Verified input/output hashes and moved finished field directory into the replay; main pipeline will recheck binding."
+    },
+    "format_environment_recovery": {
+      "reason": "The sandbox global interpreter imported an incomplete xlsxwriter namespace (Workbook absent); all five annual calculations and comparisons had already passed.",
+      "runtime": "Installed replication virtual environment; XlsxWriter 3.2.9, Workbook available",
+      "resume_command": "python workflow/finish_formats.py WORK",
+      "reference_comparisons": "All five years PASS; exact NF/ANS differences zero",
+      "recorded_utc": "2026-10-02T17:40:46.907362+00:00"
+    }
+  },
+  "total_wall_seconds_including_resume": 15203.805613
+}

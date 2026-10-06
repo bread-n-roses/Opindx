@@ -1,0 +1,143 @@
+{
+  "status": "PASS",
+  "scope": "Additive count enrichment from validated graph and score checkpoints; no metric recalculation",
+  "annual": [
+    {
+      "year": 2022,
+      "status": "PASS",
+      "rows": 101978,
+      "original_columns_exact": true,
+      "scores_exact": true,
+      "recorded_counts_exact": true,
+      "used_count_solver_totals_exact": true,
+      "used_citation_totals": {
+        "n:raw": 40073083,
+        "n:filtered": 39665988,
+        "oa:raw": 49303576,
+        "oa:filtered": 48065947
+      },
+      "source_parquet_sha256": "f31a026af27bc5dd37701ce12232ed22b2f08d7d9ffdfc33237d1940e420f0a2",
+      "native_scores_sha256": "1320089b880623f2f7258b3c5bf14d6e8afd8e1420ad526bbe926cd97ddcfda1",
+      "graph_sha256": {
+        "counts": "3c8153984186cb90ddf7f3494fc2b324bd4b78b91cc9c37364d2412b681f35f3",
+        "edges": "4461a4cb97304b9d7eb72401fde9d32f81419689c8bccb2cbba1b663c3348f70",
+        "pairs": "1bcc2ce0d1c13a05aabc86c6f6b75115e6dfe607709156d7ab626ec4aaecfda0"
+      },
+      "output": {
+        "sha256": "bcfc4331a47af393f4f7bb4e8248b87ad1176b3409354da11cfdf5d5607e8515",
+        "bytes": 12642880,
+        "rows": 101978
+      }
+    },
+    {
+      "year": 2023,
+      "status": "PASS",
+      "rows": 107305,
+      "original_columns_exact": true,
+      "scores_exact": true,
+      "recorded_counts_exact": true,
+      "used_count_solver_totals_exact": true,
+      "used_citation_totals": {
+        "n:raw": 39854129,
+        "n:filtered": 39474839,
+        "oa:raw": 51109544,
+        "oa:filtered": 49824426
+      },
+      "source_parquet_sha256": "1c7379c63249fb6a9e79e96b4deccf7478ec8b46e3592e5df6a793cf5c78551b",
+      "native_scores_sha256": "67e055dcfda48f877c0339520a1423bf5ad90d384b8a4d4fc405a5da9fa849f7",
+      "graph_sha256": {
+        "counts": "81da06e113d4defdb7e18d5a082a62d5c02334079f8a815f151af1cb5a590dc0",
+        "edges": "5e6dba8d23bd8e57d8226577ba16d70420bbe0b34f35a6f051c3c6bbbacdcb08",
+        "pairs": "b9aca19473e57785414a85a435dd6d7b878bbdd0c6d7eacb16929ab7ca8790a8"
+      },
+      "output": {
+        "sha256": "6cb33a4af2047be8bef7cf5f84b0eeb8010f39030d7063cec4f4ec9ac4333aa5",
+        "bytes": 13240377,
+        "rows": 107305
+      }
+    },
+    {
+      "year": 2024,
+      "status": "PASS",
+      "rows": 111087,
+      "original_columns_exact": true,
+      "scores_exact": true,
+      "recorded_counts_exact": true,
+      "used_count_solver_totals_exact": true,
+      "used_citation_totals": {
+        "n:raw": 43733776,
+        "n:filtered": 43366765,
+        "oa:raw": 54898675,
+        "oa:filtered": 53820374
+      },
+      "source_parquet_sha256": "9a5a9a4f60d1edbb6c062a8d03d331891f8e4f85cdb0c8fa6a03dbbf7c9b39fd",
+      "native_scores_sha256": "7ba26547f264a8d0d53e6861b25df0f5be1aee2e1608c800c7273622099fde4e",
+      "graph_sha256": {
+        "counts": "3cd526ded9baef949a2e27a869bf993191ba44dce0716d88752490b9b447a13f",
+        "edges": "71eb9d3f0a46aa916e5bf557a80ab7024047102313436aae3c09fb1f9dff5423",
+        "pairs": "2fc26e291f04638353aded7686c6044c7345e0d63fb6d6ae24e759a236264de6"
+      },
+      "output": {
+        "sha256": "b339cf0f82f9b41f041f2d02afb9ff75d92e889cb187944e3dd624d0c23e8e9a",
+        "bytes": 13644318,
+        "rows": 111087
+      }
+    },
+    {
+      "year": 2025,
+      "status": "PASS",
+      "rows": 114783,
+      "original_columns_exact": true,
+      "scores_exact": true,
+      "recorded_counts_exact": true,
+      "used_count_solver_totals_exact": true,
+      "used_citation_totals": {
+        "n:raw": 46390868,
+        "n:filtered": 46001053,
+        "oa:raw": 58851428,
+        "oa:filtered": 57790597
+      },
+      "source_parquet_sha256": "4a5b0d6539abc2660011f12d13e3b270f85ebddb04f7dae4aca38e206dfd014d",
+      "native_scores_sha256": "79e42e21d27cef31e64e3404a66853c40f87942807d132a2ce0d4575d8e0cb12",
+      "graph_sha256": {
+        "counts": "87a7e41202ac4067ccb48d117762ac2328c97eb1d720ec722756d6818a723eb7",
+        "edges": "d312db681e7172bc2f6e4e143077492bd5a4bc68b8208339017374d1cdbb9b10",
+        "pairs": "375cf32ba8a39fef8db942c41cf054336d36b990d3b73068560d8d69a5600af6"
+      },
+      "output": {
+        "sha256": "b7df781578e9912441e8c3ebe43a258f63ff852553a68e6183b1cf30a4ca9c65",
+        "bytes": 13965571,
+        "rows": 114783
+      }
+    },
+    {
+      "year": 2026,
+      "status": "PASS",
+      "rows": 117026,
+      "original_columns_exact": true,
+      "scores_exact": true,
+      "recorded_counts_exact": true,
+      "used_count_solver_totals_exact": true,
+      "used_citation_totals": {
+        "n:raw": 29493921,
+        "n:filtered": 29190415,
+        "oa:raw": 39653229,
+        "oa:filtered": 38782497
+      },
+      "source_parquet_sha256": "67249220720f6af07c21f941743da7c8214ac14c08f78cd61c29906a56de177c",
+      "native_scores_sha256": "23a5005bc3e949fe2d9c5e0f7c4b0f722d36487f990bcc591b82fd293561addc",
+      "graph_sha256": {
+        "counts": "c60b7d1ce47e19846cd49b5c81435841f053722b8274c180d2864f1eab14ed27",
+        "edges": "dd6e0290bbed2337a946cf7e53618f740ceb8c39d817aa989b2cd1ff35773502",
+        "pairs": "e4726d0ac633ae2fa616a3a3b43bf9369f01ea0e79ae56b6fd93c741ffdfd141"
+      },
+      "output": {
+        "sha256": "c10e6da45534fb65deb0c4b6c93f55df58d4e587e200ffd00e98e736b18340e9",
+        "bytes": 13779903,
+        "rows": 117026
+      }
+    }
+  ],
+  "total_rows": 552179,
+  "publication_performed": false
+}

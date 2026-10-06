@@ -3,6 +3,7 @@ import { parquetReadObjects } from 'https://cdn.jsdelivr.net/npm/hyparquet@1.31.
 import * as E from './engine.js';
 import * as D from './journal-details.js';
 import * as P from './presets.js';
+import {} from './section-nav.js';
 import { workbookBytes } from './selection-download.js';
 
 const $ = id => document.getElementById(id);
@@ -15,13 +16,14 @@ const FILTERS = {
   fields: {column: 'oa_field', label: 'OpenAlex fields', list: 'field-filter'},
 };
 let index, year, rows = [], state = {...P.DEFAULTS, fields: []};
-let ranks, ranksKey, visible = [], columns = [], memberCount = 0, yearRequest = 0, loading = true;
+let ranks, ranksKey, visible = [], hiddenMatches = [], columns = [], memberCount = 0, yearRequest = 0, loading = true;
 let explicitCustom = false, downloadBusy = false;
 // A display preference for this visit; never part of a preset or ranking pool.
 const hiddenColumns = new Set();
 const filterValues = {fields: []};
 const historyFiles = new Map();
 let historyRequest = 0;
+let stopJournalTracking = () => {};
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const option = (value, label) => `<option value="${escape(value)}">${escape(label)}</option>`;
@@ -42,26 +44,41 @@ async function fetchOk(url) {
 function showError(error) {
   $('notice').hidden = false;
   $('notice').className = 'notice error';
-  $('notice').textContent = `The data could not be loaded (${error.message}).`;
+  $('notice-message').hidden = false;
+  $('notice-message').textContent = `The data could not be loaded (${error.message}).`;
+  $('selection-summary').hidden = true;
 }
 function setLoading(value) {
   loading = value;
   $('results').setAttribute('aria-busy', String(value));
   $('download-view').disabled = value || downloadBusy;
+  $('selection-actions').hidden = value || year == null;
   if (value) toggleDownloads(false);
-  $('search').disabled = year == null;
-  $('search-controls').disabled = year == null;
+  $('search').disabled = !index;
+  $('search-controls').disabled = !index;
+  $('field-picker').querySelector('fieldset').disabled = year == null && !index?.years.find(entry => entry.year === Number($('year').value))?.fields;
+  $('reset').disabled = !index;
   if (value) { $('previous').disabled = true; $('next').disabled = true; }
 }
 
 // Only the most recent year request may replace the table, including on failure.
 async function loadYear(newYear) {
   const request = ++yearRequest;
+  if (year == null) {
+    const entry = index.years.find(item => item.year === newYear);
+    $('year').value = newYear;
+    $('universe').innerHTML = Object.entries(entry.universes).map(([id, name]) => option(id, name)).join('');
+    if (!(state.universe in entry.universes)) state.universe = Object.keys(entry.universes)[0];
+    $('universe').value = state.universe;
+  }
   setLoading(true);
   $('notice').hidden = false;
   $('notice').className = 'notice';
-  $('notice').textContent = `Loading citation year ${newYear}…`;
+  $('notice-message').hidden = false;
+  $('notice-message').textContent = `Loading citation year ${newYear}…`;
+  $('selection-summary').hidden = true;
   try {
+    if (year == null) { fillFilters(); syncControls(); renderInitialTable(newYear); }
     const buffer = await (await fetchOk(`data/scores_${newYear}.parquet`)).arrayBuffer();
     if (request !== yearRequest) return;
     const data = await parquetReadObjects({file: buffer});
@@ -78,9 +95,10 @@ async function loadYear(newYear) {
     syncControls();
     render();
     const entry = publishedYear();
-    $('notice').hidden = !entry.dummy;
-    $('notice').className = 'notice dummy';
-    $('notice').textContent = entry.dummy ? 'Dummy data: these journals and numbers are made up for testing.' : '';
+    $('notice').className = entry.dummy ? 'notice dummy' : 'notice';
+    $('notice-message').hidden = !entry.dummy;
+    $('notice-message').textContent = entry.dummy ? 'Dummy data: these journals and numbers are made up for testing.' : '';
+    $('selection-summary').hidden = false;
   } catch (error) {
     if (request !== yearRequest) return;
     setLoading(false);
@@ -91,31 +109,32 @@ async function loadYear(newYear) {
 }
 
 // ---- Table ----
-function getColumns() {
+function getColumns(entry = publishedYear()) {
   const cols = [
     {key:'title', label:'Journal title', className:'journal-column align-left', title:'Open more info for journal details'},
     {key:'oa_field', label:'OpenAlex field', className:'align-left', title:'Predominant field and its share of classified publications'},
-    {key:'publications', label:'Publications', title:`Articles and reviews ${year - 5}–${year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
-    {key:'citations', label:'Citations', title:`Citations in ${year}, excluding journal self-citations`},
+    {key:'publications', label:'Publications used', title:`Articles and reviews ${entry.year - 5}–${entry.year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
+    {key:'citations', label:'Citations used', title:`Citations in ${entry.year}, excluding journal self-citations`},
     {key:'publications_without_references_pct', label:'Pubs. w/out refs.', title:'Share of publications without a recorded OpenAlex reference'},
   ];
   for (const [metric, m] of Object.entries(METRICS)) cols.push({key:`score:${metric}`, label:m.short,
-    className:metric === 'share' ? 'group-start' : '', score:true, title:`${m.name} in the ${universeName(state.universe)} universe (${m.note})`});
+    className:metric === 'share' ? 'group-start' : '', score:true, title:`${m.name} in the ${entry.universes[state.universe] ?? state.universe.toUpperCase()} universe (${m.note})`});
   for (const key of E.percentileKeys(state)) cols.push(key === 'fieldPct'
     ? {key, label:'Field', className:'group-start percentile-cell', title:'Percentile within the assigned field, after eligibility requirements'}
     : {key, label:'Total', className:'percentile-cell', title:'Percentile among all retained journals; 100 is highest'});
   return cols;
 }
-function renderHead() {
-  const entry = publishedYear(), month = (entry.openalex_snapshot ?? '').slice(0, 7) || 'unknown';
-  const scoreCount = columns.filter(col => col.score).length;
-  const pctCount = columns.filter(col => col.key.endsWith('Pct')).length;
-  const profileCount = columns.length - scoreCount - pctCount;
-  const groups = `<th scope="colgroup" colspan="${profileCount}" class="meta-group"><span>Publications in ${year - 5}–${year - 1} · Cited in ${year} · OpenAlex snapshot ${escape(month)} · ${entry.status === 'frozen' ? 'Frozen' : 'Live'} metrics</span> ` +
+function renderHead(entry = publishedYear(), headerColumns = columns, interactive = true) {
+  const month = (entry.openalex_snapshot ?? '').slice(0, 7) || 'unknown';
+  const scoreCount = headerColumns.filter(col => col.score).length;
+  const pctCount = headerColumns.filter(col => col.key.endsWith('Pct')).length;
+  const profileCount = headerColumns.length - scoreCount - pctCount;
+  const groups = `<th scope="colgroup" colspan="${profileCount}" class="meta-group"><span>Publications in ${entry.year - 5}–${entry.year - 1} · Cited in ${entry.year} · OpenAlex snapshot ${escape(month)} · ${entry.status === 'frozen' ? 'Frozen' : 'Live'} metrics</span> ` +
     '<a class="table-help" href="journal-help.html#journal-table" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a></th>' +
-    (scoreCount ? `<th scope="colgroup" colspan="${scoreCount}" class="score-group ${escape(state.universe)}">${escape(universeName(state.universe))}</th>` : '') +
+    (scoreCount ? `<th scope="colgroup" colspan="${scoreCount}" class="score-group ${escape(state.universe)}">${escape(entry.universes[state.universe] ?? state.universe.toUpperCase())}</th>` : '') +
     (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">Percentiles · ${METRICS[state.metric].short}</th>` : '');
-  const headers = columns.map(col => {
+  const headers = headerColumns.map(col => {
+    if (!interactive) return `<th scope="col" class="${col.className || ''}">${col.label}</th>`;
     const sorted = state.sortKey === col.key;
     const direction = state.sortDirection === 1 ? 'ascending' : 'descending';
     const arrow = sorted ? (state.sortDirection === 1 ? '↑' : '↓') : '↕';
@@ -125,6 +144,13 @@ function renderHead() {
       `<div class="column-heading"><button type="button" class="sort-button" data-sort="${col.key}">${col.label}<span class="sort-indicator" aria-hidden="true">${arrow}</span></button>${hide}</div></th>`;
   }).join('');
   $('table-head').innerHTML = `<tr class="group-row">${groups}</tr><tr>${headers}</tr>`;
+}
+function renderInitialTable(newYear) {
+  const entry = index.years.find(item => item.year === newYear);
+  const initialColumns = getColumns(entry);
+  renderHead(entry, initialColumns, false);
+  $('table-body').innerHTML = '<tr class="loading-row" aria-hidden="true">' +
+    initialColumns.map(col => `<td class="${col.className || ''}">&nbsp;</td>`).join('') + '</tr>';
 }
 function cell(row, col) {
   const value = E.columnValue(row, state, ranks, col.key), id = row.openalex_id;
@@ -162,24 +188,47 @@ function render() {
   }
   $('restore-columns').hidden = !hiddenColumns.size;
   visible = E.view(rows, state.showPercentiles ? state : {...state, poolOnly:false}, ranks);
+  hiddenMatches = E.hiddenSearchMatches(rows, state, ranks);
   memberCount = rows.filter(row => row[`in_${state.universe}`]).length;
   drawPage();
 }
+const HIDDEN_REASONS = {
+  universe: 'Switch to OpenAlex universe',
+  percentiles: 'Show journals without percentiles',
+  fields: 'Show all fields',
+  access: 'Show also not-open-access journals',
+};
+function hiddenMatchRow({row, reasons}) {
+  const notice = `<div class="hidden-match-notice"><span>Exists but hidden:</span>` +
+    `${reasons.map(reason => `<button type="button" class="text-button" data-reveal="${reason}">${HIDDEN_REASONS[reason]}</button>`).join('')}</div>`;
+  const otherCount = columns.filter(col => !['title','oa_field'].includes(col.key)).length;
+  const fieldVisible = columns.some(col => col.key === 'oa_field');
+  const title = `<td class="journal-column align-left">${escape(row.title)}` +
+    (!fieldVisible ? `<span class="hidden-match-field">${escape(E.fieldLabel(row))}</span>` : '') +
+    (!otherCount ? notice : '') + '</td>';
+  return '<tr class="hidden-match">' + title +
+    (fieldVisible ? `<td class="field-cell">${escape(E.fieldLabel(row))}</td>` : '') +
+    (otherCount ? `<td colspan="${otherCount}">${notice}</td>` : '') + '</tr>';
+}
 function drawPage() {
-  state.page = Math.max(0, Math.min(state.page, Math.ceil(visible.length / PAGE_SIZE) - 1));
-  const shown = visible.slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE);
+  const results = [...visible.map(row => ({row})), ...hiddenMatches];
+  state.page = Math.max(0, Math.min(state.page, Math.ceil(results.length / PAGE_SIZE) - 1));
+  const shown = results.slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE);
   renderHead();
-  const restricted = state.universe !== 'oa' || state.fields.length || state.oaOnly || (state.showPercentiles && state.poolOnly);
-  $('table-body').innerHTML = shown.length ? shown.map(row => `<tr>${columns.map(col => cell(row, col)).join('')}</tr>`).join('')
-    : `<tr><td colspan="${columns.length}" class="empty-cell">No journals match these choices in the ${escape(universeName(state.universe))} universe. ` +
-      (restricted && universeIds().includes('oa') ? '<button type="button" class="text-button" data-search-all>Search all OpenAlex journals</button>' : 'Try a broader search.') + '</td></tr>';
+  $('table-body').innerHTML = shown.length ? shown.map(match => match.reasons ? hiddenMatchRow(match)
+    : `<tr>${columns.map(col => cell(match.row, col)).join('')}</tr>`).join('')
+    : `<tr><td colspan="${columns.length}" class="empty-cell">No journals match these choices in the ${escape(universeName(state.universe))} universe. Try another search or adjust the filters.</td></tr>`;
   $('result-count').innerHTML = `<strong>${count(visible.length)}</strong> of <strong>${count(memberCount)}</strong> journals in the ${escape(universeName(state.universe))} universe`;
   $('pool-summary').hidden = !state.showPercentiles;
-  $('pool-summary').title = `Journals with a ${E.percentileKeys(state).includes('poolPct') ? 'Total' : 'Field'} percentile across the selected universe, before search and display filters.`;
-  $('pool-summary').innerHTML = state.showPercentiles ? ` · <strong>${count(E.availablePercentiles(state, ranks).size)}</strong> journals with percentile` : '';
-  $('page-status').textContent = visible.length ? `${count(state.page * PAGE_SIZE + 1)}–${count(state.page * PAGE_SIZE + shown.length)} of ${count(visible.length)} journals` : '0 journals';
+  $('pool-summary').title = `Journals with a ${E.percentileKeys(state).includes('poolPct') ? 'Total' : 'Field'} percentile among the journals matching the current search and filters (all result pages).`;
+  const percentileJournals = state.showPercentiles ? E.availablePercentiles(state, ranks) : null;
+  const percentileCount = percentileJournals ? visible.reduce((total, row) => total + Number(percentileJournals.has(row.openalex_id)), 0) : 0;
+  $('pool-summary').innerHTML = state.showPercentiles ? ` · <strong>${count(percentileCount)}</strong> journals with percentile` : '';
+  $('hidden-summary').hidden = hiddenMatches.length === 0;
+  $('hidden-summary').innerHTML = hiddenMatches.length ? ` &middot; <strong>${count(hiddenMatches.length)}</strong> journals hidden` : '';
+  $('page-status').textContent = results.length ? `${count(state.page * PAGE_SIZE + 1)}\u2013${count(state.page * PAGE_SIZE + shown.length)} of ${count(results.length)} ${hiddenMatches.length ? `search matches (${count(hiddenMatches.length)} hidden)` : 'journals'}` : '0 journals';
   $('previous').disabled = loading || state.page === 0;
-  $('next').disabled = loading || (state.page + 1) * PAGE_SIZE >= visible.length;
+  $('next').disabled = loading || (state.page + 1) * PAGE_SIZE >= results.length;
 }
 
 // ---- Controls ----
@@ -190,7 +239,8 @@ const uniqueValues = values => [...new Set(values.filter(Boolean))].sort(E.compa
 function fillFilters() {
   const inUniverse = rows.filter(row => row[`in_${state.universe}`]);
   for (const [key, filter] of Object.entries(FILTERS)) {
-    filterValues[key] = uniqueValues(inUniverse.map(row => row[filter.column]));
+    const initialFields = index?.years.find(entry => entry.year === Number($('year').value))?.fields;
+    filterValues[key] = uniqueValues(year == null ? (initialFields?.[state.universe] ?? []) : inUniverse.map(row => row[filter.column]));
     state[key] = state[key].filter(value => filterValues[key].includes(value));
     drawFilter(key);
   }
@@ -211,7 +261,7 @@ function drawFilter(key) {
 function syncControls() {
   for (const [id, key] of Object.entries(SELECTS)) $(id).value = state[key];
   for (const [id, key] of Object.entries(CHECKBOXES)) $(id).checked = state[key];
-  if (!loading) $('year').value = year;
+  if (!loading && year != null) $('year').value = year;
   $('universe').value = state.universe;
   $('preset').value = explicitCustom ? 'custom' : P.identifyPreset(state);
   // Do not replace the search input's value while typing: keep caret/IME state.
@@ -228,6 +278,7 @@ function syncControls() {
 }
 function toggleSettings(open) {
   $('settings').hidden = !open;
+  $('settings-help').hidden = !open;
   $('settings-toggle').setAttribute('aria-expanded', String(open));
   $('settings-indicator').textContent = open ? '\u2212' : '+';
 }
@@ -237,34 +288,42 @@ function update(changes) {
   if (Object.hasOwn(changes, 'percentileMode')) changes = {...changes, showPercentiles:changes.percentileMode !== 'none'};
   Object.assign(state, changes, {page:0});
   if (Object.keys(changes).some(key => key in P.PRESETS.full) && P.identifyPreset(state) === 'custom') toggleSettings(true);
+  if (year == null) {
+    fillFilters();
+    syncControls();
+    renderInitialTable(Number($('year').value));
+    return;
+  }
   if (changedUniverse) fillFilters();
   syncControls(); render();
 }
 function applyPreset(preset) {
   if (preset === 'custom') { explicitCustom = true; syncControls(); toggleSettings(true); return; }
   explicitCustom = false;
-  update(P.PRESETS[preset]);
+  update({...P.PRESETS[preset], oaOnly:false});
   toggleSettings(false);
 }
 
 function showJournal(id) {
   const row = rows.find(r => r.openalex_id === id);
   if (!row) return;
-  const details = D.metadataRows(row);
+  stopJournalTracking();
+  const details = D.metadataRows(row, state);
   $('dialog-content').innerHTML = `<p class="dialog-label">JOURNAL DETAILS · ${year} · ${state.treatment.toUpperCase()}</p><h2 id="dialog-title">${escape(row.title)}</h2>` +
     '<nav id="journal-sections" class="journal-section-nav" aria-label="Journal detail sections">' +
     '<a href="#details-title" data-journal-section="details-title">Details</a>' +
     '<a href="#fields-title" data-journal-section="fields-title">Fields covered</a>' +
-    '<a href="#metrics-title" data-journal-section="metrics-title">Metrics by year <span aria-hidden="true">↓</span></a>' +
+    '<a href="#metrics-title" data-journal-section="metrics-title">Metrics by year</a>' +
     '<button type="button" id="close-dialog" class="dialog-close" data-journal-close aria-label="Close journal details" title="Close journal details" autofocus>×</button></nav>' +
-    '<div class="dialog-section-heading"><h3 id="details-title" tabindex="-1">Details</h3></div>' +
+    '<div class="dialog-section-heading"><h3 id="details-title" tabindex="-1">Details</h3><a class="table-help" href="journal-help.html#journal-details" target="_blank" rel="noopener noreferrer" aria-label="Details: What is what? (new tab)">What is what?</a></div>' +
     `<dl id="journal-metadata" aria-labelledby="details-title">${details.map(([key, value]) => `<dt>${key}</dt><dd>${value}</dd>`).join('')}</dl>` +
-    '<div class="dialog-section-heading"><h3 id="fields-title" tabindex="-1">Fields covered</h3><a class="table-help" href="journal-help.html#fields-covered" target="_blank" rel="noopener noreferrer" aria-label="Fields covered: What is what in this table? (new tab)">What is what in this table?</a></div><div id="field-breakdown" aria-live="polite"><p>Loading fields…</p></div>' +
-    `<div class="dialog-section-heading"><h3 id="metrics-title" tabindex="-1">Metrics by year · ${escape(universeName(state.universe))} universe · ${state.treatment === 'raw' ? 'Raw' : 'Filtered'}</h3><a class="table-help" href="journal-help.html#yearly-metrics" target="_blank" rel="noopener noreferrer" aria-label="Metrics by year: What is what in this table? (new tab)">What is what in this table?</a></div>` +
+    '<div class="dialog-section-heading"><h3 id="fields-title" tabindex="-1">Fields covered</h3><a class="table-help" href="journal-help.html#fields-covered" target="_blank" rel="noopener noreferrer" aria-label="Fields covered: What is what? (new tab)">What is what?</a></div><div id="field-breakdown" aria-live="polite"><p>Loading fields…</p></div>' +
+    `<div class="dialog-section-heading"><h3 id="metrics-title" tabindex="-1">Metrics by year · ${escape(universeName(state.universe))} universe · ${state.treatment === 'raw' ? 'Raw' : 'Filtered'}</h3><a class="table-help" href="journal-help.html#yearly-metrics" target="_blank" rel="noopener noreferrer" aria-label="Metrics by year: What is what? (new tab)">What is what?</a></div>` +
     '<div id="history" class="dialog-table-scroll" role="region" aria-labelledby="metrics-title" tabindex="0"></div>' +
     '<p id="history-percentile-status" role="status"></p>';
   $('journal-dialog').showModal();
   $('journal-dialog').scrollTop = 0;
+  stopJournalTracking = globalThis.OpindxSections.trackSections($('journal-sections'), {scroller: $('journal-dialog'), content: $('dialog-content')});
   showHistory(id, row);
 }
 
@@ -431,13 +490,6 @@ async function downloadXlsx() {
   }
 }
 
-function showCompleteData() {
-  const links = [...index.years].sort((a, b) => b.year - a.year)
-    .map(entry => `<a href="data/scores_${entry.year}.parquet" download>${entry.year}</a>`).join(' · ');
-  const older = index.releases_url ? ` · <a href="${escape(index.releases_url)}" target="_blank" rel="noopener noreferrer">older versions</a>` : '';
-  $('download-files').innerHTML = `Complete files per year, all columns, and older versions of the data: ${links}${older}.`;
-}
-
 // ---- Events ----
 for (const [id, key] of Object.entries(SELECTS)) $(id).addEventListener('change', event =>
   update({[key]:NUMERIC.has(key) ? Number(event.target.value) : event.target.value}));
@@ -481,8 +533,12 @@ $('restore-columns').addEventListener('click', () => {
 });
 $('table-body').addEventListener('click', event => {
   if (loading) return;
-  if (event.target.closest('[data-search-all]')) {
-    update({...P.PRESETS.full, fields:[], oaOnly:false}); fillFilters(); return;
+  const reveal = event.target.closest('[data-reveal]')?.dataset.reveal;
+  if (Object.hasOwn(HIDDEN_REASONS, reveal)) {
+    const changes = {universe:{universe:'oa'}, percentiles:{poolOnly:false}, fields:{fields:[]}, access:{oaOnly:false}};
+    update(changes[reveal]);
+    fillFilters();
+    return;
   }
   const id = event.target.closest('[data-journal]')?.dataset.journal;
   if (id) showJournal(id);
@@ -524,13 +580,16 @@ document.addEventListener('keydown', event => {
   }
 });
 $('dialog-content').addEventListener('click', navigateJournalSection);
-$('journal-dialog').addEventListener('close', () => { historyRequest++; });
+$('journal-dialog').addEventListener('close', () => { historyRequest++; stopJournalTracking(); });
 $('reset').addEventListener('click', () => {
   explicitCustom = false;
   hiddenColumns.clear();
   state = {...P.DEFAULTS, fields:[]};
-  if (!universeIds().includes(state.universe)) state.universe = universeIds()[0];
-  fillFilters(); syncControls(); render(); toggleSettings(false);
+  const ids = Object.keys(index.years.find(entry => entry.year === (year ?? Number($('year').value))).universes);
+  if (!ids.includes(state.universe)) state.universe = ids[0];
+  fillFilters(); syncControls();
+  if (year == null) renderInitialTable(Number($('year').value)); else render();
+  toggleSettings(false);
 });
 
 // ---- Start ----
@@ -539,8 +598,7 @@ try {
   index = await (await fetchOk('data/index.json')).json();
   const initial = P.startingSelection(index.years, location.search);
   state = {...state, ...P.PRESETS[initial.preset]};
-  $('year').innerHTML = [...index.years].sort((a, b) => b.year - a.year).map(entry => option(entry.year, entry.year)).join('');
+  $('year').innerHTML = [...index.years].sort((a, b) => b.year - a.year).map(entry => option(entry.year, `${entry.year} (${entry.status})`)).join('');
   $('year').value = initial.year;
-  showCompleteData();
   await loadYear(initial.year);
 } catch (error) { showError(error); }

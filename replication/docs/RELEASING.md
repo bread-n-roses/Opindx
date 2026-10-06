@@ -52,3 +52,13 @@ The site's existing deployment must select a data release by manifest/score asse
 not simply the newest GitHub release. The prepared deployment patch addresses this
 before software releases can coexist in the same repository. Historical data tags
 and frozen-year pins remain supported.
+
+## Approved additive exception: version 0.2.0
+
+The owner approved the 2026-10-06 release without a new raw-input replay because
+all original annual columns and scores are exactly unchanged. The release gate
+accepts docs/release-validation.json only for its named version and exact source
+hashes, checks the original calculation core/corrections/input pins against the
+baseline replay, and requires five-year count reconciliation and all-cell format
+verification. This is not a general skip-validation flag. Changed scientific
+calculation code requires fresh validation. The original replay stays intact.

@@ -16,7 +16,7 @@ const FILTERS = {
   fields: {column: 'oa_field', label: 'OpenAlex fields', list: 'field-filter'},
 };
 let index, year, rows = [], state = {...P.DEFAULTS, fields: []};
-let ranks, ranksKey, visible = [], columns = [], memberCount = 0, yearRequest = 0, loading = true;
+let ranks, ranksKey, visible = [], hiddenMatches = [], columns = [], memberCount = 0, yearRequest = 0, loading = true;
 let explicitCustom = false, downloadBusy = false;
 // A display preference for this visit; never part of a preset or ranking pool.
 const hiddenColumns = new Set();
@@ -113,8 +113,8 @@ function getColumns(entry = publishedYear()) {
   const cols = [
     {key:'title', label:'Journal title', className:'journal-column align-left', title:'Open more info for journal details'},
     {key:'oa_field', label:'OpenAlex field', className:'align-left', title:'Predominant field and its share of classified publications'},
-    {key:'publications', label:'Publications', title:`Articles and reviews ${entry.year - 5}–${entry.year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
-    {key:'citations', label:'Citations', title:`Citations in ${entry.year}, excluding journal self-citations`},
+    {key:'publications', label:'Publications used', title:`Articles and reviews ${entry.year - 5}–${entry.year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
+    {key:'citations', label:'Citations used', title:`Citations in ${entry.year}, excluding journal self-citations`},
     {key:'publications_without_references_pct', label:'Pubs. w/out refs.', title:'Share of publications without a recorded OpenAlex reference'},
   ];
   for (const [metric, m] of Object.entries(METRICS)) cols.push({key:`score:${metric}`, label:m.short,
@@ -188,26 +188,47 @@ function render() {
   }
   $('restore-columns').hidden = !hiddenColumns.size;
   visible = E.view(rows, state.showPercentiles ? state : {...state, poolOnly:false}, ranks);
+  hiddenMatches = E.hiddenSearchMatches(rows, state, ranks);
   memberCount = rows.filter(row => row[`in_${state.universe}`]).length;
   drawPage();
 }
+const HIDDEN_REASONS = {
+  universe: 'Switch to OpenAlex universe',
+  percentiles: 'Show journals without percentiles',
+  fields: 'Show all fields',
+  access: 'Show also not-open-access journals',
+};
+function hiddenMatchRow({row, reasons}) {
+  const notice = `<div class="hidden-match-notice"><span>Exists but hidden:</span>` +
+    `${reasons.map(reason => `<button type="button" class="text-button" data-reveal="${reason}">${HIDDEN_REASONS[reason]}</button>`).join('')}</div>`;
+  const otherCount = columns.filter(col => !['title','oa_field'].includes(col.key)).length;
+  const fieldVisible = columns.some(col => col.key === 'oa_field');
+  const title = `<td class="journal-column align-left">${escape(row.title)}` +
+    (!fieldVisible ? `<span class="hidden-match-field">${escape(E.fieldLabel(row))}</span>` : '') +
+    (!otherCount ? notice : '') + '</td>';
+  return '<tr class="hidden-match">' + title +
+    (fieldVisible ? `<td class="field-cell">${escape(E.fieldLabel(row))}</td>` : '') +
+    (otherCount ? `<td colspan="${otherCount}">${notice}</td>` : '') + '</tr>';
+}
 function drawPage() {
-  state.page = Math.max(0, Math.min(state.page, Math.ceil(visible.length / PAGE_SIZE) - 1));
-  const shown = visible.slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE);
+  const results = [...visible.map(row => ({row})), ...hiddenMatches];
+  state.page = Math.max(0, Math.min(state.page, Math.ceil(results.length / PAGE_SIZE) - 1));
+  const shown = results.slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE);
   renderHead();
-  const restricted = state.universe !== 'oa' || state.fields.length || state.oaOnly || (state.showPercentiles && state.poolOnly);
-  $('table-body').innerHTML = shown.length ? shown.map(row => `<tr>${columns.map(col => cell(row, col)).join('')}</tr>`).join('')
-    : `<tr><td colspan="${columns.length}" class="empty-cell">No journals match these choices in the ${escape(universeName(state.universe))} universe. ` +
-      (restricted && universeIds().includes('oa') ? '<button type="button" class="text-button" data-search-all>Search all OpenAlex journals</button>' : 'Try a broader search.') + '</td></tr>';
+  $('table-body').innerHTML = shown.length ? shown.map(match => match.reasons ? hiddenMatchRow(match)
+    : `<tr>${columns.map(col => cell(match.row, col)).join('')}</tr>`).join('')
+    : `<tr><td colspan="${columns.length}" class="empty-cell">No journals match these choices in the ${escape(universeName(state.universe))} universe. Try another search or adjust the filters.</td></tr>`;
   $('result-count').innerHTML = `<strong>${count(visible.length)}</strong> of <strong>${count(memberCount)}</strong> journals in the ${escape(universeName(state.universe))} universe`;
   $('pool-summary').hidden = !state.showPercentiles;
   $('pool-summary').title = `Journals with a ${E.percentileKeys(state).includes('poolPct') ? 'Total' : 'Field'} percentile among the journals matching the current search and filters (all result pages).`;
   const percentileJournals = state.showPercentiles ? E.availablePercentiles(state, ranks) : null;
   const percentileCount = percentileJournals ? visible.reduce((total, row) => total + Number(percentileJournals.has(row.openalex_id)), 0) : 0;
   $('pool-summary').innerHTML = state.showPercentiles ? ` · <strong>${count(percentileCount)}</strong> journals with percentile` : '';
-  $('page-status').textContent = visible.length ? `${count(state.page * PAGE_SIZE + 1)}–${count(state.page * PAGE_SIZE + shown.length)} of ${count(visible.length)} journals` : '0 journals';
+  $('hidden-summary').hidden = hiddenMatches.length === 0;
+  $('hidden-summary').innerHTML = hiddenMatches.length ? ` &middot; <strong>${count(hiddenMatches.length)}</strong> journals hidden` : '';
+  $('page-status').textContent = results.length ? `${count(state.page * PAGE_SIZE + 1)}\u2013${count(state.page * PAGE_SIZE + shown.length)} of ${count(results.length)} ${hiddenMatches.length ? `search matches (${count(hiddenMatches.length)} hidden)` : 'journals'}` : '0 journals';
   $('previous').disabled = loading || state.page === 0;
-  $('next').disabled = loading || (state.page + 1) * PAGE_SIZE >= visible.length;
+  $('next').disabled = loading || (state.page + 1) * PAGE_SIZE >= results.length;
 }
 
 // ---- Controls ----
@@ -279,7 +300,7 @@ function update(changes) {
 function applyPreset(preset) {
   if (preset === 'custom') { explicitCustom = true; syncControls(); toggleSettings(true); return; }
   explicitCustom = false;
-  update(P.PRESETS[preset]);
+  update({...P.PRESETS[preset], oaOnly:false});
   toggleSettings(false);
 }
 
@@ -287,7 +308,7 @@ function showJournal(id) {
   const row = rows.find(r => r.openalex_id === id);
   if (!row) return;
   stopJournalTracking();
-  const details = D.metadataRows(row);
+  const details = D.metadataRows(row, state);
   $('dialog-content').innerHTML = `<p class="dialog-label">JOURNAL DETAILS · ${year} · ${state.treatment.toUpperCase()}</p><h2 id="dialog-title">${escape(row.title)}</h2>` +
     '<nav id="journal-sections" class="journal-section-nav" aria-label="Journal detail sections">' +
     '<a href="#details-title" data-journal-section="details-title">Details</a>' +
@@ -512,8 +533,12 @@ $('restore-columns').addEventListener('click', () => {
 });
 $('table-body').addEventListener('click', event => {
   if (loading) return;
-  if (event.target.closest('[data-search-all]')) {
-    update({...P.PRESETS.full, fields:[], oaOnly:false}); fillFilters(); return;
+  const reveal = event.target.closest('[data-reveal]')?.dataset.reveal;
+  if (Object.hasOwn(HIDDEN_REASONS, reveal)) {
+    const changes = {universe:{universe:'oa'}, percentiles:{poolOnly:false}, fields:{fields:[]}, access:{oaOnly:false}};
+    update(changes[reveal]);
+    fillFilters();
+    return;
   }
   const id = event.target.closest('[data-journal]')?.dataset.journal;
   if (id) showJournal(id);

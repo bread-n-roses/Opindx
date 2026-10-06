@@ -24,7 +24,7 @@ Use the same citation year, universe, treatment, preset, percentile requirements
 field selection and column visibility to reproduce a browser selection.
 NF and ANS are loaded from the annual Parquets. Field percentages and percentiles
 are computed/formatted by the bundled JavaScript. Annual full data files retain
-all fields; Download this selection uses only visible columns across all result
+all fields; Download selection uses only visible columns across all result
 pages, splitting the displayed OpenAlex field percentage into its own column.
 
 Building the local website does not publish it. The remote Parquet reader module
@@ -49,3 +49,8 @@ The public site is https://opindx.org; https://www.opindx.org redirects to it.
 The bundled `website/site/CNAME` preserves this domain when publishing the site
 to the GitHub Pages branch. Keep the repository deployment guard and existing
 Pages/DNS/HTTPS settings. Local builds do not change the public site.
+
+Schema 3 data is required to display Citations used. Earlier releases do not
+contain those universe-specific counts; the interface shows a dash rather than
+substituting their broader recorded counts. Use the new annual files for all
+years, including frozen years, without changing historical NF/ANS values.

@@ -23,37 +23,38 @@
     </div></div>
 
     <section class="search-panel panel" aria-label="Find journals">
-      <label class="search-label" for="search">Find a journal</label>
+      <div class="search-heading">
+        <label class="search-label" for="search">Find a journal</label>
+        <div class="search-actions">
+          <a class="table-help" href="journal-help.html#search" target="_blank" rel="noopener noreferrer" aria-label="Search: What is what? (new tab)">What is what?</a>
+          <button type="button" class="text-button" id="reset" disabled>Reset</button>
+        </div>
+      </div>
       <div class="search-box"><svg class="search-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
         <input id="search" type="search" placeholder="Search by journal title, publisher, ISSN, or OpenAlex ID" autocomplete="off" disabled>
       </div>
       <fieldset id="search-controls" class="search-controls" disabled>
         <legend class="visually-hidden">Search and metric settings</legend>
         <div class="primary-controls">
-          <label class="control">Citation year<select id="year"></select></label>
-          <div class="control"><span id="field-label">OpenAlex fields</span>
+          <label class="control">Citation year<select id="year"><option value="2025" selected>2025 (live)</option></select></label>
+          <label class="control">Journal universe<select id="universe"><option value="n" selected>Norwegian Register</option></select></label>
+          <div class="control"><span id="field-label">Fields</span>
             <details class="picker" id="field-picker"><summary aria-labelledby="field-label field-summary"><span id="field-summary">All</span></summary>
-              <div class="picker-list"><fieldset class="filter-box"><legend class="visually-hidden">OpenAlex fields</legend>
+              <div class="picker-list"><fieldset class="filter-box"><legend class="visually-hidden">Fields</legend>
                 <label class="check-line all-fields-line"><input id="all-fields" type="checkbox" checked>All fields</label>
                 <div class="filter-list" id="field-filter"></div>
               </fieldset></div>
             </details>
           </div>
-          <label class="control">Journal universe<select id="universe"></select></label>
           <div class="control"><label for="preset">Presets</label><div class="preset-control">
-            <select id="preset"><option value="full">Max coverage (noisy)</option><option value="ef-ais">Close to EF and AIS</option><option value="vu-sbe">VU Amsterdam (SBE)</option><option value="custom">Custom</option></select>
+            <select id="preset"><option value="ef-ais">Close to EF &amp; AIS</option><option value="full">Full coverage (noisy)</option><option value="vu-sbe">VU Amsterdam (SBE)</option><option value="custom">Custom</option></select>
           </div></div>
         </div>
         <div class="control-links">
           <button type="button" class="text-button advanced-toggle" id="settings-toggle" aria-expanded="false" aria-controls="settings"><span id="settings-indicator" aria-hidden="true">+</span> Advanced settings</button>
-          <a class="table-help" href="journal-help.html#search" target="_blank" rel="noopener noreferrer" aria-label="Search: What is what? (new tab)">What is what?</a>
-          <button type="button" class="text-button" id="reset">Reset</button>
+          <a id="settings-help" class="table-help" hidden href="journal-help.html#advanced-settings" target="_blank" rel="noopener noreferrer" aria-label="Advanced settings: What is what? (new tab)">What is what?</a>
         </div>
         <section class="settings" id="settings" aria-label="Advanced settings" hidden>
-          <div class="advanced-general">
-            <label class="check-line"><input id="oa-only" type="checkbox">Open access journals only</label>
-            <label class="check-line"><input id="include-zero" type="checkbox">Include publications without references (not recommended)</label>
-          </div>
           <div class="percentile-band">
             <div class="reference-controls">
               <div class="control"><span id="percentile-label">Show percentiles</span>
@@ -67,38 +68,48 @@
               </div>
               <fieldset id="percentile-settings" class="percentile-settings"><legend class="visually-hidden">Percentile requirements</legend>
                 <label class="control">Ranking indicator<select id="metric"></select></label>
-                <label class="control">Share of publications w/out references<select id="coverage"><option value="-1">No maximum</option><option value="0">Below 100%</option><option value="10">Below 90%</option><option value="20">Below 80%</option><option value="30">Below 70%</option><option value="40">Below 60%</option><option value="50">Below 50%</option><option value="60">Below 40%</option><option value="70">Below 30%</option><option value="80">Below 20%</option><option value="90">Below 10%</option></select></label>
-                <label class="control">Years with publications<select id="min-years"><option value="0">No minimum</option><option value="1">At least 1 year</option><option value="2">At least 2 years</option><option value="3">At least 3 years</option><option value="4">At least 4 years</option><option value="5">All 5 years</option></select></label>
+                <label class="control">Share of publications w/out references<select id="coverage"><option value="-1">No maximum</option><option value="0">Below 100%</option><option value="10" selected>Below 90%</option><option value="20">Below 80%</option><option value="30">Below 70%</option><option value="40">Below 60%</option><option value="50">Below 50%</option><option value="60">Below 40%</option><option value="70">Below 30%</option><option value="80">Below 20%</option><option value="90">Below 10%</option></select></label>
+                <label class="control">Years with publications<select id="min-years"><option value="0">No minimum</option><option value="1">At least 1 year</option><option value="2">At least 2 years</option><option value="3">At least 3 years</option><option value="4" selected>At least 4 years</option><option value="5">All 5 years</option></select></label>
                 <label class="control">Retain top % per field<input id="top-percent" type="number" min="1" max="100" step="1" value="100"></label>
               </fieldset>
             </div>
-            <label class="check-line pool-only-line"><input id="pool-only" type="checkbox">Hide journals without percentiles</label>
+            <label class="check-line pool-only-line"><input id="pool-only" type="checkbox" checked>Hide journals without percentiles</label>
+          </div>
+          <div class="advanced-general">
+            <label class="check-line"><input id="oa-only" type="checkbox">Open access journals only</label>
+            <label class="check-line"><input id="include-zero" type="checkbox">Include publications without references (noisy)</label>
           </div>
         </section>
       </fieldset>
     </section>
 
-    <div class="notice" id="notice" role="status">Loading the data…</div>
-    <section class="table-panel panel" aria-label="Journal metrics" aria-busy="true" id="results">
-      <div class="table-toolbar"><div class="selection-summary" role="status" aria-live="polite"><span id="result-count">Loading journals…</span><span id="pool-summary" title="Journals with a Total percentile across the selected universe, before search and display filters." hidden></span></div>
-        <div class="table-actions"><button type="button" class="text-button" id="restore-columns" hidden>Restore columns</button>
+    <div class="notice" id="notice">
+      <div class="notice-copy" role="status" aria-live="polite" aria-atomic="true">
+        <div id="notice-message">Loading the data…</div>
+        <div class="selection-summary" id="selection-summary" hidden><span id="result-count"></span><span id="pool-summary" title="Journals with a percentile among the journals matching the current search and filters (all result pages)." hidden></span><span id="hidden-summary" hidden></span></div>
+      </div>
+      <div class="table-actions" id="selection-actions" hidden><button type="button" class="text-button" id="restore-columns" hidden>Restore columns</button>
           <div class="download-picker">
-            <button type="button" class="download-button" id="download-view" aria-expanded="false" aria-controls="download-options" disabled>Download this selection</button>
+            <button type="button" class="download-button" id="download-view" aria-expanded="false" aria-controls="download-options" disabled>Download selection</button>
             <div class="download-options" id="download-options" role="group" aria-label="Download format" hidden>
               <button type="button" id="download-csv">CSV</button>
               <button type="button" id="download-xlsx">XLSX</button>
             </div>
           </div><span id="download-status" role="status" aria-live="polite"></span></div>
-      </div>
-      <div class="table-scroll" role="region" aria-label="Journal metrics table; scroll for more columns" tabindex="0"><table><caption class="visually-hidden">Journal metrics for the selected citation year and universe</caption><thead id="table-head"></thead><tbody id="table-body"></tbody></table></div>
+    </div>
+    <section class="table-panel panel" aria-label="Journal metrics" aria-busy="true" id="results">
+      <div class="table-scroll" role="region" aria-label="Journal metrics table; scroll for more columns" tabindex="0"><table><caption class="visually-hidden">Journal metrics for the selected citation year and universe</caption><thead id="table-head">
+        <tr class="group-row"><th scope="colgroup" colspan="5" class="meta-group"><span id="initial-table-context">Publications in 2020&ndash;2024 &middot; Cited in 2025 &middot; OpenAlex snapshot 2026-09 &middot; Live metrics</span> <a class="table-help" href="journal-help.html#journal-table" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a></th><th scope="colgroup" colspan="2" class="score-group n">Norwegian Register</th><th scope="colgroup" class="percentile-group">Percentiles &middot; ANS</th></tr>
+        <tr><th scope="col" class="journal-column align-left">Journal title</th><th scope="col" class="align-left">OpenAlex field</th><th scope="col">Publications used</th><th scope="col">Citations used</th><th scope="col">Pubs. w/out refs.</th><th scope="col" class="group-start">NF</th><th scope="col">ANS</th><th scope="col" class="group-start percentile-cell">Field</th></tr>
+      </thead><tbody id="table-body"><tr class="loading-row" aria-hidden="true"><td class="journal-column">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="group-start">&nbsp;</td><td>&nbsp;</td><td class="group-start">&nbsp;</td></tr></tbody></table></div>
       <div class="table-footer"><span id="page-status"></span><div class="pagination"><button id="previous" aria-label="Previous page" disabled>←</button><button id="next" aria-label="Next page" disabled>→</button></div></div>
     </section>
 
     <section class="downloads panel" aria-labelledby="downloads-title"><h2 id="downloads-title">Complete data and code</h2>
-      <p id="download-files">Complete files per year, all columns, and older versions of the data are loading…</p>
-      <p>Complete code to reproduce the metrics and this website will be available in a separate reproducibility repository (coming soon).</p>
+      <p id="download-files">Complete datasets per year, including all columns of the data, are available as CSV, XLSX, and Parquet downloads as DOI-versioned Zenodo <a href="https://doi.org/10.5281/zenodo.23108620" target="_blank" rel="noopener noreferrer">downloads</a>.</p>
+      <p>Complete code to reproduce the metrics and this website: <a href="https://github.com/bread-n-roses/Opindx/tree/main/replication" target="_blank" rel="noopener noreferrer">replication package on GitHub</a> · <a href="https://doi.org/10.5281/zenodo.23108423" target="_blank" rel="noopener noreferrer">versioned software on Zenodo</a>.</p>
     </section>
-    <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></span><span>Open Data · Open Source · Nonprofit · Made at <a href="https://vu.nl/" target="_blank" rel="noopener noreferrer">Vrije Universiteit Amsterdam</a></span></footer>
+    <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a></span><span>Open Data · Open Source · Nonprofit · Made at Vrije Universiteit Amsterdam by Utz Weitzel</span></footer>
   </main>
   <dialog id="journal-dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
   <noscript><p class="noscript">Enable JavaScript to search, filter and sort the journal table.</p></noscript>

@@ -45,7 +45,10 @@ def description(name):
         treatment = name.rsplit('_',1)[1].capitalize()
         return f'{metric}; {universe} universe; {treatment} treatment. Missing is distinct from zero.'
     if name.startswith('publications_'): return 'Articles/reviews in t-5 through t-1; '+name.rsplit('_',1)[1]+' treatment.'
-    if name.startswith('citations_'): return 'Incoming citations in t to the five-year publication window, excluding journal self-citations; '+name.rsplit('_',1)[1]+' treatment.'
+    if name.startswith(('citations_n_', 'citations_oa_')):
+        universe = 'Norwegian Register' if name.startswith('citations_n_') else 'OpenAlex'
+        return f'Incoming citations used by NF/ANS in the {universe} universe in t, to articles/reviews in t-5 through t-1; {name.rsplit("_",1)[1]} treatment; journal self-citations excluded. Null outside the universe; zero is a measured zero.'
+    if name.startswith('citations_'): return 'Recorded incoming citations from all cached citing sources in t to the five-year publication window, excluding journal self-citations; '+name.rsplit('_',1)[1]+' treatment.'
     if name.startswith('oa_field_') and name[-1:] in ['1','2','3']: return 'Field name at descending frequency rank '+name[-1]+'.'
     if name.startswith('oa_field_') and name.endswith('_works'): return 'Classified articles/reviews in '+name.removesuffix('_works')+'.'
     raise ValueError('Undocumented field: '+name)

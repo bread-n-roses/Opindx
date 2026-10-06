@@ -78,3 +78,27 @@ Both releases are now public; see `publication.json`. The prepared archives were
 published without recalculation or payload changes. All public file names, sizes
 and MD5 checksums match; GitHub asset SHA256 checks also pass. The website was
 deployed first and its served assets checked against the tested commit.
+
+## Version 0.2.0: additive count and interface revision (2026-10-06)
+
+- Five annual schema-3 datasets: 552,179 rows, 47 columns. All original 43
+  columns, including every NF/ANS value and missing position, remain exact.
+- New citation counts are derived from receipt-checked canonical graphs and
+  the exact native score universes. Non-self citation totals match each saved
+  solver audit. Publication counts match canonical calculation inputs.
+- `metric-counts-validation.json` records annual input/output hashes and checks.
+- All annual CSV/XLSX cells pass source-Parquet verification using the same
+  exact CSV and 2e-15 XLSX float rules as the initial release.
+- 126 replication Python tests, 12 engine checks, 13 journal-detail checks,
+  27 main-page checks, and 6 website builder tests pass.
+- The local website was rebuilt with all five enriched annual files.
+
+This is additive validation from the approved cached graphs, not a new replay
+from raw Works/Sources. `full-replay.json` still describes version 0.1.0; its
+source inventory must not be presented as validation of this changed version.
+The owner explicitly approved using the completed additive checks instead of
+repeating the full calculation. A fresh replay was started and then stopped at
+the owner's request; it is not claimed as validation. The release gate binds this
+exception to version 0.2.0, the current source hashes, unchanged calculation core,
+and both annual count and format reports. See release-validation.json.
+Browser visual QA remains outstanding: no browser connection was available.

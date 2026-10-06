@@ -1,0 +1,73 @@
+{
+  "status": "PASS",
+  "scope": "Schema-3 additions and exact unchanged prior public columns",
+  "numerical_inputs": [
+    "OpenAlex Works/Sources",
+    "Norwegian Register annual journal metadata"
+  ],
+  "proprietary_benchmark_files_included": false,
+  "raw_register_contact_fields_included": false,
+  "prior_public_audit_sha256": "e8dcad413c000c6c5f02d7a5069d83134b9a705adfb5efaeb130478b7ef72b84",
+  "annual": [
+    {
+      "year": 2022,
+      "rows": 101978,
+      "columns": 47,
+      "original_columns_exact": true,
+      "added_columns": [
+        "citations_n_filtered",
+        "citations_n_raw",
+        "citations_oa_filtered",
+        "citations_oa_raw"
+      ]
+    },
+    {
+      "year": 2023,
+      "rows": 107305,
+      "columns": 47,
+      "original_columns_exact": true,
+      "added_columns": [
+        "citations_n_filtered",
+        "citations_n_raw",
+        "citations_oa_filtered",
+        "citations_oa_raw"
+      ]
+    },
+    {
+      "year": 2024,
+      "rows": 111087,
+      "columns": 47,
+      "original_columns_exact": true,
+      "added_columns": [
+        "citations_n_filtered",
+        "citations_n_raw",
+        "citations_oa_filtered",
+        "citations_oa_raw"
+      ]
+    },
+    {
+      "year": 2025,
+      "rows": 114783,
+      "columns": 47,
+      "original_columns_exact": true,
+      "added_columns": [
+        "citations_n_filtered",
+        "citations_n_raw",
+        "citations_oa_filtered",
+        "citations_oa_raw"
+      ]
+    },
+    {
+      "year": 2026,
+      "rows": 117026,
+      "columns": 47,
+      "original_columns_exact": true,
+      "added_columns": [
+        "citations_n_filtered",
+        "citations_n_raw",
+        "citations_oa_filtered",
+        "citations_oa_raw"
+      ]
+    }
+  ]
+}

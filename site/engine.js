@@ -141,7 +141,7 @@ export function columnValue(row, state, ranks, key) {
   if (key === 'publications_without_references_pct') return withoutReferences(row);
   if (key === 'fieldPct') return ranks.fieldRanks.get(row.openalex_id) ?? null;
   if (key === 'poolPct') return ranks.poolRanks.get(row.openalex_id) ?? null;
-  if (key === 'publications' || key === 'citations') return row[`${key}_${state.treatment}`] ?? null;
+  if (key === 'publications' || key === 'citations') return usedCount(row, state, key);
   if (key.startsWith('score:')) return score(row, state, state.universe, key.split(':')[1]);
   return row[key] ?? null;
 }
@@ -172,3 +172,28 @@ export function view(rows, state, ranks) {
 
 export const searchText = row => row.search ??= [row.openalex_id, row.title, row.issns, row.publisher,
   row.oa_domain, row.oa_field, row.norwegian_area, row.norwegian_field].filter(Boolean).join(' ').toLowerCase();
+
+// Explain excluded matches only while the user is typing a search query.
+// These are notices, never members of the visible selection or ranking pool.
+export function hiddenSearchMatches(rows, state, ranks) {
+  const query = state.query.toLowerCase().trim();
+  if (!query) return [];
+  const fields = new Set(state.fields);
+  const eligible = state.showPercentiles && state.poolOnly && percentileKeys(state).length
+    ? availablePercentiles(state, ranks) : null;
+  return rows.filter(row => searchText(row).includes(query)).map(row => {
+    const reasons = [];
+    if (!row[`in_${state.universe}`]) reasons.push('universe');
+    // Percentile eligibility belongs to the selected universe. Recheck after switching.
+    else if (eligible && !eligible.has(row.openalex_id)) reasons.push('percentiles');
+    if (fields.size && !fields.has(row[FIELD_COLUMN])) reasons.push('fields');
+    if (state.oaOnly && row.is_open_access !== true) reasons.push('access');
+    return {row, reasons};
+  }).filter(match => match.reasons.length).sort((a,b) => compareText(a.row.title,b.row.title));
+}
+
+// Missing per-universe counts must never fall back to broader recorded citations.
+export function usedCount(row, state, kind) {
+  if (!row?.[`in_${state.universe}`]) return null;
+  return row[kind === 'citations' ? `citations_${state.universe}_${state.treatment}` : `publications_${state.treatment}`] ?? null;
+}

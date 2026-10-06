@@ -34,6 +34,7 @@ from build_field_breakdown import aggregate, COUNTS, NAMES
 from build_journal_details_preview import register_details
 import import_run
 from .datasets import digest
+from .metric_counts import from_effective_graph
 
 def read(path):
     return json.loads(Path(path).read_text(encoding='utf-8'))
@@ -209,16 +210,17 @@ def annual(run,year,field_counts,output,*,reference=None):
     details=[register_details(row,roster) for row in result.fillna({'norwegian_register_url':'','norwegian_field':''}).itertuples(index=False)]
     result['norwegian_entries_json']=[x[0] for x in details];result['norwegian_primary_id']=[x[1] for x in details]
     result=result[import_run.COLUMNS+EXTRA_COLUMNS+NAMES+COUNTS+['oa_field_other_works','norwegian_entries_json','norwegian_primary_id']]
+    result=from_effective_graph(result,edges,scores)
     result=result.sort_values('openalex_id',kind='stable').reset_index(drop=True)
     target=output/f'scores_{year}.parquet';result.to_parquet(target,index=False)
     parity=None
     if reference:
         expected=pd.read_parquet(Path(reference)/target.name).sort_values('openalex_id',kind='stable').reset_index(drop=True)
-        pd.testing.assert_frame_equal(result,expected,check_dtype=False,check_exact=False,rtol=1e-12,atol=0)
-        for c in result:
+        pd.testing.assert_frame_equal(result[expected.columns],expected,check_dtype=False,check_exact=False,rtol=1e-12,atol=0)
+        for c in expected:
             if not pd.api.types.is_float_dtype(result[c]):
                 pd.testing.assert_series_equal(result[c],expected[c],check_dtype=False,check_exact=True)
-        parity='PASS: complete identity/metadata/count parity; score relative tolerance 1e-12'
+        parity='PASS: all reference columns match; metadata/counts exact, score relative tolerance 1e-12'
     report={'status':'PASS','year':year,'rows':len(result),'output_sha256':digest(target),'reference_parity':parity,
         'inputs':{k:digest(v) for k,v in inputs.items()},'field_counts_sha256':digest(field_counts),
         'corrections_sha256':profile()['approval_sha256'][str(year)],'solver':json.loads(solver.to_json(orient='records'))}
@@ -257,7 +259,7 @@ def main():
     for year in profile()['years']:
         reports.append(annual(run,year,field_counts,out,reference=args.reference))
         print(str(year)+': PASS',flush=True)
-    manifest={'run':'replication-2026-09','created':'2026-10-02','dummy':False,'schema_version':2,
+    manifest={'run':'replication-2026-09','created':'2026-10-02','dummy':False,'schema_version':3,
         'openalex_snapshot':'2026-09-23','norwegian_register_snapshot':'2026-07-26','years':profile()['years'],
         'universes':{'n':'Norwegian Register','oa':'OpenAlex'},'field_assignment':METHOD,
         'assets':{f'scores_{r["year"]}.parquet':{'sha256':r['output_sha256'],'rows':r['rows'],'bytes':(out/f'scores_{r["year"]}.parquet').stat().st_size} for r in reports}}

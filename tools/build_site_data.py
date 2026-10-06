@@ -92,14 +92,16 @@ def check_run(folder):
         sys.exit(f"{folder.name}: manifest.json says run '{manifest['run']}', but the release is called '{folder.name}'")
     universes = manifest["universes"]
     version = manifest.get("schema_version", 1)
-    if version not in (1, 2):
+    if version not in (1, 2, 3):
         raise ValueError(f"Unsupported data schema version {version}")
     expected = COLUMNS + [f"in_{u}" for u in universes] + [
         f"{metric}_{u}_{treatment}" for u in universes for metric in ("share", "per_article") for treatment in ("raw", "filtered")]
     if manifest.get("field_assignment"):
         expected += FIELD_COLUMNS
-    if version == 2:
+    if version >= 2:
         expected += FIELD_COLUMNS + DETAIL_COLUMNS
+    if version >= 3:
+        expected += [f"citations_{u}_{t}" for u in universes for t in ("raw", "filtered")]
     for year in manifest["years"]:
         path = folder / f"scores_{year}.parquet"
         if not path.exists():
@@ -108,12 +110,25 @@ def check_run(folder):
         if missing:
             sys.exit(f"{folder.name}/{path.name}: missing columns {missing}")
         table = pq.read_table(path)
-        if version == 2:
+        if version >= 2:
             asset = manifest.get("assets", {}).get(path.name, {})
             if (asset.get("sha256") != digest(path) or asset.get("bytes") != path.stat().st_size
                     or asset.get("rows") != len(table)):
                 raise ValueError(f"{folder.name}/{path.name}: manifest integrity check failed")
-        validate_table(table, year, universes, details=version == 2)
+        validate_table(table, year, universes, details=version >= 2)
+        if version >= 3:
+            for u in universes:
+                member = table[f'in_{u}']
+                for t in ('raw','filtered'):
+                    values = table[f'citations_{u}_{t}']
+                    if not pa.types.is_integer(values.type):
+                        raise ValueError('Used citation counts must be integers')
+                    if not pc.all(pc.equal(pc.is_valid(values), member)).as_py():
+                        raise ValueError('Used count missingness must match universe membership')
+                    if not pc.all(pc.fill_null(pc.and_(pc.greater_equal(values, 0), pc.less_equal(values, table[f'citations_{t}'])), True)).as_py():
+                        raise ValueError('Used counts must be nonnegative and no greater than recorded counts')
+                if not pc.all(pc.fill_null(pc.less_equal(table[f'citations_{u}_filtered'], table[f'citations_{u}_raw']), True)).as_py():
+                    raise ValueError('Filtered used citations exceed Raw')
     return manifest
 
 
@@ -131,7 +146,7 @@ def write_history(published, data):
             columns += [f"in_{u}", f"share_{u}_raw", f"share_{u}_filtered", f"per_article_{u}_raw", f"per_article_{u}_filtered"]
         path = data / f"scores_{year['year']}.parquet"
         available = set(pq.read_schema(path).names)
-        columns += [c for c in FIELD_COLUMNS + DETAIL_COLUMNS if c in available]
+        columns += [c for c in FIELD_COLUMNS + DETAIL_COLUMNS + [f"citations_{u}_{t}" for u in year["universes"] for t in ("raw", "filtered")] if c in available]
         tables.append(pq.read_table(path, columns=columns))
     history = pa.concat_tables(tables, promote_options="default")  # years can have different universes
     group = pc.utf8_slice_codeunits(history["openalex_id"], -2)
