@@ -1,5 +1,6 @@
 cff-version: 1.2.0
 message: "Please cite this software using its version DOI."
+doi: "10.5281/zenodo.23187011"
 date-released: 2026-10-06
 title: "Opindx replication: Network Factor and Article Network Score"
 type: software
