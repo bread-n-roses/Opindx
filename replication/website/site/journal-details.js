@@ -109,8 +109,11 @@ export function metricsTable(history, year, state, metrics, annualRanks = new Ma
     if (!r) return `<td colspan="${headings.length - 1 + pct}" class="missing">Not in the data for this year</td>`;
     if (!r[`in_${state.universe}`]) return `<td colspan="${headings.length - 1 + pct}" class="missing">Outside the selected universe this year.</td>`;
     const withoutRefs = E.withoutReferences(r);
+    const referenceBar = E.isNumber(withoutRefs)
+      ? `<span class="coverage-value">${fmt(withoutRefs, 2)}%</span><div class="coverage-track" aria-hidden="true"><div class="coverage-fill" style="width:${Math.max(0, Math.min(100, withoutRefs))}%"></div></div>`
+      : '\u2014';
     let html = `<td>${fmt(E.usedCount(r, state, 'publications'))}</td><td>${fmt(E.usedCount(r, state, 'citations'))}</td>` +
-      `<td>${E.isNumber(withoutRefs) ? `${fmt(withoutRefs, 2)}%` : '—'}</td>` +
+      `<td>${referenceBar}</td>` +
       `<td>${escape(r.norwegian_level ?? '—')}</td>`;
     html += metricKeys.map(metric => {
       const value = E.score(r, state, state.universe, metric), digits = metrics[metric].digits;

@@ -86,10 +86,15 @@ await check('Journal and register labels are escaped', () => {
 
 await check('Annual counts, missing-reference percentage and register level retain their column order', () => {
   const state = {...settings,showPercentiles:false};
-  const table = row => D.metricsTable([[entry(2026),row]],2026,state,metrics);
+  const markup = row => D.metricsTable([[entry(2026),row]],2026,state,metrics);
+  const table = row => markup(row).replace(/<span class="coverage-value">(.*?)<\/span><div class="coverage-track"[^>]*><div class="coverage-fill"[^>]*><\/div><\/div>/g,'$1');
   assert.match(table(meta), /<td>80<\/td><td>0<\/td><td>10.00%<\/td><td>1<\/td>/);
   assert.match(table({...meta,reference_coverage_pct:100}), /<td>0.00%<\/td>/);
   assert.match(table({...meta,reference_coverage_pct:null,norwegian_level:null}), /<td>0<\/td><td>—<\/td><td>—<\/td>/);
+  assert.match(markup(meta), /class="coverage-fill" style="width:10%"/);
+  assert.match(markup({...meta,reference_coverage_pct:100}), /class="coverage-fill" style="width:0%"/);
+  assert.match(markup({...meta,reference_coverage_pct:0}), /class="coverage-fill" style="width:100%"/);
+  assert.doesNotMatch(markup({...meta,reference_coverage_pct:null}), /coverage-track/);
   const labels = [...table(meta).split('</thead>')[0].matchAll(/<th\b[^>]*>(.*?)<\/th>/g)]
     .map(match => match[1].replace(/<[^>]+>/g,''));
   assert.deepEqual(labels,['Citing year','Publications used','Citations used','Publications w/out references','Norwegian Reg. level','NF','ANS']);
