@@ -503,7 +503,7 @@ await check('Help covers main, historical, field-breakdown and About headers', a
   assert.match(h.elements.get('table-head').innerHTML,/journal-help.html#journal-table/);
   assert.match(html,/>Download selection<\/button>/);
   assert.match(html,/>Hide journals without percentiles<\/label>/);
-  assert.match(html,/>VU Amsterdam \(SBE\)<\/option>/);
+  assert.match(html,/>Close to EF &amp; AIS \(select\)<\/option>/);
   assert.match(html,/>Include publications without references \(noisy\)<\/label>/);
 });
 await check('Percentile choices propagate to columns, CSV, filtering and summary counts', async () => {
