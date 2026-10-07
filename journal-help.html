@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A guide to Opindx search, presets, fields, metrics and percentiles.">
+  <meta name="color-scheme" content="light">
+  <title>Journal metrics explained &middot; Opindx</title>
+  <link rel="icon" href="assets/favicon-round.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-round.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css?v=bc94815">
+  <script defer src="section-nav.js?v=bc94815"></script>
+  <script defer src="help.js?v=bc94815"></script>
+  <script data-goatcounter="https://opindx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body class="journal-help">
+  <header class="masthead">
+    <a class="brand" href="index.html"><img class="brand-logo" src="assets/logo.png" width="174" height="58" alt="Op__ind_x"></a>
+    <nav class="nav" aria-label="Pages"><a href="index.html">Journal metrics</a><a href="about.html">About</a><a href="journal-help.html" aria-current="page">Journal help</a></nav>
+  </header>
+  <main class="about">
+    <h1>What is what?</h1>
+    <nav class="help-section-nav" id="help-sections" aria-label="Help sections"><div class="help-section-links"><a href="#search">Search</a><a href="#advanced-settings">Advanced settings</a><a href="#journal-table">Journal table</a><a href="#journal-details">Details</a><a href="#fields-covered">Fields covered</a><a href="#yearly-metrics">Metrics by year</a><a href="#data-versions">Data versions</a></div><button type="button" id="close-help" aria-label="Close help" title="Close help">&times;</button></nav>
+    <section class="panel" aria-labelledby="search">
+      <h2 id="search">Search</h2>
+      <dl>
+        <dt>Citation year and status</dt><dd>Calendar year, whose journal citations (to publications from the preceding five years) enter the score. A live year follows the newest OpenAlex snapshot and can still change. A frozen year always comes from the same, shown OpenAlex snapshot and no longer changes, so it can be cited safely. Twelve months after the end of the score year its status changes from live to frozen. For example, 2025 is updated live with every OpenAlex snapshot until the end of 2026. At that point its status and metrics are frozen.</dd>
+        <dt>Fields</dt><dd>The most frequent primary-topic broad field among the journal's articles and reviews in OpenAlex in the preceding five years. Unclassified journals remain visible and form their own group (unknown).</dd>
+        <dt>Journal universe</dt><dd>OpenAlex includes all journals in the OpenAlex database with at least one available journal network score, offering the broadest coverage. Norwegian Register is restricted to journals classified as <a href="https://kanalregister.hkdir.no/en/informasjonsartikler/levels-and-changes-in-levels" target="_blank" rel="noopener noreferrer">Level 1 or 2</a> in the selected year, with coverage roughly comparable to the SSCI, SCI, AHCI, and ESCI journal lists. Membership alone does not guarantee that every metric is available.</dd>
+        <dt>Preset &middot; Close to EF &amp; AIS</dt><dd>The default preset uses the latest available full citation year, all fields, and filtered metrics in the Norwegian Register universe. ANS Field percentiles require below 90% of publications without references, at least four publication years, and 100% retained per field. Journals without percentiles are hidden. This <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">study</a> supports using filtered metrics and the Norwegian Register; the scores are not numerically identical to EF or AIS.</dd>
+        <dt>Preset &middot; Full coverage (noisy)</dt><dd>Uses filtered metrics in the OpenAlex universe. All exported journals remain visible, including those without percentiles. ANS Field percentiles require below 90% of publications without references, at least four publication years, and 100% retained per field. The broader universe can produce noisier metrics.</dd>
+        <dt>Preset &middot; Close to EF &amp; AIS (select)</dt><dd>Uses Close to EF &amp; AIS with stricter percentile requirements and retains the top 75% per field. Shows Total percentiles.</dd>
+        <dt>Hidden search matches</dt><dd>When you type in the search bar, matching journals excluded by your settings appear after the regular results with their title, field and an explanation. Use the buttons to change the relevant filter. These notices are excluded from result counts and downloads until the journals are revealed.</dd>
+        <dt>Preset &middot; Custom</dt><dd>Custom opens Advanced settings for own adjustment. The +/&minus; Advanced settings link also opens or closes the panel. Reset clears display choices while keeping the citation year.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="advanced-settings">
+      <h2 id="advanced-settings">Advanced settings</h2>
+      <dl>
+        <dt>Show percentiles</dt><dd>Field percentiles are percentiles within the OpenAlex field in the table selection. Total percentiles compare eligible journals retained after applying the percentile settings in the selected universe.</dd>
+        <dt>Ranking indicator</dt><dd>The metric used to rank journals: ANS or NF. Journals need an available value for this metric to receive a percentile.</dd>
+        <dt>Share of publications w/out references</dt><dd>The maximum percentage of publications without recorded OpenAlex references. Below 80% excludes journals with 80% or more missing references. No maximum also includes journals whose percentage is unavailable.</dd>
+        <dt>Years with publications</dt><dd>The minimum number of years with articles or reviews in the preceding five years, including publications without references. At least 4 years requires publications in four or five of those years.</dd>
+        <dt>Retain top % per field</dt><dd>The share of highest-ranked journals retained from each field for Total percentiles. Journals outside this selection can still have a Field percentile. Equal scores receive the same percentile and stay together at the selection cutoff.</dd>
+        <dt>Hide journals without percentiles</dt><dd>Shows only journals with a Field percentile when Field alone is selected, or a Total percentile when Total is selected. None turns this filter off.</dd>
+        <dt>Open access journals only</dt><dd>Restricts the displayed selection to journals marked open access in the OpenAlex source metadata. This describes the journal, rather than the access status of each individual publication.</dd>
+        <dt>Include publications without references (noisy)</dt><dd>Filtered metrics include articles and reviews with at least one reference recorded in OpenAlex. Checking this option uses raw metrics, which also include publications without recorded references. Missing references may reflect incomplete data or publications that genuinely have no references, adding noise to metrics and percentiles. See this <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">study</a> for more details.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="journal-table">
+      <h2 id="journal-table">Journal table</h2>
+      <dl>
+        <dt>Table header</dt><dd>Shows the five publication years and the selected citation year. The snapshot month identifies the OpenAlex data used for this year's metrics. Live metrics may be updated in later releases. Frozen metrics do not change anymore and are tied to the shown OpenAlex snapshot version.</dd>
+        <dt>OpenAlex field</dt><dd>The most frequent primary-topic broad field among the journal's articles and reviews in the preceding five years. The percentage is that field's share of all articles and reviews published by that journal in those years. The field and its percentage use all articles and reviews, including those without references. Unknown means there are no classified publications.</dd>
+        <dt>Publications used</dt><dd>Articles and reviews from the preceding five years used in the selected calculation. Filtered metrics use only publications with recorded references.</dd>
+        <dt>Citations used</dt><dd>Citations in the selected year to those publications, from journals in the selected universe. Journal self-citations are excluded.</dd>
+        <dt>Pubs. w/out refs.</dt><dd>The percentage of publications (articles and reviews) without a recorded OpenAlex reference in the five-year publication window. Missing recorded references can reflect incomplete OpenAlex data as well as publications with no references in reality. A dash indicates an unavailable percentage, including when there are no eligible publications. The percentage is: 100 &times; (Raw publications &minus; Filtered publications) &divide; Raw publications.</dd>
+        <dt>NF &middot; Network Factor</dt><dd>The journal's share of citation-network prestige in the selected universe. Citations are weighted by the prestige of the citing journal. NF sums to 100 across that calculation universe; larger journals can receive a larger share. The Network Factor follows an Eigenfactor&reg;-like methodology.</dd>
+        <dt>ANS &middot; Article Network Score</dt><dd>NF divided by the journal's share of eligible publications in the selected universe. Its publication-weighted mean is 1; an ANS of 2 represents twice that mean. Missing ANS does not imply missing NF. The Article Network Score follows an Article Influence&reg; Score-like methodology.</dd>
+        <dt>Percentiles &middot; Field</dt><dd>The journal's percentile among eligible journals assigned to the same OpenAlex field (after applying the percentile settings). See <a href="#advanced-settings">Advanced Settings</a> for the calculation and tie rules.</dd>
+        <dt>Percentiles &middot; Total</dt><dd>The journal's percentile among all journals retained after applying the percentile settings. See <a href="#advanced-settings">Advanced Settings</a> for the calculation and tie rules.</dd>
+        <dt>General</dt><dd>A dash means that a value is unavailable; a numeric zero is a defined value. Use &times; beside a column header to hide it in the main table. Journal title always remains visible. Restore columns brings back hidden columns. Hiding columns also removes them from selection downloads. It keeps the preset, sort order, filters, percentile calculation and journal popup unchanged. These display choices last for this visit. Reset or reloading the page restores the columns.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="journal-details">
+      <h2 id="journal-details">Details</h2>
+      <dl>
+        <dt>OpenAlex details</dt><dd>A link to the journal's dedicated OpenAlex page, with its OpenAlex data and ID.</dd>
+        <dt>Norwegian Register details</dt><dd>A link to the journal's dedicated Norwegian Register page, with its register data and ID.</dd>
+        <dt>Open access journal</dt><dd>Whether the journal is recorded as open access in the OpenAlex database.</dd>
+        <dt>Publications recorded / used</dt><dd>Recorded counts all articles and reviews in the preceding five years. Used counts those included in the selected Raw or Filtered calculation.</dd>
+        <dt>Citations recorded / used</dt><dd>Recorded counts citations in the selected year to those publications from all available sources. Used counts only citations entering the selected calculation. Both exclude journal self-citations.</dd>
+        <dt>Publication years</dt><dd>The number of years in the five years preceding the citation year in which at least one publication is recorded for the journal.</dd>
+        <dt>Publications w/out references</dt><dd>The percentage of publications (articles and reviews) without a recorded OpenAlex reference in the five-year publication window. Missing recorded references can reflect incomplete OpenAlex data as well as publications with no references in reality. A dash indicates an unavailable percentage, including when there are no eligible publications. The percentage is: 100 &times; (Raw publications &minus; Filtered publications) &divide; Raw publications.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="fields-covered">
+      <h2 id="fields-covered">Fields covered</h2>
+      <dl>
+        <dt>OpenAlex primary fields</dt><dd>The three most frequent primary-topic broad fields among the journal's articles and reviews in the shown five years, with their publication shares. Other fields combines the remaining fields.</dd>
+        <dt>Norwegian Register field</dt><dd>The journal's assigned field in the selected citation year. The Norwegian Register assigns one field to each journal, reviewed annually. This is a journal classification, not a publication percentage.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="yearly-metrics">
+      <h2 id="yearly-metrics">Metrics by year</h2>
+      <dl>
+        <dt>Citing year</dt><dd>The year in which citations are counted, using publications from the preceding five years. The smaller text shows live or frozen status and the OpenAlex snapshot month.</dd>
+        <dt>Publications used</dt><dd>Articles and reviews from the preceding five years used in the selected calculation. Filtered metrics use only publications with recorded references.</dd>
+        <dt>Citations used</dt><dd>Citations in the selected year to those publications, from journals in the selected universe. Journal self-citations are excluded.</dd>
+        <dt>Publications w/out references</dt><dd>The percentage of publications (articles and reviews) without a recorded OpenAlex reference in the five-year publication window. Missing recorded references can reflect incomplete OpenAlex data as well as publications with no references in reality. A dash indicates an unavailable percentage, including when there are no eligible publications. The percentage is: 100 &times; (Raw publications &minus; Filtered publications) &divide; Raw publications.</dd>
+        <dt>Norwegian Reg. level</dt><dd>The journal’s <a href="https://kanalregister.hkdir.no/en/informasjonsartikler/levels-and-changes-in-levels" target="_blank" rel="noopener noreferrer">Norwegian Register level</a> in that year. A dash (—) means no approved level (1 or 2) is available in our data for that year. This may be because the journal is not approved, is not listed, or could not be matched to a register entry.</dd>
+        <dt>NF &middot; Network Factor</dt><dd>The journal's share of citation-network prestige in the selected universe. Citations are weighted by the prestige of the citing journal. NF sums to 100 across that calculation universe; larger journals can receive a larger share. The Network Factor follows an Eigenfactor&reg;-like methodology.</dd>
+        <dt>ANS &middot; Article Network Score</dt><dd>NF divided by the journal's share of eligible publications in the selected universe. Its publication-weighted mean is 1; an ANS of 2 represents twice that mean. Missing ANS does not imply missing NF. The Article Network Score follows an Article Influence&reg; Score-like methodology.</dd>
+        <dt>Pctiles &middot; Field / Total</dt><dd>The journal's percentiles for that year, using the metric named in the heading. See <a href="#advanced-settings">Advanced settings</a>.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="data-versions">
+      <h2 id="data-versions">Data versions</h2>
+      <dl>
+        <dt>Score year</dt><dd>The citation year, using publications from the preceding five years.</dd>
+        <dt>Status</dt><dd>A live year follows the newest OpenAlex snapshot and can still change. A frozen year always comes from the same, shown OpenAlex snapshot and no longer changes, so it can be cited safely. Twelve months after the end of the score year its status changes from live to frozen. For example, 2025 is updated live with every OpenAlex snapshot until the end of 2026. At that point its status and metrics are frozen.</dd>
+        <dt>Data run</dt><dd>The archived release supplying that year's data. The link opens its files.</dd>
+        <dt>OpenAlex snapshot</dt><dd>The month of the official OpenAlex data snapshot used to calculate the metrics.</dd>
+        <dt>Norwegian Register snapshot</dt><dd>The date of the official Norwegian Register data used. Journal membership, fields and levels refer to the selected citation year.</dd>
+      </dl>
+    </section>
+    <footer class="page-footer"><span>Opindx &middot; License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a></span><span>Open Data &middot; Open Source &middot; Nonprofit &middot; Made at Vrije Universiteit Amsterdam by Utz Weitzel</span></footer>
+  </main>
+</body>
+</html>
