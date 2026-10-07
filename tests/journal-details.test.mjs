@@ -20,7 +20,7 @@ const detail = {oa_field_classified_works:3,oa_field_1:'A',oa_field_1_works:1,oa
 
 await check('Metadata order, comma-separated ISSNs, and persistent selected-year register row', () => {
   const rows = D.metadataRows(meta);
-  assert.deepEqual(rows.map(r=>r[0]),['ISSN / Publisher','OpenAlex details','Norwegian Register details','Open access journal','Publications recorded','Citations recorded','Publication years','Share of publications w/out references']);
+  assert.deepEqual(rows.map(r=>r[0]),['ISSN / Publisher','OpenAlex details','Norwegian Register details','Open access journal','Publications recorded','Citations recorded','Publication years','Publications w/out references']);
   assert.equal(rows[0][1],'1111-1111, 2222-2222 / Publisher');
   assert.match(rows[1][1],/>Journal page<\/a> for ID: S20/);
   const absent = D.metadataRows({...meta,in_n:false});
@@ -61,7 +61,7 @@ await check('Grouped percentile header follows the selected indicator and disapp
   const html = D.metricsTable(history,2026,settings,metrics);
   assert.match(html,/scope="colgroup" colspan="2"[^>]*>Pctiles &middot; ANS/);
   assert.match(html,/<th scope="col">Field<\/th><th scope="col">Total<\/th>/);
-  assert.match(html,/rowspan="2"/); assert.match(html,/OA · NR/); assert.match(html,/Citations/);
+  assert.match(html,/rowspan="2"/); assert.doesNotMatch(html,/OA · NR|Journal universe/); assert.match(html,/Citations/);
   assert.doesNotMatch(html,/Ref\. coverage/);
   assert.match(D.metricsTable(history,2026,{...settings,metric:'share'},metrics),/Pctiles &middot; NF/);
   const off = D.metricsTable(history,2026,{...settings,showPercentiles:false},metrics);
@@ -82,6 +82,30 @@ await check('Journal and register labels are escaped', () => {
   assert.match(D.metadataRows({...meta,publisher:'<img src=x>'})[0][1],/&lt;img/);
   const html = D.fieldsTable({...meta,norwegian_field:'<script>'},detail,2026);
   assert.doesNotMatch(html,/<script>/); assert.match(html,/&lt;script&gt;/);
+});
+
+await check('Annual counts, missing-reference percentage and register level retain their column order', () => {
+  const state = {...settings,showPercentiles:false};
+  const table = row => D.metricsTable([[entry(2026),row]],2026,state,metrics);
+  assert.match(table(meta), /<td>80<\/td><td>0<\/td><td>10.00%<\/td><td>1<\/td>/);
+  assert.match(table({...meta,reference_coverage_pct:100}), /<td>0.00%<\/td>/);
+  assert.match(table({...meta,reference_coverage_pct:null,norwegian_level:null}), /<td>0<\/td><td>—<\/td><td>—<\/td>/);
+  const labels = [...table(meta).split('</thead>')[0].matchAll(/<th\b[^>]*>(.*?)<\/th>/g)]
+    .map(match => match[1].replace(/<[^>]+>/g,''));
+  assert.deepEqual(labels,['Citing year','Publications used','Citations used','Publications w/out references','Norwegian Reg. level','NF','ANS']);
+});
+
+await check('Outside-universe and absent-data messages occupy the same year row', () => {
+  const row = {...meta,in_n:false,reference_coverage_pct:26.785714};
+  const table = D.metricsTable([[entry(2022),row]],2026,settings,metrics);
+  assert.doesNotMatch(table, /73.21%|universe-note/);
+  assert.match(table, /<td colspan="8" class="missing">Outside the selected universe this year\.<\/td>/);
+  assert.equal([...table.split('<tbody>')[1].matchAll(/<tr\b/g)].length,1);
+  const oa = D.metricsTable([[entry(2022),row]],2026,{...settings,universe:'oa'},metrics);
+  assert.doesNotMatch(oa, /Outside the selected universe/);
+  assert.match(oa, /73.21%/);
+  const absent = D.metricsTable([[entry(2022),null]],2026,settings,metrics);
+  assert.match(absent, /<td colspan="8" class="missing">Not in the data for this year<\/td>/);
 });
 
 // Exercise the actual asynchronous coordinator with plain test elements (not browser QA).
@@ -181,7 +205,8 @@ await check('Every history row has only the selected percentile columns, includi
       [{...meta,in_n:false},new Map()], [meta,new Map([[2026,{ranks:E.rank([meta],state)}]])]]) {
       const table = D.metricsTable([[entry(2026),row]],2026,state,metrics,ranks);
       const body = table.split('<tbody>')[1];
-      assert.equal([...body.matchAll(/<td\b/g)].length,6+expected,mode);
+      assert.equal([...body.matchAll(/<td\b/g)].length,row.in_n ? 6+expected : 1,mode);
+      if (!row.in_n) assert.ok(body.includes(`colspan="${6+expected}"`));
       assert.equal(table.includes('>Field</th>'),['field','both'].includes(mode));
       assert.equal(table.includes('>Total</th>'),['total','both'].includes(mode));
     }
@@ -189,7 +214,7 @@ await check('Every history row has only the selected percentile columns, includi
     assert.ok(absent.includes(`colspan="${6+expected}"`));
   }
   assert.equal(D.metadataRows(meta).at(-1)[1],'10.00%');
-  assert.equal(D.metadataRows({...meta,reference_coverage_pct:null}).at(-1)[1],'Unavailable');
+  assert.equal(D.metadataRows({...meta,reference_coverage_pct:null}).at(-1)[1],'—');
 });
 
 

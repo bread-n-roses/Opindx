@@ -53,7 +53,7 @@ export function metadataRows(row, state = {universe:'oa',treatment:'filtered'}) 
     ['Publications recorded', `${fmt(row.publications_raw)} &middot; Used in ${escape(state.treatment)} metrics: ${fmt(E.usedCount(row, state, 'publications'))}`],
     ['Citations recorded', `${fmt(row.citations_raw)} &middot; Used in ${escape(state.treatment)} metrics: ${fmt(E.usedCount(row, state, 'citations'))}`],
     ['Publication years', `${fmt(row.active_years)} of 5 with eligible output`],
-    ['Share of publications w/out references', E.isNumber(E.withoutReferences(row)) ? `${fmt(E.withoutReferences(row), 2)}%` : 'Unavailable'],
+    ['Publications w/out references', E.isNumber(E.withoutReferences(row)) ? `${fmt(E.withoutReferences(row), 2)}%` : '—'],
   );
   return result;
 }
@@ -90,8 +90,9 @@ export function universeMembership(row) {
 
 export function metricsTable(history, year, state, metrics, annualRanks = new Map()) {
   const metricKeys = Object.keys(metrics), pctKeys = E.percentileKeys(state), pct = pctKeys.length;
-  const headings = ['Citing year', 'Journal universe', 'Level', 'Publications used', 'Citations used',
-    ...Object.values(metrics).map(m => m.short)];
+  const headings = [['Citing', 'year'], ['Publications', 'used'], ['Citations', 'used'],
+    ['Publications', 'w/out references'], ['Norwegian', 'Reg. level'],
+    ...Object.values(metrics).map(m => [m.short])];
   const percentileCells = (r, entry) => {
     if (!r[`in_${state.universe}`]) return '<td>&mdash;</td>'.repeat(pct);
     const result = annualRanks.get(entry.year);
@@ -106,8 +107,11 @@ export function metricsTable(history, year, state, metrics, annualRanks = new Ma
   };
   const cells = (r, entry) => {
     if (!r) return `<td colspan="${headings.length - 1 + pct}" class="missing">Not in the data for this year</td>`;
-    let html = `<td>${universeMembership(r)}</td><td>${escape(r.norwegian_level ?? '—')}</td>` +
-      `<td>${fmt(E.usedCount(r, state, 'publications'))}</td><td>${fmt(E.usedCount(r, state, 'citations'))}</td>`;
+    if (!r[`in_${state.universe}`]) return `<td colspan="${headings.length - 1 + pct}" class="missing">Outside the selected universe this year.</td>`;
+    const withoutRefs = E.withoutReferences(r);
+    let html = `<td>${fmt(E.usedCount(r, state, 'publications'))}</td><td>${fmt(E.usedCount(r, state, 'citations'))}</td>` +
+      `<td>${E.isNumber(withoutRefs) ? `${fmt(withoutRefs, 2)}%` : '—'}</td>` +
+      `<td>${escape(r.norwegian_level ?? '—')}</td>`;
     html += metricKeys.map(metric => {
       const value = E.score(r, state, state.universe, metric), digits = metrics[metric].digits;
       const formatted = E.isNumber(value) && value > 0 && value < 10 ** -digits ? value.toExponential(2) : fmt(value, digits);
@@ -115,7 +119,7 @@ export function metricsTable(history, year, state, metrics, annualRanks = new Ma
     }).join('');
     return html + (pct ? percentileCells(r, entry) : '');
   };
-  return '<table class="metrics-table"><thead><tr>' + headings.map((h, i) => `<th scope="col"${pct ? ' rowspan="2"' : ''}${i === 0 ? ' class="align-left"' : ''}>${h}</th>`).join('') +
+  return '<table class="metrics-table"><thead><tr>' + headings.map((h, i) => `<th scope="col"${pct ? ' rowspan="2"' : ''}${i === 0 ? ' class="align-left"' : ''}>${h.map(line => `<span class="metric-heading-line">${escape(line)}</span>`).join(' ')}</th>`).join('') +
     (pct ? `<th scope="colgroup" colspan="${pct}" class="percentile-heading">Pctiles &middot; ${escape(metrics[state.metric].short)}</th></tr><tr>${pctKeys.map(key => `<th scope="col">${key === 'fieldPct' ? 'Field' : 'Total'}</th>`).join('')}` : '') +
     '</tr></thead><tbody>' + history.map(([entry, r]) => `<tr class="${entry.year === year ? 'current-year' : ''}">` +
       `<th scope="row" class="align-left">${entry.year}<span class="vintage">${escape(entry.status)} · ${escape((entry.openalex_snapshot ?? '').slice(0, 7))}</span></th>${cells(r, entry)}</tr>`).join('') +

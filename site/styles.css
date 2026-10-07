@@ -215,6 +215,7 @@ dialog .vintage { display: block; font-size: 10px; font-weight: 400; color: var(
 .dialog-table-scroll:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
 #journal-dialog .metrics-table { min-width: 570px }
 #journal-dialog .metrics-table thead th { white-space: normal; min-width: 64px }
+#journal-dialog .metric-heading-line { display: block; white-space: nowrap }
 #journal-dialog .fields-table { table-layout: fixed }
 #journal-dialog .fields-table th, #journal-dialog .fields-table td { white-space: normal; overflow-wrap: anywhere }
 #journal-dialog .fields-table th:last-child, #journal-dialog .fields-table td:last-child { width: 112px }

@@ -497,7 +497,7 @@ await check('Help covers main, historical, field-breakdown and About headers', a
     const label = col.key.endsWith('Pct') ? `Percentiles \u00b7 ${col.label}` : col.label;
     assert.ok(mainHelp.replaceAll('&middot;', '\u00b7').includes(`<dt>${label}`),col.label);
   }
-  for (const header of ['Citing year','Journal universe','Level','Publications used','Citations used','NF','ANS']) assert.ok(section('yearly-metrics').includes(`<dt>${header}`),header);
+  for (const header of ['Citing year','Publications used','Citations used','Publications w/out references','Norwegian Reg. level','NF','ANS']) assert.ok(section('yearly-metrics').includes(`<dt>${header}`),header);
   for (const header of ['OpenAlex primary fields','Norwegian Register field']) assert.ok(section('fields-covered').includes(`<dt>${header}`),header);
   for (const header of ['Score year','Status','Data run','OpenAlex snapshot','Norwegian Register snapshot']) assert.ok(section('data-versions').includes(`<dt>${header}`),header);
   assert.match(h.elements.get('table-head').innerHTML,/journal-help.html#journal-table/);
