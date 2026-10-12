@@ -223,7 +223,7 @@ def write_initial_selection(page, published, current_year=None):
     source = page.read_text(encoding="utf-8")
     source = re.sub(r'(<select id="year">).*?(</select>)',
                     lambda m: m[1] + f'<option value="{year}" selected>{year} ({escape(entry["status"])})</option>' + m[2], source)
-    context = (f'Publications in {year-5}&ndash;{year-1} &middot; Cited in {year}'
+    context = (f'Publications: {year-5}&ndash;{year-1} &middot; Citations: {year}'
                f' &middot; OpenAlex snapshot {escape((entry.get("openalex_snapshot") or "Unknown")[:7])}'
                f' &middot; {escape(entry["status"].capitalize())} metrics')
     source = re.sub(r'(<span id="initial-table-context">).*?(</span>)',

@@ -238,4 +238,21 @@ await check('Recorded and used counts follow universe and treatment without a br
   assert.equal(E.usedCount(row,settings,'citations'),null);
 });
 
+
+await check('Popup percentiles remain annual while the main table averages them', async()=>{
+  const h=harness(true);
+  h.context.state.averagePercentiles=true;
+  h.context.rows.push({openalex_id:'historical-only',title:'Earlier journal',selectedYearMissing:true});
+  let computed=0;
+  h.context.E={...E,rank(rows,state){
+    assert.equal(state.averagePercentiles,false);
+    computed++;
+    return E.rank(rows,state);
+  }};
+  await h.context.showHistory(meta.openalex_id,meta);
+  assert.ok(computed>0);
+  assert.match(h.elements.history.innerHTML,/100\.0/);
+  assert.equal(D.registerLinks({openalex_id:'historical-only',selectedYearMissing:true}),'Unavailable for this year');
+});
+
 console.log(`${passed} journal-details tests passed`);

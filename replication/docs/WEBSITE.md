@@ -54,3 +54,15 @@ Schema 3 data is required to display Citations used. Earlier releases do not
 contain those universe-specific counts; the interface shows a dash rather than
 substituting their broader recorded counts. Use the new annual files for all
 years, including frozen years, without changing historical NF/ANS values.
+
+## Rolling average percentiles (software 0.3.0)
+
+The optional checkbox averages annual percentiles for t-2, t-1 and t after each
+year's filtering and ranking. A selected-year eligible percentile is required,
+separately for Field and Total. Missing earlier percentiles are ignored; no older
+years are substituted and means are not ranked again. NF/ANS, membership and
+other metadata remain selected-year values. Popup history remains annual.
+Close to EF & AIS (select) enables averaging by default where all three datasets
+are available, retaining 75% per field. Selection exports identify the averaging
+period. The school-rule regression checks disappearance without a current-year
+percentile and re-entry using two available percentiles within the calendar window.

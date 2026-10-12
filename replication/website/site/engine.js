@@ -14,11 +14,13 @@ export const field = row => row[FIELD_COLUMN] || 'Unclassified';
 export const FIELD_DETAIL_COLUMNS = ['oa_field_modal_share', 'oa_field_modal_works',
   'oa_field_classified_works', 'oa_field_classification_coverage', 'oa_field_tied_modes'];
 export function fieldLabel(row) {
+  if (row.selectedYearMissing) return '\u2014';
   const label = field(row), share = row.oa_field_modal_share;
   return isNumber(share) && share >= 0 && share <= 1 && label !== 'Unknown'
     ? `${label} (${(100 * share).toFixed(1)}%)` : label;
 }
 export function fieldDescription(row) {
+  if (row.selectedYearMissing) return 'Field unavailable for the selected year.';
   if (!Object.hasOwn(row, 'oa_field_modal_share')) return 'OpenAlex source field from this historical data run.';
   const window = `${row.score_year - 5}-${row.score_year - 1}`;
   const coverage = row.oa_field_classification_coverage;
@@ -123,6 +125,32 @@ export function rank(rows, state) {
     qualified: fieldRanks.size, retained: retained.length, groups: groups.size };
 }
 
+// Annual ranks must be ordered selected year, selected year - 1, selected year - 2.
+// Require a selected-year rank independently for Field and Total. Ignore missing
+// earlier ranks within this window; do not rank the resulting means again.
+export function averageRanks(annualRanks) {
+  const period = annualRanks.slice(0, 3), current = period[0];
+  const mean = key => {
+    const averages = new Map();
+    for (const [id, currentValue] of current?.[key] ?? []) {
+      if (!isNumber(currentValue)) continue;
+      let sum = 0, count = 0;
+      for (const ranks of period) {
+        const value = ranks[key].get(id);
+        if (isNumber(value)) { sum += value; count++; }
+      }
+      averages.set(id, sum / count);
+    }
+    return averages;
+  };
+  const fieldRanks = mean('fieldRanks'), poolRanks = mean('poolRanks');
+  return {fieldRanks, poolRanks, reasons:new Map(current?.reasons ?? []),
+    fieldCounts:new Map(current?.fieldCounts ?? []), groups:current?.groups ?? 0,
+    qualified:fieldRanks.size, retained:poolRanks.size};
+}
+
+export const inViewUniverse = (row, state) => Boolean(row[`in_${state.universe}`]);
+
 // Percentile choices apply to tables, journal history, filters and downloads.
 export function percentileKeys(state) {
   if (state.showPercentiles === false || state.percentileMode === 'none') return [];
@@ -152,7 +180,7 @@ export function view(rows, state, ranks) {
   const query = state.query.toLowerCase().trim();
   const fields = new Set(state.fields);
   const shown = rows.filter(row =>
-    row[`in_${state.universe}`] &&
+    inViewUniverse(row, state, ranks) &&
     (!fields.size || fields.has(row[FIELD_COLUMN])) &&
     (!state.oaOnly || row.is_open_access === true) &&
     (!state.poolOnly || !percentileKeys(state).length || availablePercentiles(state, ranks).has(row.openalex_id)) &&
@@ -183,7 +211,7 @@ export function hiddenSearchMatches(rows, state, ranks) {
     ? availablePercentiles(state, ranks) : null;
   return rows.filter(row => searchText(row).includes(query)).map(row => {
     const reasons = [];
-    if (!row[`in_${state.universe}`]) reasons.push('universe');
+    if (!inViewUniverse(row, state, ranks)) reasons.push('universe');
     // Percentile eligibility belongs to the selected universe. Recheck after switching.
     else if (eligible && !eligible.has(row.openalex_id)) reasons.push('percentiles');
     if (fields.size && !fields.has(row[FIELD_COLUMN])) reasons.push('fields');

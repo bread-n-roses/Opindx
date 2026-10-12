@@ -1,18 +1,19 @@
 // Presets define the metrics and comparison pool. Search/display filters are independent.
 export const PRESETS = Object.freeze({
   full: Object.freeze({universe: 'oa', treatment: 'filtered', showPercentiles: true, percentileMode: 'field',
-    metric: 'per_article', minCoverage: 10, minYears: 4, topPercent: 100, poolOnly: false}),
+    metric: 'per_article', minCoverage: 10, minYears: 4, topPercent: 100, poolOnly: false, averagePercentiles: false}),
   'ef-ais': Object.freeze({universe: 'n', treatment: 'filtered', showPercentiles: true, percentileMode: 'field',
-    metric: 'per_article', minCoverage: 10, minYears: 4, topPercent: 100, poolOnly: true}),
+    metric: 'per_article', minCoverage: 10, minYears: 4, topPercent: 100, poolOnly: true, averagePercentiles: false}),
   'vu-sbe': Object.freeze({universe: 'n', treatment: 'filtered', showPercentiles: true, percentileMode: 'total',
-    metric: 'per_article', minCoverage: 20, minYears: 4, topPercent: 75, poolOnly: true}),
+    metric: 'per_article', minCoverage: 20, minYears: 4, topPercent: 75, poolOnly: true, averagePercentiles: true}),
 });
 export const DEFAULTS = Object.freeze({...PRESETS['ef-ais'], query: '', fields: [],
   oaOnly: false, sortKey: 'score:per_article', sortDirection: -1, page: 0});
 
-export function identifyPreset(state) {
+export function identifyPreset(state, canAverage = true) {
   return Object.entries(PRESETS).find(([, values]) =>
-    Object.entries(values).every(([key, value]) => state[key] === value))?.[0] ?? 'custom';
+    Object.entries(values).every(([key, value]) =>
+      state[key] === (key === 'averagePercentiles' && !canAverage ? false : value)))?.[0] ?? 'custom';
 }
 
 export function startingSelection(years, search = '', now = new Date()) {

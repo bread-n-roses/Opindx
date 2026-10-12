@@ -78,8 +78,8 @@ await check('First load shows headers and one blank row; later loads preserve th
   const initialBody = html.match(/<tbody id="table-body">([\s\S]*?)<\/tbody>/)[1];
   assert.match(html, /<select id="year"><option value="2025" selected>2025 \(live\)<\/option>/);
   assert.match(html, /<select id="universe"><option value="n" selected>Norwegian Register<\/option>/);
-  assert.match(initialHead, /Cited in 2025/);
-  assert.match(initialHead, /Publications in 2020&ndash;2024/);
+  assert.match(initialHead, /Citations: 2025/);
+  assert.match(initialHead, /Publications: 2020&ndash;2024/);
   assert.equal((initialHead.match(/<tr\b/g) || []).length,2);
   assert.equal((initialBody.match(/<tr\b/g) || []).length,1);
   for (const title of ['Journal title','OpenAlex field','Publications used','Citations used','NF','ANS','Field']) assert.ok(initialHead.includes(title));
@@ -90,7 +90,7 @@ await check('First load shows headers and one blank row; later loads preserve th
   const h = harness(url => new Promise(resolve => pending.set(url,resolve)));
   const first = h.api.loadYear(2024);
   assert.equal(h.api.getYear(),undefined);
-  assert.match(h.elements.get('table-head').innerHTML,/Cited in 2024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Citations: 2024/);
   assert.match(h.elements.get('table-head').innerHTML,/Frozen metrics/);
   assert.doesNotMatch(h.elements.get('table-head').innerHTML,/data-sort=|data-hide-column=/);
   assert.equal((h.elements.get('table-body').innerHTML.match(/<tr\b/g)||[]).length,1);
@@ -104,7 +104,7 @@ await check('First load shows headers and one blank row; later loads preserve th
   assert.equal(h.elements.get('table-head').innerHTML,loadedHead);
   assert.equal(h.elements.get('table-body').innerHTML,loadedBody);
   pending.get('data/scores_2025.parquet')({ok:true,arrayBuffer:async()=>records}); await next;
-  assert.match(h.elements.get('table-head').innerHTML,/Cited in 2025/);
+  assert.match(h.elements.get('table-head').innerHTML,/Citations: 2025/);
   assert.doesNotMatch(h.elements.get('table-body').innerHTML,/loading-row/);
 });
 await check('Year and universe can change before the first table; late responses cannot override them', async () => {
@@ -119,7 +119,7 @@ await check('Year and universe can change before the first table; late responses
   h.elements.get('universe').emit('change',{value:'n'});
   assert.match(h.elements.get('table-head').innerHTML,/Norwegian Register/);
   const second = h.elements.get('year').emit('change',{value:'2024'});
-  assert.match(h.elements.get('table-head').innerHTML,/Cited in 2024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Citations: 2024/);
   assert.match(h.elements.get('table-head').innerHTML,/Norwegian Register/);
   pending.get('data/scores_2024.parquet')({ok:true,arrayBuffer:async()=>records}); await second;
   assert.equal(h.api.getYear(),2024);
@@ -128,7 +128,7 @@ await check('Year and universe can change before the first table; late responses
   assert.equal(h.elements.get('preset').disabled,false);
   pending.get('data/scores_2025.parquet')({ok:true,arrayBuffer:async()=>records}); await first;
   assert.equal(h.api.getYear(),2024);
-  assert.match(h.elements.get('table-head').innerHTML,/Cited in 2024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Citations: 2024/);
 });
 await check('Presets, fields and search apply before the first journal table arrives', async () => {
   let resolve;
@@ -170,7 +170,7 @@ await check('A custom filtered view preserves journals missing ANS and renders t
   assert.equal(h.api.getState().minCoverage,20);
   assert.equal(h.api.getState().minYears,4);
   assert.equal(h.api.getState().topPercent,100);
-  assert.match(h.elements.get('table-head').innerHTML,/2020–2024 · Cited in 2025 · OpenAlex snapshot 2026-09 · Live metrics/);
+  assert.match(h.elements.get('table-head').innerHTML,/2020–2024 · Citations: 2025 · OpenAlex snapshot 2026-09 · Live metrics/);
   assert.doesNotMatch(h.elements.get('table-body').innerHTML,/journal-id|1234-5678|openalex\.org/);
 });
 await check('Custom percentile requirements exclude boundary coverage and short histories without hiding journals', async () => {
@@ -204,7 +204,10 @@ await check('Advanced settings opens; presets close it; VU SBE applies 75%, four
   assert.equal(h.elements.get('settings').hidden,true);
   assert.equal(h.elements.get('settings-help').hidden,true);
   const state = h.api.getState();
-  for (const [key,value] of Object.entries(P.PRESETS['vu-sbe'])) assert.equal(state[key],value,key);
+  for (const [key,value] of Object.entries(P.PRESETS['vu-sbe']))
+    assert.equal(state[key],key === 'averagePercentiles' ? false : value,key);
+  assert.equal(h.elements.get('average-percentiles').disabled,true);
+  assert.equal(h.elements.get('preset').value,'vu-sbe');
   assert.equal(h.api.getVisible().length,15);
   assert.match(h.elements.get('table-head').innerHTML,/Percentiles · ANS/);
   assert.equal(h.elements.get('pool-only').checked,true);
@@ -627,4 +630,224 @@ await check('XLSX failure restores downloads and preserves the captured selectio
   assert.equal(h.elements.get('download-view').disabled,false);
   assert.equal(h.api.csv().parts[0].split('\r\n').length,2);
 });
+
+const averageYears=[2026,2025,2024,2023,2022].map(year=>({...years[0],year}));
+const averageRow=(id,score,extra={})=>({...records[2],openalex_id:id,title:`Journal ${id}`,search:undefined,in_n:true,
+  per_article_n_filtered:score,share_n_filtered:score/100,publications_filtered:2025, ...extra});
+const averageData={
+  2025:[averageRow('A',3,{title:'Current A',oa_field:'Economics'}),averageRow('B',4,{reference_coverage_pct:0}),
+    averageRow('C',null,{in_n:false,share_n_filtered:null,oa_field:'Medicine'}),averageRow('D',6)],
+  2024:[averageRow('A',1,{title:'Earlier A'}),averageRow('B',2),averageRow('H',3,{publisher:'Earlier publisher',issns:'old-issn'})],
+  2023:[averageRow('A',99,{reference_coverage_pct:0}),averageRow('B',1),averageRow('C',2)],
+  2022:[averageRow('A',1)],2026:[averageRow('D',8)],
+};
+const averageSettings={...filteredFixture,universe:'n',minCoverage:10,topPercent:50,poolOnly:true};
+const averageFetch=async url=>({ok:true,arrayBuffer:async()=>averageData[Number(url.match(/scores_(\d+)/)[1])].map(row=>({...row}))});
+function averageHarness(fetcher=averageFetch) {
+  const h=harness(fetcher,workbookBytes,averageSettings);
+  h.api.init({years:averageYears},averageSettings);
+  return h;
+}
+await check('Select preset initially loads all three years and defaults to averaged Total percentiles', async()=>{
+  const reads=[];
+  const h=averageHarness(url=>{reads.push(Number(url.match(/scores_(\d+)/)[1]));return averageFetch(url);});
+  h.api.init({years:averageYears},P.PRESETS['vu-sbe']);
+  await h.api.loadYear(2025);
+  assert.deepEqual(reads.sort(),[2023,2024,2025]);
+  assert.equal(h.api.getState().averagePercentiles,true);
+  assert.equal(h.api.getState().topPercent,75);
+  assert.equal(h.elements.get('preset').value,'vu-sbe');
+  assert.equal(h.elements.get('average-percentiles').checked,true);
+  assert.equal(h.elements.get('settings').hidden,true);
+  assert.match(h.elements.get('table-head').innerHTML,/Avg percentiles/);
+  const output=h.api.selectionExport();
+  assert.equal(output.matrix[0].at(-1),'Avg Total percentile (ANS; 2023-2025)');
+  assert.equal(output.matrix.some(row=>row[0]==='Journal B'),false);
+  assert.ok(Math.abs(output.matrix.find(row=>row[0]==='Current A').at(-1) - (50+100/3)/2)<1e-10);
+  assert.equal(h.api.getVisible().length,2);
+});
+await check('Choosing Select during the first load awaits the full averaging period', async()=>{
+  const pending=new Map();
+  const h=averageHarness(url=>new Promise(resolve=>pending.set(url,()=>averageFetch(url).then(resolve))));
+  const initial=h.api.loadYear(2025);
+  const selected=h.elements.get('preset').emit('change',{value:'vu-sbe'});
+  assert.deepEqual([...pending.keys()].sort(),['data/scores_2023.parquet','data/scores_2024.parquet','data/scores_2025.parquet']);
+  assert.equal(h.elements.get('download-view').disabled,true);
+  assert.equal(h.elements.get('settings').hidden,true);
+  pending.get('data/scores_2025.parquet')();
+  await initial;
+  assert.equal(h.api.getYear(),undefined);
+  pending.get('data/scores_2024.parquet')();
+  pending.get('data/scores_2023.parquet')();
+  await selected;
+  assert.equal(h.api.getYear(),2025);
+  assert.equal(h.api.getState().averagePercentiles,true);
+  assert.equal(h.elements.get('preset').value,'vu-sbe');
+  assert.equal(h.api.getVisible().length,2);
+  assert.equal(h.elements.get('download-view').disabled,false);
+});
+await check('Select keeps its name in unavailable years and resumes averaging only while still that preset', async()=>{
+  const h=averageHarness(); await h.api.loadYear(2023);
+  await h.api.applyPreset('vu-sbe');
+  assert.equal(h.api.getState().averagePercentiles,false);
+  assert.equal(h.elements.get('average-percentiles').disabled,true);
+  assert.equal(h.elements.get('preset').value,'vu-sbe');
+  await h.api.loadYear(2024);
+  assert.equal(h.api.getState().averagePercentiles,true);
+  assert.equal(h.elements.get('preset').value,'vu-sbe');
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles: average 2022.2024/);
+  await h.elements.get('average-percentiles').emit('change',{checked:false});
+  assert.equal(h.elements.get('preset').value,'custom');
+  await h.api.loadYear(2025);
+  assert.equal(h.api.getState().averagePercentiles,false);
+  assert.equal(h.elements.get('preset').value,'custom');
+  const sparse=averageHarness(); sparse.api.init({years},P.PRESETS['vu-sbe']);
+  await sparse.api.loadYear(2025);
+  assert.equal(sparse.elements.get('preset').value,'vu-sbe');
+  assert.equal(sparse.api.getState().averagePercentiles,false);
+  await sparse.api.loadYear(2026);
+  assert.equal(sparse.elements.get('preset').value,'vu-sbe');
+  assert.equal(sparse.api.getState().averagePercentiles,true);
+});
+await check('Averaged percentile selection preserves selected-year data, requires current-year eligibility and exports the means', async()=>{
+  const h=averageHarness();await h.api.loadYear(2025);
+  assert.equal(h.api.getVisible().length,2);
+  await h.elements.get('average-percentiles').emit('change',{checked:true});
+  assert.equal(h.api.getState().averagePercentiles,true);
+  assert.equal(h.elements.get('preset').value,'custom');
+  assert.match(h.elements.get('table-head').innerHTML,/Avg percentiles · ANS/);
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles: average 2023–2025/);
+  assert.match(h.elements.get('pool-summary').innerHTML,/<strong>2<\/strong>/);
+  assert.equal(h.api.getVisible().length,2);
+  const out=h.api.selectionExport(),header=out.matrix[0];
+  const col=label=>header.indexOf(label),byTitle=title=>out.matrix.find(r=>r[0]===title);
+  assert.ok(out.filename.includes('avg-percentiles-2023-2025'));
+  assert.ok(Math.abs(byTitle('Current A')[col('Avg Field percentile (ANS; 2023-2025)')] - (50+100/3)/2)<1e-10);
+  assert.equal(byTitle('Current A')[col('ANS')],3);
+  assert.equal(byTitle('Current A')[col('Publications used')],2025);
+  for (const title of ['Journal B','Journal C','Journal H']) assert.equal(byTitle(title),undefined);
+  assert.equal(h.api.getRows().some(r=>r.openalex_id==='H'),false);
+  h.api.update({poolOnly:false});
+  const unhidden=h.api.selectionExport();
+  assert.equal(unhidden.matrix.find(r=>r[0]==='Journal B').at(-1),null);
+  h.api.update({poolOnly:true});
+  assert.doesNotMatch(h.elements.get('table-body').innerHTML,/title="Compared with|Based on .* years/);
+  assert.match(h.api.csv().parts[0],/Avg Field percentile/);
+  const xlsx=await h.api.xlsx(); const book=XLSX.read(xlsx.bytes,{type:'array'});
+  const matrix=XLSX.utils.sheet_to_json(book.Sheets[book.SheetNames[0]],{header:1,defval:null});
+  assert.deepEqual(matrix,Array.from(out.matrix,r=>Array.from(r)));
+  h.api.update({fields:['Economics']});
+  assert.match(h.elements.get('pool-summary').innerHTML,/<strong>2<\/strong>/);
+  assert.equal(h.api.getVisible().some(r=>r.openalex_id==='H'),false);
+  h.api.update({fields:[],percentileMode:'total'});
+  assert.equal(h.api.getVisible().length,1);
+  assert.equal(h.api.getVisible().some(r=>r.openalex_id==='A'),false);
+  const total=h.api.selectionExport();
+  assert.equal(total.matrix.find(r=>r[0]==='Journal D').at(-1),100);
+  await h.api.applyPreset('full');
+  assert.equal(h.api.getState().averagePercentiles,false);
+  assert.equal(h.api.getRows().some(r=>r.openalex_id==='H'),false);
+});
+await check('A journal missing its current percentile disappears and returns with available years inside the calendar window', async()=>{
+  const data={
+    2026:[averageRow('R',2),averageRow('X',1)],
+    2025:[averageRow('R',99,{reference_coverage_pct:0}),averageRow('X',1)],
+    2024:[averageRow('R',1),averageRow('X',2)],
+    2023:[averageRow('R',999),averageRow('X',1)],
+    2022:[],
+  };
+  const h=averageHarness(async url=>({ok:true,arrayBuffer:async()=>data[Number(url.match(/scores_(\d+)/)[1])].map(row=>({...row}))}));
+  await h.api.loadYear(2025);
+  h.api.update({topPercent:100});
+  await h.api.update({averagePercentiles:true});
+  assert.equal(h.api.getVisible().some(row=>row.openalex_id==='R'),false);
+  await h.api.loadYear(2026);
+  const output=h.api.selectionExport();
+  const returned=output.matrix.find(row=>row[0]==='Journal R');
+  assert.equal(returned.at(-1),75); // Mean of 2026 (100) and 2024 (50); omit 2025 and exclude 2023.
+  assert.equal(returned[output.matrix[0].indexOf('ANS')],2);
+  assert.match(h.elements.get('table-head').innerHTML,/Publications: 2021–2025 · Citations: 2026 · Percentiles: average 2024–2026 · OpenAlex snapshot/);
+});
+await check('Averaging label, earliest-year gate, None and Reset remain consistent', async()=>{
+  const h=averageHarness(); await h.api.loadYear(2023);
+  assert.equal(h.elements.get('average-percentiles').disabled,true);
+  await h.api.update({averagePercentiles:true});
+  assert.equal(h.api.getState().averagePercentiles,false);
+  await h.api.loadYear(2024);
+  assert.equal(h.elements.get('average-percentiles').disabled,false);
+  assert.equal(h.elements.get('average-percentiles-label').textContent,'Average percentiles over 2022–2024');
+  await h.api.update({averagePercentiles:true});
+  await h.api.update({percentileMode:'none'});
+  assert.equal(h.api.getState().averagePercentiles,false);
+  assert.equal(h.elements.get('average-percentiles').disabled,true);
+  h.api.update({percentileMode:'field'});
+  await h.api.update({averagePercentiles:true});
+  await h.elements.get('reset').emit('click');
+  assert.equal(h.api.getState().averagePercentiles,false);
+  assert.equal(h.elements.get('average-percentiles').checked,false);
+  const sparse=averageHarness();sparse.api.init({years},averageSettings);await sparse.api.loadYear(2025);
+  assert.equal(sparse.elements.get('average-percentiles').disabled,true);
+});
+await check('Loading failure never substitutes a partial averaging window and retry recovers', async()=>{
+  let fail=true;
+  const h=averageHarness(async url=>{if(fail && url.includes('2023')) throw Error('offline');return averageFetch(url);});
+  await h.api.loadYear(2025);
+  await h.api.update({averagePercentiles:true});
+  assert.equal(h.api.getState().averagePercentiles,false);
+  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/Avg percentiles/);
+  assert.match(h.elements.get('notice-message').textContent,/offline/);
+  fail=false;await h.api.update({averagePercentiles:true});
+  assert.equal(h.api.getVisible().length,2);
+});
+await check('Late average loading cannot overwrite a newer citation year', async()=>{
+  let resolve;
+  const h=averageHarness(url=>url.includes('2023') ? new Promise(done=>{resolve=()=>averageFetch(url).then(done);}) : averageFetch(url));
+  await h.api.loadYear(2025);
+  const old=h.api.update({averagePercentiles:true});
+  assert.equal(h.elements.get('download-view').disabled,true);
+  const latest=h.elements.get('year').emit('change',{value:'2026'});
+  await latest;
+  assert.equal(h.api.getYear(),2026);
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles: average 2024–2026/);
+  resolve();await old;
+  assert.equal(h.api.getYear(),2026);
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles: average 2024–2026/);
+});
+
+
+await check('Averaged ranks respond to metric, universe and treatment without redownloading years', async()=>{
+  let reads=0;
+  const h=averageHarness(async()=>{reads++;return {ok:true,arrayBuffer:async()=>[
+    averageRow('A',1,{share_n_filtered:2,per_article_n_raw:2,per_article_oa_filtered:2}),
+    averageRow('B',2,{share_n_filtered:1,per_article_n_raw:1,per_article_oa_filtered:1}),
+  ]};});
+  await h.api.loadYear(2025);
+  h.api.update({topPercent:100,poolOnly:false});
+  await h.api.update({averagePercentiles:true});
+  const value=()=>h.api.selectionExport().matrix.find(r=>r[0]==='Journal A').at(-1);
+  assert.equal(value(),50);
+  h.api.update({metric:'share'});assert.equal(value(),100);
+  assert.match(h.elements.get('table-head').innerHTML,/Avg percentiles · NF/);
+  h.api.update({metric:'per_article',treatment:'raw'});assert.equal(value(),100);
+  h.api.update({treatment:'filtered',universe:'oa'});assert.equal(value(),100);
+  h.api.update({query:'Journal A'});assert.equal(value(),100);
+  assert.equal(reads,3);
+});
+await check('Averaging can be cancelled during loading without applying partial ranks', async()=>{
+  let release;
+  const h=averageHarness(url=>url.includes('2023')?new Promise(done=>{release=()=>averageFetch(url).then(done);}):averageFetch(url));
+  await h.api.loadYear(2025);
+  const pending=h.api.update({averagePercentiles:true});
+  await h.api.update({averagePercentiles:false});
+  assert.equal(h.api.getVisible().length,2);
+  release();await pending;
+  assert.equal(h.api.getState().averagePercentiles,false);
+  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/Avg percentiles/);
+  assert.equal(h.api.getVisible().length,2);
+  assert.ok(html.indexOf('id="pool-only"')<html.indexOf('id="average-percentiles"'));
+  assert.ok(html.indexOf('id="average-percentiles"')<html.indexOf('class="advanced-general"'));
+  assert.match(html,/Search by \(partial\) journal title, publisher, ISSN, or OpenAlex ID/);
+  assert.match(html,/available as DOI-versioned CSV, XLSX, and Parquet Zenodo/);
+});
+
 console.log(`${passed} main-page tests passed`);

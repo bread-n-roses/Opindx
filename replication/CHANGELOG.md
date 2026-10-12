@@ -1,5 +1,19 @@
 # Changes
 
+## 0.3.0 - 2026-10-12
+
+- Adds optional rolling three-calendar-year averages of annual percentiles.
+- Requires a selected-year eligible percentile independently for Field and Total;
+  missing earlier years are ignored, never counted as zero. Averages are not reranked.
+- Keeps NF/ANS and all other metadata specific to the selected year; annual popup
+  percentiles stay annual. CSV/XLSX selection exports match the displayed averages.
+- Close to EF & AIS (select) enables averaged Total percentiles, retaining 75% per field.
+- Shortens the table context and explains averaging in the journal help page.
+- Includes the full OpenAlex/Norwegian computation workflow and updated website.
+  Calculation code, inputs, corrections and all annual data files remain unchanged.
+- Validated by current website/replication tests and source/archive checks against
+  the existing computation evidence. No new raw-input replay is claimed.
+
 ## 0.2.0 - 2026-10-06
 
 - Adds four universe/treatment citation-input columns; retains all previous values.

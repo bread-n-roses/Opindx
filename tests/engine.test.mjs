@@ -126,4 +126,48 @@ check('Field-only filtering retains valid Field ranks outside the Total pool', (
   equal(E.view(fixture,{...state,percentileMode:'both'},ranks).length,4);
   equal(E.view(fixture,{...state,percentileMode:'none'},ranks).length,8);
 });
+
+check('Average percentiles omit missing ranks independently and do not rerank the means', () => {
+  const ranks = E.averageRanks([
+    {fieldRanks:new Map([['A',80],['B',40],['zero',0]]),poolRanks:new Map([['A',60]])},
+    {fieldRanks:new Map([['B',100],['historical',100]]),poolRanks:new Map([['B',100],['historical',100]])},
+    {fieldRanks:new Map([['A',90],['B',100],['zero',60]]),poolRanks:new Map([['A',100]])},
+  ]);
+  equal(ranks.fieldRanks.get('A'),85); equal(ranks.fieldRanks.get('B'),80);
+  equal(ranks.fieldRanks.get('zero'),30); equal(ranks.poolRanks.get('A'),80);
+  equal(ranks.poolRanks.has('B'),false); equal(ranks.poolRanks.has('zero'),false);
+  equal(ranks.fieldRanks.has('absent'),false); equal(ranks.fieldRanks.has('historical'),false);
+});
+check('Averaging uses each annual field, universe and eligibility before the retained cut', () => {
+  const row = (id,score,field='X',extra={}) => ({openalex_id:id,title:id,oa_field:field,
+    in_n:true,reference_coverage_pct:90,active_years:5,per_article_n_raw:score,...extra});
+  const settings={...base,topPercent:50};
+  const years=[
+    [row('A',1),row('B',2),row('C',3)],
+    [row('A',9,'Y'),row('B',4),row('C',8,'X',{reference_coverage_pct:0})],
+    [row('A',9,'Y',{in_n:false}),row('B',1),row('C',2)],
+  ];
+  const r=E.averageRanks(years.map(data=>E.rank(data,settings)));
+  equal(r.fieldRanks.get('A'),(100/3+100)/2);
+  equal(r.poolRanks.has('A'),false);
+  equal(r.fieldRanks.get('B'),(200/3+100+50)/3);
+  equal(r.poolRanks.get('B'),50);
+  equal(r.fieldRanks.get('C'),100); equal(r.poolRanks.get('C'),100);
+});
+check('Current eligibility, zero percentiles and the strict three-year window control averages', () => {
+  const annual = entries => ({fieldRanks:new Map(entries),poolRanks:new Map(entries)});
+  const r = E.averageRanks([annual([['returns',80],['zero',0],['onlyCurrent',60]]),
+    annual([['historical',100]]),annual([['returns',40]]),annual([['returns',100]])]);
+  equal(r.fieldRanks.get('returns'),60); equal(r.poolRanks.get('returns'),60);
+  equal(r.fieldRanks.get('zero'),0); equal(r.fieldRanks.get('onlyCurrent'),60);
+  equal(r.fieldRanks.has('historical'),false);
+  const absent = E.averageRanks([annual([]),annual([['returns',80]]),annual([['returns',40]])]);
+  equal(absent.fieldRanks.has('returns'),false);
+  const rows = E.prepareRows([journal('returns',7),journal('outside',9,{inN:false})]);
+  const settings={...base,averagePercentiles:true,showPercentiles:true,percentileMode:'field'};
+  const historical = annual([['returns',60],['outside',100]]);
+  equal(E.view(rows,settings,historical).length,1);
+  equal(E.score(rows[0],settings),7);
+});
+
 if (failures) throw new Error(`${failures} test(s) failed`);

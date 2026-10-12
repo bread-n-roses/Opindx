@@ -400,8 +400,8 @@ h1 { font-family: Quicksand,"Segoe UI",sans-serif; font-weight: 600; letter-spac
 #percentile-summary { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 #percentile-choices { display: flex; flex-direction: column; gap: 2px }
 #percentile-picker summary, #percentile-choices .check-line { font-weight: 600 }
-.percentile-settings:disabled .control, .pool-only-line:has(input:disabled) { opacity: .55 }
-.pool-only-line { margin-top: 4px }
+.percentile-settings:disabled .control, .pool-only-line:has(input:disabled), .average-percentiles-line:has(input:disabled) { opacity: .55 }
+.percentile-options { display: flex; flex-wrap: wrap; align-items: center; column-gap: 24px; margin-top: 4px }
 /* Help section links stay available; narrow screens scroll the links horizontally. */
 .help-section-nav { position: sticky; top: 8px; z-index: 8; display: flex; gap: 4px; padding: 4px; margin: 14px 0 16px; background: var(--white); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 3px 8px #2229360c }
 .help-section-links { display: flex; flex-wrap: wrap; flex: 1; min-width: 0; gap: 0 4px }

@@ -112,3 +112,13 @@ creator/affiliations, licenses and the dataset-to-software DOI link passed.
 The website was deployed and verified first. Frozen years 2022-2024 use the
 new schema with unchanged metrics; 2025-2026 remain live. Validation used the
 owner-approved additive exception, preserving the original full replay.
+
+## Software 0.3.0: website averaging update (2026-10-12)
+
+This release updates browser averaging and bundles the unchanged full computation
+workflow. The existing owner-approved additive validation gate remains bound to
+the exact new source inventory, protected baseline calculation files and annual
+count/format evidence. The 0.2.0 validation record is preserved separately.
+Current-year eligibility and the strict three-calendar-year window are covered
+by regression checks, including displayed/exported averages. No new NF/ANS
+recalculation or raw-input replay is claimed; existing annual data retains its DOI.

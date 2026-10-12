@@ -30,6 +30,7 @@ export function registerEntries(row, detail) {
 
 export function registerLinks(row, detail) {
   const ids = registerIds(row);
+  if (row.selectedYearMissing) return 'Unavailable for this year';
   if (!ids.length) return 'Not in Norwegian Register';
   const entries = registerEntries(row, detail);
   const idLink = id => link(registerUrl(id), id,
