@@ -1,6 +1,6 @@
 # Opindx replication package
 
-Version 0.2.0 is published: [10.5281/zenodo.23187011](https://doi.org/10.5281/zenodo.23187011). Creator: Utz Weitzel
+Version 0.3.0 is published: [10.5281/zenodo.23321233](https://doi.org/10.5281/zenodo.23321233). Creator: Utz Weitzel
 (VU Amsterdam; Radboud University Nijmegen). Complete datasets: [versioned Zenodo series](https://doi.org/10.5281/zenodo.23108620).
 See `docs/VALIDATION.md` for measured validation and `docs/publication.json` for release receipts.
 The published source archive and release tags remain unchanged; this branch adds calculation-input citation counts and recorded/used count displays.

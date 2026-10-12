@@ -1,16 +1,16 @@
 {
-  "date": "2026-10-06",
+  "date": "2026-10-12",
   "website": "https://opindx.org",
-  "initial_website_commit": "50bf2744cb0b16e1aa8ebf893b6fdea9d1ad4102",
+  "initial_website_commit": "b2e0959cd7a10fe6d293034880d96a2454409778",
   "software": {
     "kind": "software",
-    "tag": "software-v0.2.0",
-    "record_id": 23187011,
-    "doi": "10.5281/zenodo.23187011",
+    "tag": "software-v0.3.0",
+    "record_id": 23321233,
+    "doi": "10.5281/zenodo.23321233",
     "submitted": true,
     "state": "done",
-    "record_url": "https://zenodo.org/record/23187011",
-    "github": "https://github.com/bread-n-roses/Opindx/releases/tag/software-v0.2.0"
+    "record_url": "https://zenodo.org/record/23321233",
+    "github": "https://github.com/bread-n-roses/Opindx/releases/tag/software-v0.3.0"
   },
   "dataset": {
     "kind": "dataset",
@@ -22,16 +22,15 @@
     "record_url": "https://zenodo.org/record/23187363",
     "github": "https://github.com/bread-n-roses/Opindx/releases/tag/data-2026-09-v3"
   },
-  "validation": "Owner-approved additive checks; original calculation core and all prior values unchanged. No new completed raw-input replay.",
-  "public_file_checks": "All GitHub SHA256 and Zenodo MD5/size checks passed; software DOI linked from dataset metadata; same DOI series as prior versions.",
+  "dataset_changed": false,
+  "validation": "126 replication tests; 15 engine checks, 16 journal-detail checks, 37 main-page checks plus 2 navigation checks; 6 website-builder checks. Archive source parity and GitHub SHA256/Zenodo MD5/size checks passed. Protected computation source and annual data unchanged; no new raw-input replay.",
+  "workflow_runs": {
+    "website": 38273114382,
+    "pages": 38273186917,
+    "zenodo": 38273326763
+  },
+  "public_file_checks": "All six public software files verified; version, creator/affiliations and MIT license checked. Existing annual dataset DOI preserved.",
   "website_visual_browser_qa": false,
-  "ordinary_pushes_publish_zenodo": false,
-  "upload_recovery": {
-    "initial_workflow_cancelled_for_slow_transfer": 37459080614,
-    "local_transfer_interrupted": true,
-    "interrupted_recovery_workflow": 37461342352,
-    "successful_recovery_workflow": 37462978174,
-    "same_dataset_record_reused": 23187363,
-    "payload_changed": false
-  }
+  "website_live_assets_verified": true,
+  "ordinary_pushes_publish_zenodo": false
 }

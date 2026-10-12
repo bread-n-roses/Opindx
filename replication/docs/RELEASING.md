@@ -82,3 +82,13 @@ count/format evidence. The 0.2.0 validation record is preserved separately.
 Current-year eligibility and the strict three-calendar-year window are covered
 by regression checks, including displayed/exported averages. No new NF/ANS
 recalculation or raw-input replay is claimed; existing annual data retains its DOI.
+
+## Publication follow-up: 2026-10-12
+
+Software 0.3.0: https://doi.org/10.5281/zenodo.23321233 .
+GitHub: https://github.com/bread-n-roses/Opindx/releases/tag/software-v0.3.0 .
+Website deployment and live source checks passed before software publication.
+All six GitHub/Zenodo software file hashes and sizes passed verification; creator,
+affiliations, version and MIT license were checked. The computation source and
+annual data did not change. Dataset 2026-09-v3 retains its existing DOI:
+https://doi.org/10.5281/zenodo.23187363 . This is not a new raw-input replay.
