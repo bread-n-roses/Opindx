@@ -164,8 +164,30 @@ export function availablePercentiles(state, ranks) {
 export const withoutReferences = row => isNumber(row.reference_coverage_pct)
   ? 100 - row.reference_coverage_pct : null;
 
+// Optional metadata stays tied to the selected annual row.
+export function registerIds(row) {
+  if (!row.in_n) return [];
+  return [...new Set(String(row.norwegian_register_url ?? '').split(';').flatMap(text => {
+    try {
+      const url = new URL(text.trim()), id = url.searchParams.get('id');
+      return ['http:', 'https:'].includes(url.protocol) && url.hostname === 'kanalregister.hkdir.no' && /^\d+$/.test(id ?? '') ? [id] : [];
+    } catch { return []; }
+  }))];
+}
+export function registerLevel(row) {
+  if (!row.in_n) return null;
+  const levels = [...new Set(String(row.norwegian_level ?? '').split(/[|;,]/).map(s => s.trim()).filter(s => ['1', '2'].includes(s)))];
+  return levels.length === 1 ? Number(levels[0]) : levels.length ? levels.join(', ') : null;
+}
+export function journalIssns(row) {
+  return [...new Set([row.issns, row.issn_l].filter(Boolean).flatMap(value => String(value).split(/[;,\s]+/)).filter(Boolean))].join(' ') || null;
+}
+
 // The value behind a table column, used for display, sorting and CSV export.
 export function columnValue(row, state, ranks, key) {
+  if (key === 'norwegian_register_ids') return registerIds(row).join(', ') || null;
+  if (key === 'norwegian_level') return registerLevel(row);
+  if (key === 'issns') return journalIssns(row);
   if (key === 'publications_without_references_pct') return withoutReferences(row);
   if (key === 'fieldPct') return ranks.fieldRanks.get(row.openalex_id) ?? null;
   if (key === 'poolPct') return ranks.poolRanks.get(row.openalex_id) ?? null;

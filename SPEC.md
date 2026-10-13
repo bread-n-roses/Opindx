@@ -106,7 +106,7 @@ site/data/history/00…99.parquet  all years per group of journals, for the jour
 - Working-paper references link to https://doi.org/10.31235/osf.io/x9b8q_v1 in a new tab with the shared arrow indicator.
 - Table toolbar: selection/member counts and the retained count labelled "journals with percentile". No eligibility or field-group count. The percentile count includes only journals matching the current search and display filters, across all result pages; it cannot exceed the selection count. Display filters do not redefine comparison pools. Download this selection saves CSV/XLSX for the entire selection across all pages, using only columns visible onscreen.
 - Percentile settings place Hide journals without percentiles and Average percentiles over [years] side by side below the dropdowns, wrapping on narrow screens. Show percentiles stays usable when the calculation controls and hide-journals checkbox are disabled. Compact table cell padding, minimum widths and header controls reduce laptop horizontal scrolling without reducing text size; mobile touch targets remain larger.
-- Table header: publication window, citation year, OpenAlex snapshot month, Frozen/Live metrics, and a help link. Metric groups identify the selected universe and Percentiles with ANS or NF. Columns: Journal title, OpenAlex field, Publications used, Citations used, Pubs. w/out refs., NF, ANS; optional Field and Total percentiles. Journal cells show title and more info only.
+- Table header: publication window, citation year, optional Percentiles avg period, OpenAlex data month, help link and Add columns button. Live/frozen status remains in the citation-year dropdown. Metric groups identify the selected universe and Percentiles with ANS or NF. Columns: Journal title, OpenAlex field, Publications used, Citations used, Pubs. w/out refs., NF, ANS; optional Field and Total percentiles. Journal cells show title and more info only.
 - Every main-table column except Journal title has an accessible hide button (×), separate from its sort button. Grouped headers adapt to the remaining columns. Restore columns returns hidden columns. Visibility is a display preference for the visit, preserved through year/preset/filter changes and cleared by Reset or reload. It never changes presets, sort order, percentile calculations, journal filtering or popup columns; selection downloads follow the visible columns.
 - Percentiles retain the existing empirical-CDF/tie rules and use the selected universe and OpenAlex broad field. No pooling of small fields. Pool-only affects display only when percentiles are enabled. Year changes ignore stale responses and restore the prior selection on failure.
 - Journal details retain the local redesign described below. Percentiles in the popup use each historical year's own population with the current ranking settings.
@@ -262,3 +262,27 @@ New counts are additive; preserve every old value, row and existing DOI version.
 ## Three-year average percentiles
 
 The optional Advanced settings checkbox averages annual Field and Total percentiles independently over t-2 through t. First apply each year's chosen universe, raw/filtered treatment, ranking metric, reference-coverage and publication-history requirements, and retained top share. Average the available ranks by OpenAlex source ID; omit missing years and do not rerank the resulting means. An eligible selected-year percentile is required independently for Field and Total; earlier missing years are ignored within the strict three-calendar-year window. Annual NF/ANS and all non-percentile values remain those of t; never backfill metadata or counts from earlier years. Search, field and open-access filters use selected-year metadata. Only selected-year rows and universe membership enter the displayed table; earlier eligibility cannot make a currently ineligible journal receive an averaged percentile. Hide-without-percentiles and result counts follow the selected averaged Field/Total output. Popup history always uses annual scores and annual ranks. Close to EF & AIS (select) enables averaging by default when available; the other named presets and Reset disable it. None disables it too. Preserve the select preset label while averaging is unavailable; restore its averaging default when moving to a supported year. Require t >= 2024 and three published annual files; fetch failures must not silently shorten the period. Selection CSV/XLSX exports use the displayed means and identify the period in headers/filenames. No new tooltip is added to averaged percentile cells.
+
+## Optional journal columns
+
+Add columns next to What is what? in the journal table header opens a checkbox
+dialog selecting publication years,
+recorded publications/citations, OpenAlex ID, Norwegian Register IDs/level and
+space-separated ISSNs, in that order. Append selected columns after percentiles
+under Additional columns. Column choices are display preferences for the visit,
+independent of presets and ranks; retain them across year/preset changes and
+clear them on Reset. Hide/Restore respects selected optional and percentile
+columns. Sort and selection CSV/XLSX downloads use the same selected-year values.
+IDs link to journal pages in new tabs; Norwegian IDs/approved levels are absent
+outside selected-year register membership. ISSNs wrap without truncation.
+
+Column checkboxes apply immediately while the dialog remains open. Done, the
+close cross and native Escape close it; focus returns to the current table
+button even after rerendering. Mobile checkboxes have 44px touch rows.
+
+Optional column popup/help and CSV/XLSX headers use full names; table headers
+retain their compact names. Add columns counts only visible additional columns.
+Closing an additional column unchecks it in the popup; Restore restores the
+previously chosen additions and updates the counter. Unchecking a column in the
+popup removes it from that chosen set. The help anchor starts at Publication
+years without a separate Add columns definition.

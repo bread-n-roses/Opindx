@@ -33,6 +33,25 @@ function annualFile(selectedYear) {
 }
 // A display preference for this visit; never part of a preset or ranking pool.
 const hiddenColumns = new Set();
+const addedColumns = new Set();
+const OPTIONAL_COLUMNS = [
+  {key:'active_years', label:'Publ. years', downloadLabel:'Publication years', title:'Years with recorded publications in the preceding five years'},
+  {key:'publications_raw', label:'Publ. recorded', downloadLabel:'Publications recorded', title:'All recorded articles and reviews in the preceding five years'},
+  {key:'citations_raw', label:'Citations recorded', title:'Recorded non-self citations from all available sources'},
+  {key:'openalex_id', label:'OpenAlex ID', text:true, title:'OpenAlex journal ID and journal page'},
+  {key:'norwegian_register_ids', label:'Norw. Reg. ID', downloadLabel:'Norwegian Register ID', text:true, title:'Norwegian Register journal IDs for the selected year'},
+  {key:'norwegian_level', label:'Norw. Reg. level', downloadLabel:'Norwegian Register level', title:'Approved Norwegian Register level in the selected year'},
+  {key:'issns', label:'ISSNs', text:true, title:'All available journal ISSNs'},
+];
+function syncAddedColumns() {
+  let shown = 0;
+  for (const col of OPTIONAL_COLUMNS) {
+    const visible = addedColumns.has(col.key) && !hiddenColumns.has(col.key);
+    $(`add-${col.key}`).checked = visible;
+    if (visible) shown++;
+  }
+  $('add-columns-summary').textContent = shown ? `${shown} selected` : 'None';
+}
 const filterValues = {fields: []};
 const historyFiles = new Map();
 let historyRequest = 0;
@@ -149,17 +168,23 @@ function getColumns(entry = publishedYear()) {
   for (const key of E.percentileKeys(state)) cols.push(key === 'fieldPct'
     ? {key, label:'Field', className:'group-start percentile-cell', title:'Percentile within the assigned field, after eligibility requirements'}
     : {key, label:'Total', className:'percentile-cell', title:'Percentile among all retained journals; 100 is highest'});
+  for (const col of OPTIONAL_COLUMNS.filter(col => addedColumns.has(col.key))) cols.push({...col, extra:true,
+    className:`${col.text ? 'align-left ' : ''}${col.key === 'issns' ? 'issns-cell ' : ''}${cols.some(item => item.extra) ? '' : 'group-start'}`});
   return cols;
 }
 function renderHead(entry = publishedYear(), headerColumns = columns, interactive = true) {
+  syncAddedColumns();
   const month = (entry.openalex_snapshot ?? '').slice(0, 7) || 'unknown';
   const scoreCount = headerColumns.filter(col => col.score).length;
   const pctCount = headerColumns.filter(col => col.key.endsWith('Pct')).length;
-  const profileCount = headerColumns.length - scoreCount - pctCount;
-  const groups = `<th scope="colgroup" colspan="${profileCount}" class="meta-group"><span>Publications: ${entry.year - 5}–${entry.year - 1} · Citations: ${entry.year}${state.averagePercentiles ? ` · Percentiles: average ${entry.year - 2}–${entry.year}` : ''} · OpenAlex snapshot ${escape(month)} · ${entry.status === 'frozen' ? 'Frozen' : 'Live'} metrics</span> ` +
-    '<a class="table-help" href="journal-help.html#journal-table" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a></th>' +
+  const extraCount = headerColumns.filter(col => col.extra).length;
+  const profileCount = headerColumns.length - scoreCount - pctCount - extraCount;
+  const groups = `<th scope="colgroup" colspan="${profileCount}" class="meta-group"><span>Publications: ${entry.year - 5}–${entry.year - 1} · Citations: ${entry.year}${state.averagePercentiles ? ` · Percentiles avg: ${entry.year - 2}–${entry.year}` : ''} · OpenAlex data: ${escape(month)}</span> ` +
+    '<a class="table-help" href="journal-help.html#journal-table" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a>' +
+    `<button type="button" class="text-button table-help add-columns-trigger" data-add-columns aria-haspopup="dialog" aria-controls="columns-dialog"${index ? '' : ' disabled'}>Add columns${extraCount ? ` (${extraCount})` : ''}</button></th>` +
     (scoreCount ? `<th scope="colgroup" colspan="${scoreCount}" class="score-group ${escape(state.universe)}">${escape(entry.universes[state.universe] ?? state.universe.toUpperCase())}</th>` : '') +
-    (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">${state.averagePercentiles ? 'Avg percentiles' : 'Percentiles'} · ${METRICS[state.metric].short}</th>` : '');
+    (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">${state.averagePercentiles ? 'Avg percentiles' : 'Percentiles'} · ${METRICS[state.metric].short}</th>` : '') +
+    (extraCount ? `<th scope="colgroup" colspan="${extraCount}" class="extra-group group-start">Additional columns</th>` : '');
   const headers = headerColumns.map(col => {
     if (!interactive) return `<th scope="col" class="${col.className || ''}">${col.label}</th>`;
     const sorted = state.sortKey === col.key;
@@ -184,6 +209,15 @@ function cell(row, col) {
   if (col.key === 'title') return `<td class="journal-column"><span class="journal-title">${escape(row.title)}</span> ` +
     `<button type="button" class="text-button more-info" data-journal="${escape(id)}" aria-label="More info about ${escape(row.title)}">more info</button></td>`;
   if (col.key === 'oa_field') return `<td class="field-cell" title="${escape(E.fieldDescription(row))}">${escape(E.fieldLabel(row))}</td>`;
+  if (col.extra) {
+    const link = (url, label) => `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${escape(label)}</a>`;
+    const text = col.key === 'openalex_id' && value
+      ? link(`https://openalex.org/${encodeURIComponent(value)}`, value)
+      : col.key === 'norwegian_register_ids' && value
+        ? E.registerIds(row).map(id => link(`https://kanalregister.hkdir.no/en/tidsskrift?id=${id}`, id)).join(', ')
+        : typeof value === 'string' ? escape(value) : fmt(value);
+    return `<td class="${col.className || ''} ${value == null ? 'missing' : ''}">${text}</td>`;
+  }
   if (col.key === 'publications_without_references_pct') {
     const low = state.showPercentiles && E.isNumber(value) && state.minCoverage >= 0 && value >= 100 - state.minCoverage;
     const bar = E.isNumber(value) ? `<div class="coverage-track" aria-hidden="true"><div class="coverage-fill" style="width:${Math.max(0, Math.min(100, value))}%"></div></div>` : '';
@@ -294,6 +328,7 @@ function drawFilter(key) {
     (values.length ? '' : '<p class="hint">No fields available.</p>');
 }
 function syncControls() {
+  syncAddedColumns();
   for (const [id, key] of Object.entries(SELECTS)) $(id).value = state[key];
   for (const [id, key] of Object.entries(CHECKBOXES)) $(id).checked = state[key];
   if (!loading && year != null) $('year').value = year;
@@ -492,7 +527,7 @@ function selectionExport() {
       }},
     ];
     const label = col.key.endsWith('Pct')
-      ? `${state.averagePercentiles ? 'Avg ' : ''}${col.label} percentile (${METRICS[state.metric].short}${state.averagePercentiles ? `; ${year - 2}-${year}` : ''})` : col.label;
+      ? `${state.averagePercentiles ? 'Avg ' : ''}${col.label} percentile (${METRICS[state.metric].short}${state.averagePercentiles ? `; ${year - 2}-${year}` : ''})` : (col.downloadLabel ?? col.label);
     return [{label, value:row => E.columnValue(row, state, ranks, col.key)}];
   });
   const header = downloadColumns.map(col => col.label);
@@ -548,12 +583,27 @@ $('top-percent').addEventListener('change', event => {
 $('universe').addEventListener('change', event => update({universe:event.target.value}));
 $('preset').addEventListener('change', event => applyPreset(event.target.value));
 $('settings-toggle').addEventListener('click', () => toggleSettings($('settings').hidden));
+$('add-columns-choices').addEventListener('change', event => {
+  const key = event.target.value;
+  if (!OPTIONAL_COLUMNS.some(col => col.key === key)) return;
+  if (event.target.checked) addedColumns.add(key); else addedColumns.delete(key);
+  hiddenColumns.delete(key);
+  syncAddedColumns();
+  if (loading && year != null) return;
+  if (year == null) renderInitialTable(Number($('year').value)); else render();
+});
 $('percentile-choices').addEventListener('change', event => {
   if (event.target.id === 'percentiles-none') { update({percentileMode:'none'}); return; }
   const field = $('percentiles-field').checked, total = $('percentiles-total').checked;
   update({percentileMode:field && total ? 'both' : field ? 'field' : total ? 'total' : 'none'});
 });
 $('table-head').addEventListener('click', event => {
+  if (event.target.closest('[data-add-columns]')) {
+    if (!index) return;
+    syncAddedColumns();
+    $('columns-dialog').showModal();
+    return;
+  }
   if (loading) return;
   const hideKey = event.target.closest('[data-hide-column]')?.dataset.hideColumn;
   if (hideKey) {
@@ -567,9 +617,13 @@ $('table-head').addEventListener('click', event => {
   }
   const key = event.target.closest('[data-sort]')?.dataset.sort;
   if (!key) return;
-  const textColumn = ['title','oa_field'].includes(key);
+  const textColumn = ['title','oa_field'].includes(key) || OPTIONAL_COLUMNS.find(col => col.key === key)?.text;
   update({sortKey:key, sortDirection:state.sortKey === key ? -state.sortDirection : textColumn ? 1 : -1});
   $('table-head').querySelector(`[data-sort="${key}"]`)?.focus({preventScroll:true});
+});
+for (const id of ['columns-close', 'columns-done']) $(id).addEventListener('click', () => $('columns-dialog').close());
+$('columns-dialog').addEventListener('close', () => {
+  $('table-head').querySelector('[data-add-columns]')?.focus({preventScroll:true});
 });
 $('restore-columns').addEventListener('click', () => {
   hiddenColumns.clear(); render();
@@ -630,6 +684,7 @@ $('reset').addEventListener('click', () => {
   const targetYear = pendingYear ?? year ?? Number($('year').value);
   explicitCustom = false;
   hiddenColumns.clear();
+  addedColumns.clear();
   state = {...P.DEFAULTS, fields:[]};
   const ids = Object.keys(index.years.find(entry => entry.year === (year ?? Number($('year').value))).universes);
   if (!ids.includes(state.universe)) state.universe = ids[0];

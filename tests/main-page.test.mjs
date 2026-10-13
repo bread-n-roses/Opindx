@@ -37,6 +37,7 @@ function harness(fetchOverride, workbookWriter = workbookBytes, initialSettings 
       setAttribute(key,value) { this.attrs[key] = value; },
       querySelector(key) { if (!this.children.has(key)) this.children.set(key, element(key)); return this.children.get(key); },
       focus() {}, contains(target) { return target === this; },
+      showModal() { this.open = true; }, close() { this.open = false; this.events.close?.(); },
       emit(type, changes = {}) { Object.assign(this, changes); return this.events[type]?.({target:this}); },
     };
   }
@@ -91,7 +92,7 @@ await check('First load shows headers and one blank row; later loads preserve th
   const first = h.api.loadYear(2024);
   assert.equal(h.api.getYear(),undefined);
   assert.match(h.elements.get('table-head').innerHTML,/Citations: 2024/);
-  assert.match(h.elements.get('table-head').innerHTML,/Frozen metrics/);
+  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/Frozen metrics|Live metrics/);
   assert.doesNotMatch(h.elements.get('table-head').innerHTML,/data-sort=|data-hide-column=/);
   assert.equal((h.elements.get('table-body').innerHTML.match(/<tr\b/g)||[]).length,1);
   assert.equal(h.elements.get('selection-actions').hidden,true);
@@ -170,7 +171,7 @@ await check('A custom filtered view preserves journals missing ANS and renders t
   assert.equal(h.api.getState().minCoverage,20);
   assert.equal(h.api.getState().minYears,4);
   assert.equal(h.api.getState().topPercent,100);
-  assert.match(h.elements.get('table-head').innerHTML,/2020–2024 · Citations: 2025 · OpenAlex snapshot 2026-09 · Live metrics/);
+  assert.match(h.elements.get('table-head').innerHTML,/2020–2024 · Citations: 2025 · OpenAlex data: 2026-09/);
   assert.doesNotMatch(h.elements.get('table-body').innerHTML,/journal-id|1234-5678|openalex\.org/);
 });
 await check('Custom percentile requirements exclude boundary coverage and short histories without hiding journals', async () => {
@@ -695,7 +696,7 @@ await check('Select keeps its name in unavailable years and resumes averaging on
   await h.api.loadYear(2024);
   assert.equal(h.api.getState().averagePercentiles,true);
   assert.equal(h.elements.get('preset').value,'vu-sbe');
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles: average 2022.2024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2022.2024/);
   await h.elements.get('average-percentiles').emit('change',{checked:false});
   assert.equal(h.elements.get('preset').value,'custom');
   await h.api.loadYear(2025);
@@ -716,7 +717,7 @@ await check('Averaged percentile selection preserves selected-year data, require
   assert.equal(h.api.getState().averagePercentiles,true);
   assert.equal(h.elements.get('preset').value,'custom');
   assert.match(h.elements.get('table-head').innerHTML,/Avg percentiles · ANS/);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles: average 2023–2025/);
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2023–2025/);
   assert.match(h.elements.get('pool-summary').innerHTML,/<strong>2<\/strong>/);
   assert.equal(h.api.getVisible().length,2);
   const out=h.api.selectionExport(),header=out.matrix[0];
@@ -766,7 +767,7 @@ await check('A journal missing its current percentile disappears and returns wit
   const returned=output.matrix.find(row=>row[0]==='Journal R');
   assert.equal(returned.at(-1),75); // Mean of 2026 (100) and 2024 (50); omit 2025 and exclude 2023.
   assert.equal(returned[output.matrix[0].indexOf('ANS')],2);
-  assert.match(h.elements.get('table-head').innerHTML,/Publications: 2021–2025 · Citations: 2026 · Percentiles: average 2024–2026 · OpenAlex snapshot/);
+  assert.match(h.elements.get('table-head').innerHTML,/Publications: 2021–2025 · Citations: 2026 · Percentiles avg: 2024–2026 · OpenAlex data:/);
 });
 await check('Averaging label, earliest-year gate, None and Reset remain consistent', async()=>{
   const h=averageHarness(); await h.api.loadYear(2023);
@@ -808,10 +809,10 @@ await check('Late average loading cannot overwrite a newer citation year', async
   const latest=h.elements.get('year').emit('change',{value:'2026'});
   await latest;
   assert.equal(h.api.getYear(),2026);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles: average 2024–2026/);
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2024–2026/);
   resolve();await old;
   assert.equal(h.api.getYear(),2026);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles: average 2024–2026/);
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2024–2026/);
 });
 
 
@@ -848,6 +849,107 @@ await check('Averaging can be cancelled during loading without applying partial 
   assert.ok(html.indexOf('id="average-percentiles"')<html.indexOf('class="advanced-general"'));
   assert.match(html,/Search by \(partial\) journal title, publisher, ISSN, or OpenAlex ID/);
   assert.match(html,/available as DOI-versioned CSV, XLSX, and Parquet Zenodo/);
+});
+
+
+const addColumn = (h, key, checked = true) => h.elements.get('add-columns-choices').events.change({target:{value:key,checked}});
+await check('Optional metadata columns keep their order, selected-year values, safe links and CSV/XLSX output', async () => {
+  const sample=[{...records[0],publications_raw:326,citations_raw:1000,publications_filtered:1,citations_n_filtered:27,
+    issns:'1234-5678; 8765-4321; 1234-5678',issn_l:'1234-5678',
+    norwegian_register_url:'https://kanalregister.hkdir.no/tidsskrift?id=123; https://kanalregister.hkdir.no/en/tidsskrift?id=456; https://evil.example/tidsskrift?id=999',norwegian_level:'1|2'},
+    {...records[1],in_n:false,publications_raw:0,citations_raw:0,norwegian_level:'0',
+      norwegian_register_url:'https://kanalregister.hkdir.no/tidsskrift?id=789',issns:'1111-1111 <script>'}];
+  const h=harness(async()=>({ok:true,arrayBuffer:async()=>sample}),workbookBytes,P.PRESETS.full);await h.api.loadYear(2025);
+  const original=h.api.selectionExport().matrix[0],calls=h.rankCalls();
+  const keys=['active_years','publications_raw','citations_raw','openalex_id','norwegian_register_ids','norwegian_level','issns'];
+  const labels=['Publication years','Publications recorded','Citations recorded','OpenAlex ID','Norwegian Register ID','Norwegian Register level','ISSNs'];
+  for(const key of [...keys].reverse()) addColumn(h,key);
+  assert.deepEqual(Array.from(h.api.selectionExport().matrix[0]),[...original,...labels]);
+  assert.equal(h.rankCalls(),calls);
+  assert.equal(h.elements.get('preset').value,'full');
+  assert.equal(h.elements.get('add-columns-summary').textContent,'7 selected');
+  assert.match(h.elements.get('table-head').innerHTML,/colspan="7" class="extra-group group-start">Additional columns/);
+  const exported=h.api.selectionExport(),row=exported.matrix.find(r=>r[0]==='Journal 00');
+  const value=label=>row[exported.matrix[0].indexOf(label)];
+  assert.equal(value('Publication years'),5);assert.equal(value('OpenAlex ID'),'S0');
+  assert.equal(value('Publications used'),1);assert.equal(value('Publications recorded'),326);
+  assert.equal(value('Citations used'),0);assert.equal(value('Citations recorded'),1000);
+  assert.equal(value('Norwegian Register ID'),'123, 456');assert.equal(value('Norwegian Register level'),'1, 2');
+  assert.equal(value('ISSNs'),'1234-5678 8765-4321');
+  const outside=exported.matrix.find(r=>r[0]==='Journal 01');
+  assert.equal(outside[exported.matrix[0].indexOf('Publications recorded')],0);
+  assert.equal(outside[exported.matrix[0].indexOf('Norwegian Register ID')],null);
+  assert.equal(outside[exported.matrix[0].indexOf('Norwegian Register level')],null);
+  const body=h.elements.get('table-body').innerHTML;
+  assert.match(body,/href="https:\/\/openalex.org\/S0" target="_blank" rel="noopener noreferrer">S0/);
+  assert.match(body,/href="https:\/\/kanalregister.hkdir.no\/en\/tidsskrift\?id=123"/);
+  assert.doesNotMatch(body,/evil.example|<script>/);assert.match(body,/&lt;script&gt;/);
+  const xlsx=await h.api.xlsx(),book=XLSX.read(xlsx.bytes,{type:'array'});
+  assert.deepEqual(XLSX.utils.sheet_to_json(book.Sheets[book.SheetNames[0]],{header:1,defval:null}),Array.from(exported.matrix,r=>Array.from(r)));
+  assert.ok(h.api.csv().parts[0].split('\r\n')[0].endsWith(labels.map(label=>JSON.stringify(label)).join(',')));
+  const help=readFileSync(new URL('../site/journal-help.html',import.meta.url),'utf8');
+  for(const label of labels)assert.ok(help.replace(/<dt[^>]*>/g,'<dt>').includes(`<dt>${label}</dt>`),label);
+  assert.deepEqual(Array.from(h.api.getDisplayColumns().filter(c=>c.extra),c=>c.label),['Publ. years','Publ. recorded','Citations recorded','OpenAlex ID','Norw. Reg. ID','Norw. Reg. level','ISSNs']);
+  for(const label of labels)assert.ok(html.includes(`>${label}</label>`),label);
+  assert.doesNotMatch(help,/Opens the checkbox popup next to What is what/);
+});
+await check('Added columns persist across years and presets; hide/restore obeys selections and Reset clears them', async () => {
+  const h=harness();await h.api.loadYear(2025);
+  addColumn(h,'openalex_id');addColumn(h,'issns');
+  hide(h,'issns');
+  assert.equal(h.api.selectionExport().matrix[0].includes('ISSNs'),false);
+  assert.equal(h.elements.get('add-issns').checked,false);
+  assert.equal(h.elements.get('add-columns-summary').textContent,'1 selected');
+  assert.match(h.elements.get('table-head').innerHTML,/>Add columns \(1\)<\/button>/);
+  await h.api.applyPreset('ef-ais');await h.api.loadYear(2024);
+  assert.equal(h.api.getColumns().some(c=>c.key==='openalex_id'),true);
+  addColumn(h,'openalex_id',false);
+  h.elements.get('restore-columns').emit('click');
+  const labels=h.api.selectionExport().matrix[0];
+  assert.equal(labels.includes('ISSNs'),true);assert.equal(labels.includes('OpenAlex ID'),false);
+  assert.equal(h.elements.get('add-issns').checked,true);
+  assert.equal(h.elements.get('add-columns-summary').textContent,'1 selected');
+  assert.equal(labels.some(v=>v.includes('Total percentile')),false);
+  const calls=h.rankCalls();
+  h.elements.get('table-head').events.click({target:{closest(selector){return selector==='[data-sort]'?{dataset:{sort:'issns'}}:null;}}});
+  assert.equal(h.api.getState().sortKey,'issns');assert.equal(h.rankCalls(),calls);
+  h.elements.get('reset').emit('click');
+  assert.equal(h.elements.get('add-columns-summary').textContent,'None');
+  assert.equal(h.api.getColumns().some(c=>c.extra),false);
+  assert.equal(h.elements.get('add-issns').checked,false);
+});
+
+
+await check('The table column popup applies choices immediately and closes with Done or the cross', async () => {
+  const h=harness();await h.api.loadYear(2025);
+  const open=()=>h.elements.get('table-head').events.click({target:{closest(selector){return selector==='[data-add-columns]'?{}:null;}}});
+  open();assert.equal(h.elements.get('columns-dialog').open,true);
+  addColumn(h,'publications_raw');
+  assert.equal(h.elements.get('columns-dialog').open,true);
+  assert.equal(h.api.selectionExport().matrix[0].includes('Publications recorded'),true);
+  assert.match(h.elements.get('table-head').innerHTML,/aria-haspopup="dialog" aria-controls="columns-dialog">Add columns \(1\)/);
+  h.elements.get('columns-done').emit('click');assert.equal(h.elements.get('columns-dialog').open,false);
+  open();h.elements.get('columns-close').emit('click');assert.equal(h.elements.get('columns-dialog').open,false);
+  assert.match(html,/<dialog id="columns-dialog" class="columns-dialog" aria-labelledby="columns-title">/);
+  assert.equal(html.slice(html.indexOf('<section class="settings"'),html.indexOf('<div class="notice"')).includes('add-columns'),false);
+  assert.match(html,/journal-help.html#added-columns/);
+});
+
+
+await check('Column choices during average loading wait for the complete period and remain selected', async () => {
+  let release;
+  const h=averageHarness(url=>url.includes('2023')?new Promise(done=>{release=()=>averageFetch(url).then(done);}):averageFetch(url));
+  await h.api.loadYear(2025);
+  const pending=h.api.update({averagePercentiles:true});
+  addColumn(h,'publications_raw');
+  assert.equal(h.elements.get('add-publications_raw').checked,true);
+  release();await pending;
+  assert.equal(h.api.selectionExport().matrix[0].includes('Publications recorded'),true);
+  const help=readFileSync(new URL('../site/journal-help.html',import.meta.url),'utf8');
+  const advanced=help.split('<h2 id="advanced-settings">')[1].split('</section>')[0];
+  const table=help.split('<h2 id="journal-table">')[1].split('</section>')[0];
+  assert.equal(advanced.includes('<dt id="added-columns">'),false);
+  for(const label of ['Publication years','Publications recorded','Citations recorded','OpenAlex ID','Norwegian Register ID','Norwegian Register level','ISSNs'])assert.ok(table.replace(/<dt[^>]*>/g,'<dt>').includes(`<dt>${label}</dt>`),label);
 });
 
 console.log(`${passed} main-page tests passed`);

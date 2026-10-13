@@ -9,15 +9,7 @@ const fields = value => [...new Set(String(value ?? '').split('|').map(s => s.tr
 const registerUrl = id => `https://kanalregister.hkdir.no/en/tidsskrift?id=${encodeURIComponent(id)}`;
 const link = (url, label, title = '') => `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer"${title ? ` aria-label="${escape(title)}"` : ''}>${escape(label)}</a>`;
 
-export function registerIds(row) {
-  if (!row.in_n) return [];
-  return [...new Set(String(row.norwegian_register_url ?? '').split(';').flatMap(text => {
-    try {
-      const url = new URL(text.trim()), id = url.searchParams.get('id');
-      return url.hostname === 'kanalregister.hkdir.no' && /^\d+$/.test(id ?? '') ? [id] : [];
-    } catch { return []; }
-  }))];
-}
+export const registerIds = row => E.registerIds(row);
 
 export function registerEntries(row, detail) {
   const allowed = new Set(registerIds(row));

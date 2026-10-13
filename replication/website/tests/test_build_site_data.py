@@ -87,7 +87,8 @@ class SiteBuildTests(unittest.TestCase):
             self.assertIn(f'value="{chosen}" selected>{chosen} ({status.lower()})', text)
             self.assertIn(f'Publications: {chosen-5}&ndash;{chosen-1}', text)
             self.assertIn(f'Citations: {chosen}', text)
-            self.assertIn(f'OpenAlex snapshot 2026-09 &middot; {status} metrics', text)
+            self.assertIn('OpenAlex data: 2026-09', text)
+            self.assertNotIn(' metrics</span>', text)
             self.assertIn('<table>unchanged</table>', text)
 
     def test_schema_three_counts_validate_and_reach_history(self):

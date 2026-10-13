@@ -103,7 +103,7 @@
     </div>
     <section class="table-panel panel" aria-label="Journal metrics" aria-busy="true" id="results">
       <div class="table-scroll" role="region" aria-label="Journal metrics table; scroll for more columns" tabindex="0"><table><caption class="visually-hidden">Journal metrics for the selected citation year and universe</caption><thead id="table-head">
-        <tr class="group-row"><th scope="colgroup" colspan="5" class="meta-group"><span id="initial-table-context">Publications: 2020&ndash;2024 &middot; Citations: 2025 &middot; OpenAlex snapshot 2026-09 &middot; Live metrics</span> <a class="table-help" href="journal-help.html#journal-table" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a></th><th scope="colgroup" colspan="2" class="score-group n">Norwegian Register</th><th scope="colgroup" class="percentile-group">Percentiles &middot; ANS</th></tr>
+        <tr class="group-row"><th scope="colgroup" colspan="5" class="meta-group"><span id="initial-table-context">Publications: 2020&ndash;2024 &middot; Citations: 2025 &middot; OpenAlex data: 2026-09</span> <a class="table-help" href="journal-help.html#journal-table" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a> <button type="button" class="text-button table-help add-columns-trigger" data-add-columns aria-haspopup="dialog" aria-controls="columns-dialog" disabled>Add columns</button></th><th scope="colgroup" colspan="2" class="score-group n">Norwegian Register</th><th scope="colgroup" class="percentile-group">Percentiles &middot; ANS</th></tr>
         <tr><th scope="col" class="journal-column align-left">Journal title</th><th scope="col" class="align-left">OpenAlex field</th><th scope="col">Publications used</th><th scope="col">Citations used</th><th scope="col">Pubs. w/out refs.</th><th scope="col" class="group-start">NF</th><th scope="col">ANS</th><th scope="col" class="group-start percentile-cell">Field</th></tr>
       </thead><tbody id="table-body"><tr class="loading-row" aria-hidden="true"><td class="journal-column">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td class="group-start">&nbsp;</td><td>&nbsp;</td><td class="group-start">&nbsp;</td></tr></tbody></table></div>
       <div class="table-footer"><span id="page-status"></span><div class="pagination"><button id="previous" aria-label="Previous page" disabled>←</button><button id="next" aria-label="Next page" disabled>→</button></div></div>
@@ -115,6 +115,20 @@
     </section>
     <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a></span><span>Open Data · Open Source · Nonprofit · Made at Vrije Universiteit Amsterdam by Utz Weitzel</span></footer>
   </main>
+  <dialog id="columns-dialog" class="columns-dialog" aria-labelledby="columns-title">
+    <div class="columns-dialog-heading"><h2 id="columns-title">Add columns</h2><button type="button" id="columns-close" aria-label="Close column choices">&times;</button></div>
+    <p id="add-columns-summary" class="columns-dialog-summary" aria-live="polite">None</p>
+    <fieldset id="add-columns-choices" class="column-choices"><legend class="visually-hidden">Additional table columns</legend>
+                <label class="check-line"><input id="add-active_years" type="checkbox" value="active_years">Publication years</label>
+                <label class="check-line"><input id="add-publications_raw" type="checkbox" value="publications_raw">Publications recorded</label>
+                <label class="check-line"><input id="add-citations_raw" type="checkbox" value="citations_raw">Citations recorded</label>
+                <label class="check-line"><input id="add-openalex_id" type="checkbox" value="openalex_id">OpenAlex ID</label>
+                <label class="check-line"><input id="add-norwegian_register_ids" type="checkbox" value="norwegian_register_ids">Norwegian Register ID</label>
+                <label class="check-line"><input id="add-norwegian_level" type="checkbox" value="norwegian_level">Norwegian Register level</label>
+                <label class="check-line"><input id="add-issns" type="checkbox" value="issns">ISSNs</label>
+    </fieldset>
+    <div class="columns-dialog-footer"><a class="table-help" href="journal-help.html#added-columns" target="_blank" rel="noopener noreferrer">What is what?</a><button type="button" id="columns-done">Done</button></div>
+  </dialog>
   <dialog id="journal-dialog" aria-labelledby="dialog-title"><div id="dialog-content"></div></dialog>
   <noscript><p class="noscript">Enable JavaScript to search, filter and sort the journal table.</p></noscript>
 </body>
