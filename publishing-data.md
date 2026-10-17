@@ -134,3 +134,7 @@ creator/affiliations, licenses and the dataset-to-software DOI link passed.
 The website was deployed and verified first. Frozen years 2022-2024 use the
 new schema with unchanged metrics; 2025-2026 remain live. Validation used the
 owner-approved additive exception, preserving the original full replay.
+
+## All-metrics maturity policy confirmation (16 October 2026)
+
+The twelve-month policy applies to every metric, including NF, ANS and OJF, every journal universe and Raw/Filtered variant. Citation year t remains live through 31 December t+1 and becomes freeze-eligible on 1 January t+2. This supersedes any older eighteen-month research-policy wording. Existing annual pins and the website already follow twelve months; no score recalculation is required.

@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "title": "Opindx replication: Network Factor and Article Network Score",
+    "title": "Opindx replication: Open Journal Factor, Network Factor and Article Network Score",
     "upload_type": "software",
-    "description": "Reproducible journal metrics from downloaded OpenAlex Works/Sources snapshots and the Norwegian Register, including documented identity corrections, NF/ANS calculation, field metadata, complete annual exports and the matching browser percentile implementation.",
+    "description": "Reproducible journal metrics from downloaded OpenAlex Works/Sources Parquet snapshots and the Norwegian Register. Includes the independent OJF two-year count workflow, raw/filtered scores, NF/ANS citation-network calculations, reviewed identity corrections, field metadata, complete annual CSV/XLSX/Parquet export, and the corresponding website and percentile engine. No licensed benchmark data, commercial roster, benchmark matches or empirical comparison outputs are bundled. Version 0.4.0 adds OJF; prior NF/ANS data and frozen-year pins remain unchanged. Validation includes the recorded NF/ANS baseline replay, exact OJF frozen-count replay for all five years, source metadata matching and all-cell export checks; no new full raw-snapshot replay was performed for this additive release.",
     "creators": [
       {
         "name": "Weitzel, Utz",
@@ -11,10 +11,25 @@
     ],
     "access_right": "open",
     "license": "mit",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "related_identifiers": [
       {
         "identifier": "10.31235/osf.io/x9b8q_v1",
+        "relation": "isDocumentedBy",
+        "resource_type": "publication-preprint"
+      },
+      {
+        "identifier": "10.5281/zenodo.23437876",
+        "relation": "compiles",
+        "resource_type": "dataset"
+      },
+      {
+        "identifier": "10.5281/zenodo.23437878",
+        "relation": "isReferencedBy",
+        "resource_type": "software"
+      },
+      {
+        "identifier": "10.5281/zenodo.23437993",
         "relation": "isDocumentedBy",
         "resource_type": "publication-preprint"
       }

@@ -1,9 +1,12 @@
 # Opindx replication package
 
-Version 0.3.0 is published: [10.5281/zenodo.23321233](https://doi.org/10.5281/zenodo.23321233). Creator: Utz Weitzel
+Version 0.4.0: [10.5281/zenodo.23437873](https://doi.org/10.5281/zenodo.23437873). Creator: Utz Weitzel
 (VU Amsterdam; Radboud University Nijmegen). Complete datasets: [versioned Zenodo series](https://doi.org/10.5281/zenodo.23108620).
 See `docs/VALIDATION.md` for measured validation and `docs/publication.json` for release receipts.
-The published source archive and release tags remain unchanged; this branch adds calculation-input citation counts and recorded/used count displays.
+This version adds the independent Open Journal Factor (OJF), its complete annual
+downloads and the matching website. Earlier software versions and frozen NF/ANS
+data remain unchanged. OJF paper-analysis code is in the separate
+[Paper_Replication_OJF repository](https://github.com/bread-n-roses/Paper_Replication_OJF).
 
 This source package recreates the September 2026 journal-metrics workflow from a
 **downloaded OpenAlex Parquet snapshot and the Norwegian Register CSV**. It includes
@@ -81,6 +84,10 @@ export failed, repair the environment and run
 hashes, repeats the CSV/XLSX all-cell checks and writes completion only after
 they pass. It requires the source inventory recorded as described in
 `docs/RELEASING.md`. It does not repeat the scientific calculations.
+
+## OJF calculation
+
+Version 0.4.0 adds opindx-ojf and opindx-ojf-export. See [the OJF workflow](docs/OJF.md) for commands, the two-year window, fixed Norwegian citing sources and validation scope. NF/ANS files and calculation remain unchanged.
 
 ## Results
 

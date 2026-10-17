@@ -4,7 +4,7 @@
 export const isNumber = value => typeof value === 'number' && Number.isFinite(value);
 
 export const score = (row, state, universe = state.universe, metric = state.metric) =>
-  row[`${metric}_${universe}_${state.treatment}`] ?? null;
+  (metric === 'ojf' ? row[`ojf_${state.treatment}`] : row[`${metric}_${universe}_${state.treatment}`]) ?? null;
 
 // Percentiles are grouped by OpenAlex field (see SPEC.md).
 export const FIELD_COLUMN = 'oa_field';
@@ -22,7 +22,7 @@ export function fieldLabel(row) {
 export function fieldDescription(row) {
   if (row.selectedYearMissing) return 'Field unavailable for the selected year.';
   if (!Object.hasOwn(row, 'oa_field_modal_share')) return 'OpenAlex source field from this historical data run.';
-  const window = `${row.score_year - 5}-${row.score_year - 1}`;
+  const window = `${row.score_year - (row.metric_window_years ?? 5)}-${row.score_year - 1}`;
   const coverage = row.oa_field_classification_coverage;
   const classified = isNumber(coverage) ? `${(100 * coverage).toFixed(1)}% of eligible works have a field.` : 'No eligible works in this window.';
   const mode = field(row) === 'Unknown' ? 'No classified article/review works.'
@@ -91,8 +91,8 @@ function exclusionReason(row, state) {
   if (!isNumber(score(row, state))) return 'No score in the selected universe';
   if (state.minCoverage >= 0 && !isNumber(coverage)) return 'Share of publications without references unavailable';
   if (state.minCoverage >= 0 && coverage <= state.minCoverage) return 'At or above the publications without references limit';
-  if (state.minYears > 0 && !isNumber(years)) return 'Publication history unavailable';
-  if (state.minYears > 0 && years < state.minYears) return 'Below the publication history requirement';
+  if (state.metric !== 'ojf' && state.minYears > 0 && !isNumber(years)) return 'Publication history unavailable';
+  if (state.metric !== 'ojf' && state.minYears > 0 && years < state.minYears) return 'Below the publication history requirement';
   return '';
 }
 
@@ -149,7 +149,8 @@ export function averageRanks(annualRanks) {
     qualified:fieldRanks.size, retained:poolRanks.size};
 }
 
-export const inViewUniverse = (row, state) => Boolean(row[`in_${state.universe}`]);
+export const inViewUniverse = (row, state) => Boolean(row[`in_${state.universe}`]) &&
+  (state.metric !== 'ojf' || isNumber(row.ojf_raw) || isNumber(row.ojf_filtered));
 
 // Percentile choices apply to tables, journal history, filters and downloads.
 export function percentileKeys(state) {
@@ -231,7 +232,7 @@ export function hiddenSearchMatches(rows, state, ranks) {
   const fields = new Set(state.fields);
   const eligible = state.showPercentiles && state.poolOnly && percentileKeys(state).length
     ? availablePercentiles(state, ranks) : null;
-  return rows.filter(row => searchText(row).includes(query)).map(row => {
+  return rows.filter(row => (state.metric !== 'ojf' || isNumber(row.ojf_raw) || isNumber(row.ojf_filtered)) && searchText(row).includes(query)).map(row => {
     const reasons = [];
     if (!inViewUniverse(row, state, ranks)) reasons.push('universe');
     // Percentile eligibility belongs to the selected universe. Recheck after switching.
@@ -245,5 +246,6 @@ export function hiddenSearchMatches(rows, state, ranks) {
 // Missing per-universe counts must never fall back to broader recorded citations.
 export function usedCount(row, state, kind) {
   if (!row?.[`in_${state.universe}`]) return null;
+  if (state.metric === 'ojf') return row[`${kind}_${state.treatment}`] ?? null;
   return row[kind === 'citations' ? `citations_${state.universe}_${state.treatment}` : `publications_${state.treatment}`] ?? null;
 }

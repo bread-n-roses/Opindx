@@ -1,5 +1,14 @@
 # Changes
 
+## 0.4.0 - 2026-10-17
+
+- Adds independently calculated Open Journal Factor (OJF), with fixed Norwegian Register citing sources, two-year counts, raw/filtered scores and explicit zero/missing statuses.
+- Adds the portable all-type OpenAlex extraction, open identity/Norwegian matching, twelve-month maturity policy and full annual OJF export.
+- Packages separate OJF CSV/XLSX/Parquet files and definitions without changing prior NF/ANS files or frozen-year pins.
+- Updates the website with ANS/OJF selection, metric-specific presets and help, display/export rounding, optional table columns and independent/trademark wording.
+- Validates all 578,622 frozen OJF journal-years exactly from bound open type-count checkpoints; does not claim a repeated raw-snapshot scan.
+- The separate Paper_Replication_OJF package supplies downstream study analysis without proprietary inputs or outputs.
+
 ## 0.3.0 - 2026-10-12
 
 - Adds optional rolling three-calendar-year averages of annual percentiles.

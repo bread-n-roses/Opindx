@@ -1,0 +1,126 @@
+{
+  "status": "PASS",
+  "annual": [
+    {
+      "year": 2022,
+      "rows": 117465,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2022.parquet": {
+          "sha256": "78be4cd35336a4699cf406b708bdf857b603366a2c40c4ce8f06e192b4e61510",
+          "bytes": 10944887
+        },
+        "scores_2022.csv": {
+          "sha256": "26aa4df829d2c7669aeca9b729a5649827e16151afa1d79f2f664e8f43a491c0",
+          "bytes": 50681958
+        },
+        "scores_2022.xlsx": {
+          "sha256": "c00924a650beaf6fe8ba2c038b80770476fa5082f1b293a1af8d1bef42b6f048",
+          "bytes": 31006184
+        }
+      },
+      "dictionary_update": "Definitions updated; verified data worksheet XML is byte-identical to the all-cell checked original"
+    },
+    {
+      "year": 2023,
+      "rows": 116977,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2023.parquet": {
+          "sha256": "9fd0d24fe067591975aa414f3d3fb299c3c50dfc72835033cbf743821d5cb253",
+          "bytes": 11029817
+        },
+        "scores_2023.csv": {
+          "sha256": "93b3c8a9b2a9adf7880ea3b5475d9cebc6c5e5ca4bb4298a33ee36dd60f4de85",
+          "bytes": 50533949
+        },
+        "scores_2023.xlsx": {
+          "sha256": "8ad4b16df58593a240853f581eb5160a0dc3b5bc81f99bead6eaef714a2e0279",
+          "bytes": 30977465
+        }
+      },
+      "dictionary_update": "Definitions updated; verified data worksheet XML is byte-identical to the all-cell checked original"
+    },
+    {
+      "year": 2024,
+      "rows": 111554,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2024.parquet": {
+          "sha256": "251279a360943b9950ff0b96c1dbd5ea90fef9491999f72cdfe3dc83b77480d2",
+          "bytes": 10851360
+        },
+        "scores_2024.csv": {
+          "sha256": "fd934cadfcb993d83f7ee09b96932720541498a7b94961d7088d22c42394ebff",
+          "bytes": 50014367
+        },
+        "scores_2024.xlsx": {
+          "sha256": "212f8a676c7099aa205aa3751f8dda897f720c1855b34a424bd72063f7be4aba",
+          "bytes": 29894981
+        }
+      },
+      "dictionary_update": "Definitions updated; verified data worksheet XML is byte-identical to the all-cell checked original"
+    },
+    {
+      "year": 2025,
+      "rows": 115191,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2025.parquet": {
+          "sha256": "a7a14c653e708a4372d831fb711fdb69063992790a4cda4f9a3ad9798a53d537",
+          "bytes": 11156860
+        },
+        "scores_2025.csv": {
+          "sha256": "2ee5c71b1975046873b1782eb40ec68d9c730b370ea8b543751fa88503ff7d22",
+          "bytes": 51258253
+        },
+        "scores_2025.xlsx": {
+          "sha256": "280eab512fefc1bf03b8a00e62749430bc1921f12c0ce8e9ec9e6fb5fb46e2ef",
+          "bytes": 30900752
+        }
+      },
+      "dictionary_update": "Definitions updated; verified data worksheet XML is byte-identical to the all-cell checked original"
+    },
+    {
+      "year": 2026,
+      "rows": 117435,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2026.parquet": {
+          "sha256": "d3da48845e46f9f6f8083e139eab841de2848525d75b854f95f0f7d1190874f6",
+          "bytes": 11182745
+        },
+        "scores_2026.csv": {
+          "sha256": "ea45cf5e7fbd91119dc5f4c7ae8f2bc0cdeb4c0f75e7dd8c36711342a230bb23",
+          "bytes": 52193980
+        },
+        "scores_2026.xlsx": {
+          "sha256": "3997f6ed39d1a1fa755d8bb66ddd7e77d5ad48414e1a22d4e644d57f738d1850",
+          "bytes": 31351614
+        }
+      },
+      "dictionary_update": "Definitions updated; verified data worksheet XML is byte-identical to the all-cell checked original"
+    }
+  ],
+  "total_rows": 578622
+}

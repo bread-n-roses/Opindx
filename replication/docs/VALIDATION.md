@@ -1,3 +1,21 @@
+## Software 0.4.0 (17 October 2026)
+
+OJF is an additive open-input calculation. All count, score and status cells
+match exactly across 578,622 journal-years (2022-2026), replayed from the frozen,
+hash-bound type-count checkpoints. All annual Source metadata and Norwegian
+membership columns match the frozen open-input preparation. Ten independent
+OJF tests cover filtering, types, source scope, self-citations, duplicate
+references, retractions, windows, zero/missing denominators, field ties, toy
+Table 1 arithmetic and a raw-Parquet-to-annual workflow. The full replication
+suite passed 136 tests. Complete annual CSV/XLSX cells were checked against
+Parquet; dictionary-only corrections preserve the checked data worksheet XML.
+
+All fifteen NF/ANS annual files match their existing public GitHub asset hashes.
+The original NF/ANS full-replay evidence remains valid for its unchanged core.
+The 0.4.0 validation does not claim a repeated complete raw-snapshot scan.
+Website behavior is covered by the existing DOM-based tests; interactive browser
+automation was unavailable. See the source-bound JSON evidence in this folder.
+
 # Validation status
 
 Prepared 2026-10-02. No publication, release creation, deployment or Git push

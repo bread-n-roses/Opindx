@@ -43,17 +43,18 @@ export function metadataRows(row, state = {universe:'oa',treatment:'filtered'}) 
   result.push(['Norwegian Register details', `<span id="register-details">${registerLinks(row)}</span>`]);
   result.push(
     ['Open access journal', row.is_open_access == null ? 'Unknown' : row.is_open_access ? 'Yes' : 'No'],
-    ['Publications recorded', `${fmt(row.publications_raw)} &middot; Used in ${escape(state.treatment)} metrics: ${fmt(E.usedCount(row, state, 'publications'))}`],
+    [state.metric === 'ojf' ? 'Citable items recorded' : 'Publications recorded', `${fmt(row.publications_raw)} &middot; Used in ${escape(state.treatment)} metrics: ${fmt(E.usedCount(row, state, 'publications'))}`],
     ['Citations recorded', `${fmt(row.citations_raw)} &middot; Used in ${escape(state.treatment)} metrics: ${fmt(E.usedCount(row, state, 'citations'))}`],
-    ['Publication years', `${fmt(row.active_years)} of 5 with eligible output`],
+    ...(state.metric === 'ojf' ? [] : [['Publication years', `${fmt(row.active_years)} of 5 with eligible output`]]),
     ['Publications w/out references', E.isNumber(E.withoutReferences(row)) ? `${fmt(E.withoutReferences(row), 2)}%` : '—'],
   );
+  if (state.metric === 'ojf' && !E.isNumber(E.score(row, state))) result.push(['OJF availability', row.ojf_status_filtered === 'ref_denominator_collapse' && state.treatment !== 'raw' ? 'No citable items with recorded references in the two-year window.' : 'No citable items in the two-year window.']);
   return result;
 }
 
-export function fieldsTable(row, detail, year) {
+export function fieldsTable(row, detail, year, state = {}) {
   const parts = E.fieldBreakdown(detail);
-  const oaHeading = `OpenAlex primary fields of ${year - 5}–${year - 1} publications`;
+  const oaHeading = `OpenAlex primary fields of ${year - (state.metric === 'ojf' ? 2 : 5)}–${year - 1} publications`;
   let html = '<table class="fields-table"><thead><tr>' +
     `<th scope="col" class="align-left">${oaHeading}</th><th scope="col">${parts?.length ? '100%' : 'Unavailable'}</th></tr></thead><tbody>`;
   html += parts?.length
@@ -83,7 +84,7 @@ export function universeMembership(row) {
 
 export function metricsTable(history, year, state, metrics, annualRanks = new Map()) {
   const metricKeys = Object.keys(metrics), pctKeys = E.percentileKeys(state), pct = pctKeys.length;
-  const headings = [['Citing', 'year'], ['Publications', 'used'], ['Citations', 'used'],
+  const headings = [['Citing', 'year'], [state.metric === 'ojf' ? 'Citable items' : 'Publications', 'used'], ['Citations', 'used'],
     ['Publications', 'w/out references'], ['Norwegian', 'Reg. level'],
     ...Object.values(metrics).map(m => [m.short])];
   const percentileCells = (r, entry) => {
@@ -110,13 +111,14 @@ export function metricsTable(history, year, state, metrics, annualRanks = new Ma
       `<td>${escape(r.norwegian_level ?? '—')}</td>`;
     html += metricKeys.map(metric => {
       const value = E.score(r, state, state.universe, metric), digits = metrics[metric].digits;
-      const formatted = E.isNumber(value) && value > 0 && value < 10 ** -digits ? value.toExponential(2) : fmt(value, digits);
-      return `<td>${r[`in_${state.universe}`] ? formatted : '—'}</td>`;
+      const formatted = metric === 'ojf' ? fmt(value, 1) : E.isNumber(value) && value > 0 && value < 10 ** -digits ? value.toExponential(2) : fmt(value, digits);
+      const missingReason = metric === 'ojf' && !E.isNumber(value) ? '<span class="vintage">' + (r.ojf_status_filtered === 'ref_denominator_collapse' && state.treatment !== 'raw' ? 'No citable items with recorded references' : 'No citable items') + '</span>' : '';
+      return `<td>${r[`in_${state.universe}`] ? formatted + missingReason : '—'}</td>`;
     }).join('');
     return html + (pct ? percentileCells(r, entry) : '');
   };
   return '<table class="metrics-table"><thead><tr>' + headings.map((h, i) => `<th scope="col"${pct ? ' rowspan="2"' : ''}${i === 0 ? ' class="align-left"' : ''}>${h.map(line => `<span class="metric-heading-line">${escape(line)}</span>`).join(' ')}</th>`).join('') +
-    (pct ? `<th scope="colgroup" colspan="${pct}" class="percentile-heading">Pctiles &middot; ${escape(metrics[state.metric].short)}</th></tr><tr>${pctKeys.map(key => `<th scope="col">${key === 'fieldPct' ? 'Field' : 'Total'}</th>`).join('')}` : '') +
+    (pct ? `<th scope="colgroup" colspan="${pct}" class="percentile-heading">Percentiles</th></tr><tr>${pctKeys.map(key => `<th scope="col">${key === 'fieldPct' ? 'Field' : 'Total'}</th>`).join('')}` : '') +
     '</tr></thead><tbody>' + history.map(([entry, r]) => `<tr class="${entry.year === year ? 'current-year' : ''}">` +
       `<th scope="row" class="align-left">${entry.year}<span class="vintage">${escape(entry.status)} · ${escape((entry.openalex_snapshot ?? '').slice(0, 7))}</span></th>${cells(r, entry)}</tr>`).join('') +
     '</tbody></table>';

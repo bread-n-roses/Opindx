@@ -1,10 +1,10 @@
 cff-version: 1.2.0
 message: "Please cite this software using its version DOI."
-doi: "10.5281/zenodo.23321233"
-date-released: 2026-10-12
-title: "Opindx replication: Network Factor and Article Network Score"
+doi: "10.5281/zenodo.23437873"
+date-released: 2026-10-17
+title: "Opindx replication: Open Journal Factor, Network Factor and Article Network Score"
 type: software
-version: 0.3.0
+version: 0.4.0
 license: MIT
 repository-code: "https://github.com/bread-n-roses/Opindx"
 authors:

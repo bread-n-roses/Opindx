@@ -67,12 +67,52 @@ def validate_values(expected, observed, *, spreadsheet=False):
         assert isinstance(observed, (int,float)) and not isinstance(observed,bool)
         assert math.isclose(expected,observed,rel_tol=2e-15,abs_tol=0), (expected,observed)
 
+def ojf_description(name):
+    known={
+        'canonical_journal_key':'Reviewed identity: valid ISSN-L, or oa: followed by an OpenAlex source URL when no valid linking ISSN is available.',
+        'oa_field':'Most frequent named primary-topic field among Raw articles/reviews in t-2 through t-1; Unknown when none is classified.',
+        'oa_domain':'Domain metadata inherited from the canonical Source or existing journal record; the OJF oa_field is assigned separately from two-year Work fields.',
+        'norwegian_entries_json':'JSON array of matched Norwegian Register IDs, assigned fields and titles; an empty array means no matched approved entry.',
+        'norwegian_primary_id':'Preferred matched register ID; otherwise the first available matched ID; empty when no ID is available.',
+        'in_n':'Recipient journal is matched to an approved Norwegian Register entry in this year. All OJF citing sources are Norwegian Register sources, regardless of this flag.',
+        'in_oa':'Recipient is in the broad OpenAlex reporting population, including compatibility rows with no defined OJF.',
+        'metric_window_years':'Publication-window length: two years for OJF.',
+        'publications_raw':'Citable items (articles, reviews, data papers and software papers) in t-2 through t-1; paratext excluded.',
+        'publications_filtered':'Raw citable items with at least one reported OpenAlex reference.',
+        'citations_raw':'Citations in t from approved Norwegian Register sources to all eligible non-paratext items in t-2 through t-1, including journal self-citations.',
+        'citations_filtered':'Raw citations after removing citations to citable items without reported references; citations to non-citable content remain included.',
+        'ojf_raw':'Raw citations / Raw citable items. Full precision; zero is defined when denominator > 0 and numerator = 0; null when denominator = 0.',
+        'ojf_filtered':'Filtered citations / Filtered citable items. Full precision; zero is distinct from a missing score.',
+        'ojf_status_raw':'defined or no_raw_citable_items; do not turn missing scores into zero.',
+        'ojf_status_filtered':'defined, no_raw_citable_items or ref_denominator_collapse; the last means Raw denominator > 0 but Filtered denominator = 0.',
+        'active_years':'Not applicable to OJF; null. The ANS five-year publication-history percentile filter is not applied to OJF.',
+        'maturity_status':'freeze_eligible for citation years through 2024 in this snapshot; provisional for 2025 and 2026.',
+        'citation_year_complete':'False for the incomplete current citation year 2026 in the September 2026 snapshot.',
+        'freeze_eligible_from':'January 1 of t+2: twelve months after the citation year ends.',
+        'oa_field_classified_works':'Raw articles/reviews with a named primary field in the two-year publication window.',
+        'oa_field_classification_coverage':'Classified / all Raw articles/reviews in the two-year window, fraction 0-1.',
+        'citations_to_non_citable':'Raw citations to target content outside the four citable-item types; these remain included in OJF.',
+        'citations_self_raw':'Raw OJF numerator citations from the same canonical journal; included in OJF.',
+        'citations_self_filtered':'Filtered OJF numerator citations from the same canonical journal; included in OJF.',
+        'citations_nonjournal_raw':'Raw OJF numerator citations from approved Norwegian Register book-series or conference sources.',
+        'citations_nonjournal_filtered':'Filtered OJF numerator citations from approved Norwegian Register book-series or conference sources.',
+        'openalex_snapshot':'Date of the pinned OpenAlex snapshot.',
+        'citable_policy':'AR_DP_SP: article, review, data-paper and software-paper.',
+        'citing_sources':'N: all approved Norwegian Register channels in the citation year.',
+        'retraction_policy':'all in 2022-2023; exclude_snapshot in 2024-2026 removes citations to/from items marked retracted or retraction notices, without removing denominator items.',
+        'publication_start_year':'First publication year in the OJF denominator window, t-2.',
+        'publication_end_year':'Last publication year in the OJF denominator window, t-1.',
+    }
+    return known[name] if name in known else description(name).replace('five-year','two-year')
+
 def export(source, output):
     import xlsxwriter
     from openpyxl import load_workbook
     source,output=Path(source),Path(output)
     output.mkdir(parents=True,exist_ok=True)
     manifest=json.loads((source/'manifest.json').read_text(encoding='utf-8'))
+    is_ojf=manifest.get('metric')=='OJF'
+    define=ojf_description if is_ojf else description
     reports=[]
     schema=None
     for year in manifest['years']:
@@ -86,7 +126,11 @@ def export(source, output):
         assert not frame.duplicated(['openalex_id','score_year']).any()
         assert frame.score_year.eq(year).all()
         metrics=[c for c in frame if c.startswith(('share_','per_article_'))]
-        assert not frame[metrics].isna().all(axis=1).any()
+        if not is_ojf: assert not frame[metrics].isna().all(axis=1).any()
+        else:
+            for treatment in ['raw','filtered']:
+                wanted=frame['citations_'+treatment]/frame['publications_'+treatment].where(frame['publications_'+treatment].gt(0))
+                pd.testing.assert_series_equal(frame['ojf_'+treatment],wanted,check_names=False,check_exact=True)
         rows=table.to_pylist();names=table.column_names
         target=output/original.name
         if target.exists(): assert digest(target)==digest(original)
@@ -102,7 +146,9 @@ def export(source, output):
         xlsx_path=output/f'scores_{year}.xlsx'
         with xlsxwriter.Workbook(xlsx_path,{'constant_memory':True,'strings_to_formulas':False,'strings_to_urls':False}) as book:
             sheet=book.add_worksheet('Journal metrics')
-            header=book.add_format({'bold':True,'bg_color':'#E8EEF6','text_wrap':True,'valign':'top'})
+            book.formats[0].set_font_name('Arial');book.formats[0].set_font_size(10)
+            sheet.hide_gridlines(2)
+            header=book.add_format({'bold':True,'bg_color':'#E8EEF6','text_wrap':True,'valign':'vcenter','align':'center','font_name':'Arial','font_size':10})
             integer=book.add_format({'num_format':'#,##0'})
             numeric=book.add_format({'num_format':'0.###############'})
             sheet.freeze_panes(1,2);sheet.set_row(0,46)
@@ -123,9 +169,9 @@ def export(source, output):
             notes.set_column(0,0,110)
             for i,text in enumerate([
                 f'Opindx complete annual dataset: citation year {year}',
-                'NF = share_* columns; ANS = per_article_* columns. Full definitions are in Data dictionary.',
+                'OJF = Open Journal Factor; see ojf_raw and ojf_filtered. Full definitions are in Data dictionary.' if is_ojf else 'NF = share_* columns; ANS = per_article_* columns. Full definitions are in Data dictionary.',
                 'Raw includes all eligible publications; Filtered requires recorded references.',
-                'n = Norwegian Register; oa = OpenAlex. Publication window: t-5 through t-1.',
+                'All OJF citing sources are approved Norwegian Register channels. Publication window: t-2 through t-1.' if is_ojf else 'n = Norwegian Register; oa = OpenAlex. Publication window: t-5 through t-1.',
                 'Source snapshot: '+manifest['openalex_snapshot']+'; Norwegian Register: '+manifest['norwegian_register_snapshot'],
                 'CC BY 4.0. OpenAlex and Norwegian Register numerical inputs; documented identity corrections.',
                 'Missing values are blank; zero is a defined value. Excel numeric precision is approximately 15 digits.',
@@ -140,7 +186,7 @@ def export(source, output):
             dictionary.set_column(0,0,35);dictionary.set_column(1,1,18);dictionary.set_column(2,2,100)
             dictionary.write_row(0,0,['Column','Type','Definition'],header)
             dictionary.freeze_panes(1,0)
-            for i,field in enumerate(schema,1): dictionary.write_row(i,0,[field.name,str(field.type),description(field.name)])
+            for i,field in enumerate(schema,1): dictionary.write_row(i,0,[field.name,str(field.type),define(field.name)])
         with csv_path.open(encoding='utf-8-sig',newline='') as f:
             reader=csv.reader(f);assert next(reader)==names
             count=0
@@ -171,12 +217,14 @@ def export(source, output):
         print(f'{year}: {len(rows):,} rows, {len(names)} columns; CSV and XLSX all-cell verification PASS',flush=True)
     with (output/'data_dictionary.csv').open('w',encoding='utf-8',newline='') as f:
         writer=csv.writer(f);writer.writerow(['column','type','definition'])
-        for field in schema:writer.writerow([field.name,str(field.type),description(field.name)])
+        for field in schema:writer.writerow([field.name,str(field.type),define(field.name)])
     shutil.copyfile(source/'manifest.json',output/'source_manifest.json')
     (output/'validation.json').write_text(json.dumps({'status':'PASS','annual':reports,'total_rows':sum(r['rows'] for r in reports)},indent=2)+'\n',encoding='utf-8')
     return reports
 
-if __name__=='__main__':
+def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('source',type=Path);parser.add_argument('output',type=Path)
     args=parser.parse_args();export(args.source,args.output)
+
+if __name__=='__main__':main()

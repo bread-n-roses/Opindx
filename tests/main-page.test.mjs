@@ -54,7 +54,7 @@ function harness(fetchOverride, workbookWriter = workbookBytes, initialSettings 
     parquetReadObjects:async ({file}) => file,
   };
   const api = vm.runInNewContext(main + `\n({
-    init(data, settings) { index = data; state = {...state, ...settings}; }, loadYear, applyPreset, update, fillFilters,
+    init(data, settings) { index = data; state = {...state, ...settings}; }, loadYear, applyPreset, update, fillFilters, switchMetric,
     getState:()=>state, getYear:()=>year, getRows:()=>rows, getVisible:()=>visible,
     getColumns, getDisplayColumns:()=>columns,
     csv() { let output; saveCsv=(filename,parts)=>{output={filename,parts}}; downloadView(); return output; },
@@ -83,9 +83,9 @@ await check('First load shows headers and one blank row; later loads preserve th
   assert.match(initialHead, /Publications: 2020&ndash;2024/);
   assert.equal((initialHead.match(/<tr\b/g) || []).length,2);
   assert.equal((initialBody.match(/<tr\b/g) || []).length,1);
-  for (const title of ['Journal title','OpenAlex field','Publications used','Citations used','NF','ANS','Field']) assert.ok(initialHead.includes(title));
+  for (const title of ['Journal title','OpenAlex field','Publications used','Citations used','ANS','Field']) assert.ok(initialHead.includes(title));
   assert.match(initialBody,/class="loading-row" aria-hidden="true"/);
-  assert.equal((initialBody.match(/<td\b/g) || []).length,8);
+  assert.equal((initialBody.match(/<td\b/g) || []).length,7);
   assert.ok(html.indexOf('</tbody>') < html.indexOf('class="table-footer"'));
   const pending = new Map();
   const h = harness(url => new Promise(resolve => pending.set(url,resolve)));
@@ -118,10 +118,12 @@ await check('Year and universe can change before the first table; late responses
   assert.equal(h.elements.get('preset').disabled,false);
   assert.equal(h.elements.get('search').disabled,false);
   h.elements.get('universe').emit('change',{value:'n'});
-  assert.match(h.elements.get('table-head').innerHTML,/Norwegian Register/);
+  assert.equal(h.elements.get('universe').value,'n');
+  assert.match(h.elements.get('table-head').innerHTML,/>ANS<\//);
   const second = h.elements.get('year').emit('change',{value:'2024'});
   assert.match(h.elements.get('table-head').innerHTML,/Citations: 2024/);
-  assert.match(h.elements.get('table-head').innerHTML,/Norwegian Register/);
+  assert.equal(h.elements.get('universe').value,'n');
+  assert.match(h.elements.get('table-head').innerHTML,/>ANS<\//);
   pending.get('data/scores_2024.parquet')({ok:true,arrayBuffer:async()=>records}); await second;
   assert.equal(h.api.getYear(),2024);
   assert.equal(h.api.getState().universe,'n');
@@ -160,7 +162,7 @@ await check('A custom filtered view preserves journals missing ANS and renders t
   assert.equal(h.api.getState().showPercentiles,true);
   assert.equal(h.elements.get('percentiles-field').checked,true);
   assert.equal(h.elements.get('pool-only').checked,false);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles · ANS/);
+  assert.match(h.elements.get('table-head').innerHTML,/class="percentile-group">Percentiles<\/th>/);
   assert.equal(h.elements.get('preset').value,'custom');
   assert.equal(h.elements.get('notice').hidden,false);
   assert.equal(h.elements.get('selection-actions').hidden,false);
@@ -210,7 +212,7 @@ await check('Advanced settings opens; presets close it; VU SBE applies 75%, four
   assert.equal(h.elements.get('average-percentiles').disabled,true);
   assert.equal(h.elements.get('preset').value,'vu-sbe');
   assert.equal(h.api.getVisible().length,15);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles · ANS/);
+  assert.match(h.elements.get('table-head').innerHTML,/class="percentile-group">Percentiles<\/th>/);
   assert.equal(h.elements.get('pool-only').checked,true);
   h.elements.get('include-zero').emit('change',{checked:true});
   assert.equal(h.elements.get('preset').value,'custom');
@@ -378,21 +380,26 @@ await check('A late year response or error cannot replace the latest selected ye
   h.api.update({query:'Journal 01'});
   assert.match(h.elements.get('result-count').innerHTML,/^<strong>1<\/strong> of <strong>40<\/strong>/);
 });
-await check('Selection CSV matches visible headers and includes NF, ANS and separate field percentages across every page', async () => {
+await check('Selection CSV follows ANS columns; NF is exported only when added', async () => {
   const h = harness(); await h.api.loadYear(2025);
-  const csv = h.api.csv();
-  const lines = csv.parts.join('').split('\r\n');
+  const csv = h.api.csv(), lines = csv.parts.join('').split('\r\n');
   assert.equal(lines.length,41);
-  assert.equal(lines[0], '"Journal title","OpenAlex field","OpenAlex field (%)","Publications used","Citations used","Pubs. w/out refs.","NF","ANS","Field percentile (ANS)"');
-  assert.match(lines.at(-1),/^"Journal 39","Medicine",62.5,39,39,10,0.39,,/);
+  assert.equal(lines[0], '"Journal title","OpenAlex field","OpenAlex field (%)","Publications used","Citations used","Pubs. w/out refs.","ANS","Field percentile (ANS)"');
   const matrix = h.api.selectionExport().matrix;
   const row = matrix.find(row => row[0] === 'Journal 01');
-  assert.equal(row[6],0.01); assert.equal(row[7],1);
+  assert.equal(row[6],1);
   assert.doesNotMatch(lines[0],/openalex_id|publisher|issn|exclusion|snapshot|treatment/);
+  add(h,'score:share');
+  const withNf = h.api.selectionExport().matrix;
+  assert.equal(withNf[0].at(-1),'Network Factor (NF)');
+  assert.equal(withNf.find(row => row[0] === 'Journal 01').at(-1),0.01);
   h.api.update({query:'Journal 01',treatment:'raw'});
   assert.equal(h.api.selectionExport().matrix.length,2);
-  assert.equal(h.api.selectionExport().matrix[1][7],1001);
+  assert.equal(h.api.selectionExport().matrix[1][6],1001);
 });
+function add(h,key) {
+  h.elements.get('add-columns-choices').events.change({target:{value:key,checked:true}});
+}
 
 function hide(h, key) {
   h.elements.get('table-head').events.click({target:{closest:selector=>selector === '[data-hide-column]' ? {dataset:{hideColumn:key}}:null}});
@@ -409,17 +416,17 @@ await check('Hiding columns removes them from downloads while preserving sorting
   assert.equal(h.api.getVisible().map(row=>row.openalex_id).join(','),ids);
   assert.equal(h.rankCalls(),calculations);
   assert.notEqual(h.api.csv().parts.join(''),csv);
-  assert.deepEqual(Array.from(h.api.selectionExport().matrix[0]),['Journal title','OpenAlex field','OpenAlex field (%)','Publications used','Citations used','NF']);
+  assert.deepEqual(Array.from(h.api.selectionExport().matrix[0]),['Journal title','OpenAlex field','OpenAlex field (%)','Publications used','Citations used']);
   assert.equal(h.elements.get('restore-columns').hidden,false);
-  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/Percentiles ·|data-sort="poolPct"|data-sort="score:per_article"/);
+  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/class="percentile-group"|data-sort="poolPct"|data-sort="score:per_article"/);
   const popup = D.metricsTable([[years[1],records[0]]],2025,h.api.getState(),{share:{short:'NF',digits:5},per_article:{short:'ANS',digits:3}});
-  assert.match(popup,/Pctiles &middot; ANS/);
+  assert.match(popup,/class="percentile-heading">Percentiles<\/th>/);
   assert.doesNotMatch(popup,/>Field<\/th>/); assert.match(popup,/>Total<\/th>/);
   h.elements.get('restore-columns').emit('click');
-  assert.equal(h.api.getDisplayColumns().length,8);
+  assert.equal(h.api.getDisplayColumns().length,7);
   assert.equal(h.elements.get('restore-columns').hidden,true);
   assert.equal(h.api.csv().parts.join(''),csv);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles · ANS/);
+  assert.match(h.elements.get('table-head').innerHTML,/class="percentile-group">Percentiles<\/th>/);
 });
 await check('Grouped headers track visible columns; title cannot be hidden; reset restores all', async () => {
   const h = harness(); await h.api.loadYear(2025);
@@ -438,7 +445,7 @@ await check('Grouped headers track visible columns; title cannot be hidden; rese
   h.api.applyPreset('vu-sbe'); assert.equal(h.api.getDisplayColumns().length,2);
   await h.api.loadYear(2024); assert.equal(h.api.getDisplayColumns().length,2);
   h.elements.get('reset').emit('click');
-  assert.equal(h.api.getDisplayColumns().length,8);
+  assert.equal(h.api.getDisplayColumns().length,7);
   assert.equal(h.elements.get('preset').value,'ef-ais');
 });
 await check('All fields and individual choices are mutually consistent without a field search', async () => {
@@ -495,7 +502,7 @@ await check('Percentile summary counts matching journals across all pages withou
 await check('Help covers main, historical, field-breakdown and About headers', async () => {
   const h = harness(); await h.api.loadYear(2025);
   const help = readFileSync(new URL('../site/journal-help.html',import.meta.url),'utf8');
-  const section = id => help.split(`<h2 id="${id}">`)[1]?.split('</section>')[0] ?? '';
+  const section = id => help.split(`id="${id}">`)[1]?.split('</section>')[0] ?? '';
   const mainHelp = section('journal-table');
   for (const col of h.api.getColumns().filter(col => col.key !== 'title')) {
     const label = col.key.endsWith('Pct') ? `Percentiles \u00b7 ${col.label}` : col.label;
@@ -507,7 +514,7 @@ await check('Help covers main, historical, field-breakdown and About headers', a
   assert.match(h.elements.get('table-head').innerHTML,/journal-help.html#journal-table/);
   assert.match(html,/>Download selection<\/button>/);
   assert.match(html,/>Hide journals without percentiles<\/label>/);
-  assert.match(html,/>Close to EF &amp; AIS \(select\)<\/option>/);
+  assert.match(html,/>AIS-oriented \(select\)<\/option>/);
   assert.match(html,/>Include publications without references \(noisy\)<\/label>/);
 });
 await check('Percentile choices propagate to columns, CSV, filtering and summary counts', async () => {
@@ -515,12 +522,20 @@ await check('Percentile choices propagate to columns, CSV, filtering and summary
   h.api.update({topPercent:75,poolOnly:true});
   assert.equal(h.api.getVisible().length,39);
   assert.match(h.elements.get('pool-summary').innerHTML,/<strong>39<\/strong>/);
+  assert.equal(h.elements.get('retain-control').hidden,true);
+  assert.equal(h.elements.get('top-percent').disabled,true);
   selectPercentiles(h,'total');
+  assert.equal(h.elements.get('retain-control').hidden,false);
+  assert.equal(h.elements.get('top-percent').disabled,false);
+  assert.equal(h.elements.get('retain-label').textContent,'Retain top % per field');
+  assert.equal(h.elements.get('top-percent').value,75);
   assert.equal(h.api.getVisible().length,30);
   assert.match(h.elements.get('pool-summary').innerHTML,/<strong>30<\/strong>/);
   assert.doesNotMatch(h.api.csv().parts[0].split('\r\n')[0],/Field percentile/);
   assert.match(h.api.csv().parts[0].split('\r\n')[0],/Total percentile/);
   selectPercentiles(h,'both');
+  assert.equal(h.elements.get('retain-control').hidden,false);
+  assert.equal(h.elements.get('retain-label').textContent,'For total: retain top % per field');
   assert.equal(h.api.getVisible().length,30);
   assert.equal(h.elements.get('percentiles-none').checked,false);
   selectPercentiles(h,'none');
@@ -529,6 +544,8 @@ await check('Percentile choices propagate to columns, CSV, filtering and summary
   assert.equal(h.elements.get('percentiles-field').checked,false);
   assert.equal(h.elements.get('percentiles-total').checked,false);
   assert.equal(h.elements.get('percentile-settings').disabled,true);
+  assert.equal(h.elements.get('retain-control').hidden,true);
+  assert.equal(h.elements.get('top-percent').disabled,true);
   assert.equal(h.api.getColumns().some(c=>c.key.endsWith('Pct')),false);
   assert.doesNotMatch(h.api.csv().parts[0].split('\r\n')[0],/Field percentile|Total percentile/);
 });
@@ -593,12 +610,12 @@ await check('Download button offers CSV and XLSX without changing the selection'
 });
 await check('Real XLSX round-trip matches the selection and preserves numbers, missing cells and literal text', async () => {
   const sample = records.map((r,i)=>({...r,title:i === 0 ? '=1+1' : r.title,issns:'0123-4567'}));
-  const h = harness(async()=>({ok:true,arrayBuffer:async()=>sample})); await h.api.loadYear(2025);
+  const h = harness(async()=>({ok:true,arrayBuffer:async()=>sample})); await h.api.loadYear(2025); add(h,'score:share');
   for (const mode of ['field','total','both','none']) {
     selectPercentiles(h,mode);
     hide(h,'oa_field'); hide(h,'citations');
     const selection = h.api.selectionExport();
-    assert.ok(selection.matrix[0].includes('NF'));
+    assert.ok(selection.matrix[0].includes('Network Factor (NF)'));
     assert.ok(selection.matrix[0].includes('ANS'));
     assert.ok(!selection.matrix[0].includes('OpenAlex field (%)'));
     assert.ok(!selection.matrix[0].includes('OpenAlex field'));
@@ -716,7 +733,7 @@ await check('Averaged percentile selection preserves selected-year data, require
   await h.elements.get('average-percentiles').emit('change',{checked:true});
   assert.equal(h.api.getState().averagePercentiles,true);
   assert.equal(h.elements.get('preset').value,'custom');
-  assert.match(h.elements.get('table-head').innerHTML,/Avg percentiles · ANS/);
+  assert.match(h.elements.get('table-head').innerHTML,/class="percentile-group">Avg percentiles<\/th>/);
   assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2023–2025/);
   assert.match(h.elements.get('pool-summary').innerHTML,/<strong>2<\/strong>/);
   assert.equal(h.api.getVisible().length,2);
@@ -828,7 +845,7 @@ await check('Averaged ranks respond to metric, universe and treatment without re
   const value=()=>h.api.selectionExport().matrix.find(r=>r[0]==='Journal A').at(-1);
   assert.equal(value(),50);
   h.api.update({metric:'share'});assert.equal(value(),100);
-  assert.match(h.elements.get('table-head').innerHTML,/Avg percentiles · NF/);
+  assert.match(h.elements.get('table-head').innerHTML,/class="percentile-group">Avg percentiles<\/th>/);
   h.api.update({metric:'per_article',treatment:'raw'});assert.equal(value(),100);
   h.api.update({treatment:'filtered',universe:'oa'});assert.equal(value(),100);
   h.api.update({query:'Journal A'});assert.equal(value(),100);
@@ -890,7 +907,7 @@ await check('Optional metadata columns keep their order, selected-year values, s
   const help=readFileSync(new URL('../site/journal-help.html',import.meta.url),'utf8');
   for(const label of labels)assert.ok(help.replace(/<dt[^>]*>/g,'<dt>').includes(`<dt>${label}</dt>`),label);
   assert.deepEqual(Array.from(h.api.getDisplayColumns().filter(c=>c.extra),c=>c.label),['Publ. years','Publ. recorded','Citations recorded','OpenAlex ID','Norw. Reg. ID','Norw. Reg. level','ISSNs']);
-  for(const label of labels)assert.ok(html.includes(`>${label}</label>`),label);
+  for(const label of labels)assert.ok(html.replace(/<\/?span[^>]*>/g,'').includes(`>${label}</label>`),label);
   assert.doesNotMatch(help,/Opens the checkbox popup next to What is what/);
 });
 await check('Added columns persist across years and presets; hide/restore obeys selections and Reset clears them', async () => {
@@ -953,3 +970,129 @@ await check('Column choices during average loading wait for the complete period 
 });
 
 console.log(`${passed} main-page tests passed`);
+
+const ojfRecords = [2,4,10,0,null].map((value,i)=>({
+  openalex_id:`S${i}`,title:`OJF journal ${i}`,publisher:'Open publisher',issns:'1234-5678',
+  score_year:2025,metric_window_years:2,in_n:i<2,in_oa:true,oa_field:'Medicine',
+  ojf_raw:i===4 ? 1:value,ojf_filtered:value,ojf_status_filtered:i===4?'ref_denominator_collapse':'defined',
+  publications_raw:10,publications_filtered:i===4?0:8,citations_raw:i===4?10:value*10,
+  citations_filtered:value==null?0:value*8,reference_coverage_pct:i===4?0:80,active_years:null,
+}));
+function ojfHarness(fetcher) {
+  const h=harness(fetcher ?? (async url=>({ok:true,arrayBuffer:async()=>url.includes('/ojf/')?ojfRecords:records})));
+  h.api.init({years,ojf:{annual_path:'ojf',history_path:'ojf/history',rank_path:'ojf/ranks'}},{});
+  h.elements.get('year').value='2025';
+  return h;
+}
+await check('OJF selector uses its own files, preset, two-year counts and field percentiles',async()=>{
+  const h=ojfHarness(); await h.api.loadYear(2025); await h.api.switchMetric('ojf');
+  assert.equal(h.api.getState().metric,'ojf');
+  assert.equal(h.elements.get('universe-label').textContent,'Show journals from');
+  assert.equal(h.elements.get('preset').value,'jif');
+  assert.equal(h.elements.get('publication-years-control').hidden,true);
+  assert.equal(h.elements.get('settings').hidden,true);
+  assert.equal(h.elements.get('metric-details').attrs.href,'journal-help.html#ojf');
+  assert.equal(h.elements.get('metric-independence-text').textContent,'Independently calculated OJF values, not official Journal Impact Factors');
+  assert.match(h.elements.get('table-head').innerHTML,/Publications: 2023\u20132024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Citable items used/);
+  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/data-sort="score:share"|data-sort="score:per_article"/);
+  const result=h.api.selectionExport();
+  assert.equal(result.matrix.length,3);
+  assert.equal(result.matrix.find(row=>row[0]==='OJF journal 0')[6],2);
+  assert.ok(result.filename.includes('ojf-2025'));
+});
+await check('OJF universe changes percentiles and membership, never scores, counts or settings visibility',async()=>{
+  const h=ojfHarness(); await h.api.switchMetric('ojf');
+  const before=h.api.selectionExport().matrix.find(row=>row[0]==='OJF journal 0');
+  assert.equal(before.at(-1),50);
+  assert.equal(h.api.selectionExport().matrix.find(row=>row[0]==='OJF journal 1').at(-1),100);
+  h.api.update({universe:'oa'});
+  assert.equal(h.elements.get('settings').hidden,true);
+  const after=h.api.selectionExport().matrix.find(row=>row[0]==='OJF journal 0');
+  assert.equal(after[6],before[6]);assert.equal(after[3],before[3]);assert.equal(after[4],before[4]);
+  assert.equal(h.api.selectionExport().matrix.find(row=>row[0]==='OJF journal 1').at(-1),75);
+  assert.equal(after.at(-1),50); // 0, 2, 4, 10: two of four scores are at or below 2.
+  h.api.update({query:'OJF journal 2'});
+  assert.equal(h.api.selectionExport().matrix[1].at(-1),100);
+  assert.equal(h.elements.get('preset').value,'custom');
+});
+await check('OJF Full coverage preserves zero and undefined scores, with no automatic raw fallback',async()=>{
+  const h=ojfHarness(); await h.api.switchMetric('ojf'); h.api.applyPreset('ojf-full');
+  const table=h.api.selectionExport().matrix;
+  assert.equal(table.length,6);
+  assert.equal(table.find(row=>row[0]==='OJF journal 3')[6],0);
+  assert.equal(table.find(row=>row[0]==='OJF journal 4')[6],null);
+  assert.equal(table.find(row=>row[0]==='OJF journal 4')[3],0);
+  h.api.update({treatment:'raw'});
+  assert.equal(h.api.selectionExport().matrix.find(row=>row[0]==='OJF journal 4')[6],1);
+});
+await check('Returning to ANS and Reset load the correct metric dataset and keep NF optional',async()=>{
+  const h=ojfHarness(); await h.api.loadYear(2025); add(h,'score:share');
+  await h.api.switchMetric('ojf');
+  assert.equal(h.api.getColumns().some(col=>col.key==='score:share'),false);
+  assert.equal(h.elements.get('add-nf-choice').hidden,true);
+  await h.api.switchMetric('per_article');
+  assert.equal(h.api.getColumns().some(col=>col.key==='score:share'),true);
+  assert.equal(h.elements.get('publication-years-control').hidden,false);
+  await h.api.switchMetric('ojf'); await h.elements.get('reset').emit('click');
+  assert.equal(h.api.getState().metric,'per_article');
+  assert.equal(h.api.getRows()[0].title,'Journal 00');
+  assert.equal(h.api.getColumns().some(col=>col.key==='score:share'),false);
+});
+await check('OJF metric load failure restores the last committed ANS view',async()=>{
+  const h=ojfHarness(async url=>{if(url.includes('/ojf/'))throw Error('offline');return {ok:true,arrayBuffer:async()=>records};});
+  await h.api.loadYear(2025);await h.api.switchMetric('ojf');
+  assert.equal(h.api.getState().metric,'per_article');
+  assert.match(h.elements.get('table-head').innerHTML,/class="percentile-group">Percentiles<\/th>/);
+  assert.match(h.elements.get('notice-message').textContent,/could not be loaded/);
+});
+await check('OJF has a text Details help link, independent labels and accessible metric wording',()=>{
+  assert.doesNotMatch(html,/id="citing-sources"|id="metric-maturity"/);
+  assert.match(html,/id="metric-details" href="journal-help.html#ans" target="_blank" rel="noopener noreferrer">Details<\/a>/);
+  assert.match(html,/Article Network Score \(ANS\)/);
+  assert.match(html,/Open Journal Factor \(OJF\)/);
+  const help=readFileSync(new URL('../site/journal-help.html',import.meta.url),'utf8');
+  assert.match(help,/id="ojf-citing-sources"/);
+  assert.doesNotMatch(help,/Close to EF|Close to JIF|Ranking indicator<\/dt>/);
+});
+
+await check('OJF tables use one decimal and CSV/XLSX three decimals while percentiles retain full precision',async()=>{
+  const precise = ojfRecords.map((row,i)=>({...row,ojf_filtered:[1.2134,1.2446,10,0.04444,null][i]}));
+  const h=ojfHarness(async url=>({ok:true,arrayBuffer:async()=>url.includes('/ojf/')?precise:records}));
+  await h.api.switchMetric('ojf');
+  const annualScores=h.api.getRows().filter(row=>row.in_n).map(row=>E.score(row,h.api.getState()));
+  assert.deepEqual(Array.from(annualScores),[1.2134,1.2446]);
+  let result=h.api.selectionExport();
+  const scoreCol=result.matrix[0].indexOf('OJF');
+  const fieldCol=result.matrix[0].indexOf('Field percentile (OJF)');
+  const first=result.matrix.find(row=>row[0]==='OJF journal 0');
+  const second=result.matrix.find(row=>row[0]==='OJF journal 1');
+  assert.equal(first[scoreCol],1.213); assert.equal(second[scoreCol],1.245);
+  assert.equal(first[fieldCol],50); assert.equal(second[fieldCol],100);
+  const mainTable=h.elements.get('table-body').innerHTML;
+  assert.equal((mainTable.match(/title="1\.2">1\.2<\/td>/g)||[]).length,2);
+  assert.doesNotMatch(mainTable,/1\.21|1\.24/);
+
+  h.api.applyPreset('ojf-full');
+  result=h.api.selectionExport();
+  assert.equal(result.matrix.find(row=>row[0]==='OJF journal 3')[scoreCol],0.044);
+  assert.equal(result.matrix.find(row=>row[0]==='OJF journal 4')[scoreCol],null);
+  assert.match(h.elements.get('table-body').innerHTML,/title="0\.0">0\.0<\/td>/);
+  const csv=h.api.csv().parts.join('');
+  assert.match(csv,/,1\.213,/); assert.match(csv,/,1\.245,/);
+  assert.match(csv,/,10\.000,/); assert.match(csv,/,0\.044,/);
+  assert.doesNotMatch(csv,/1\.2134|1\.2446|0\.04444/);
+
+  const file=await h.api.xlsx();
+  const book=XLSX.read(file.bytes,{type:'array',cellNF:true});
+  const sheet=book.Sheets['Journal selection'];
+  const exported=XLSX.utils.sheet_to_json(sheet,{header:1,defval:null});
+  const rowIndex=exported.findIndex(row=>row[0]==='OJF journal 0');
+  const cell=sheet[XLSX.utils.encode_cell({r:rowIndex,c:scoreCol})];
+  assert.equal(cell.v,1.213); assert.equal(cell.z,'0.000');
+
+  const tiny=h.api.getRows().find(row=>row.openalex_id==='S3');
+  const details=D.metricsTable([[years[1],tiny]],2025,{...h.api.getState(),percentileMode:'none',showPercentiles:false},{ojf:{short:'OJF',digits:1}});
+  assert.match(details,/<td>0\.0<\/td>/); assert.doesNotMatch(details,/4\.00e|0\.040/);
+});
+console.log('7 OJF integration tests passed');

@@ -1,0 +1,87 @@
+{
+  "status": "PASS",
+  "scope": "Replay from hash-bound frozen open-input type counts, not a repeated raw-snapshot scan",
+  "years": [
+    {
+      "year": 2022,
+      "rows": 117465,
+      "count_columns_exact": true,
+      "all_score_and_status_cells_exact": true,
+      "score_rows": 939720,
+      "inputs": {
+        "type_denominators": "3f9c014f6f8343232d6f9332af5df767a74870e10dcee8b32e1b57f88f9d13e6",
+        "type_citations": "deb7ee9a7bd45a7704765265210906397735782211f631de23e52d57ed288210",
+        "population": "1f786886b05b336b4dfcd184f6bcb18034df547a47f0173deee5f17724fbcfb9",
+        "counts": "82bfc8c5952087d15daeecc3ff4d06884fc31aa354ea2383a9cd9fe669dbcbbb",
+        "scores": "8fb925c2f0b8380eccd6529a88410bea521c765e5725b84ef7e103a0ae8810a9"
+      }
+    },
+    {
+      "year": 2023,
+      "rows": 116977,
+      "count_columns_exact": true,
+      "all_score_and_status_cells_exact": true,
+      "score_rows": 935816,
+      "inputs": {
+        "type_denominators": "44b9a95f2f95af6fe001f1642d5dc6a7af70d56d4f0acc0a7d6c16c3879c2ce6",
+        "type_citations": "76b2694fe399a35222f588b6d02adb1ea37301acfc0050ddc045bbfb5875544c",
+        "population": "bc272aa9ba5840932aaa40b108a5e2dc9f4fabf932b30e5920405a3d14b057ae",
+        "counts": "7fe74e3978be293989ade8bd24eb5302ccb50034eb3ff429dc8e8d1b9d477fb3",
+        "scores": "29edca0a04165dc3e3ea2d552fabf48f3b30105d0a1287094e156cb9949459cf"
+      }
+    },
+    {
+      "year": 2024,
+      "rows": 111554,
+      "count_columns_exact": true,
+      "all_score_and_status_cells_exact": true,
+      "score_rows": 892432,
+      "inputs": {
+        "type_denominators": "cb6f800a939ad66987be91da9b0439e6e93e13ac630410dc3e10ec509c44c7e9",
+        "type_citations": "347af58233b7451b89d9ffd9770a06c95659e9a1454904e5b8f546ba6d88d482",
+        "population": "e01b98cb1958ed095486ed184009f3bde6f5d54b091a0834b792065f42ef397f",
+        "counts": "1839bd61bcbd100606845185233cd30a6821ba8425ee66e3d67bbbf08df0ace3",
+        "scores": "46c24e29c0256803621266ff053f2c7bfdaf0b2cc472d703102c3d48b6f074f3"
+      }
+    },
+    {
+      "year": 2025,
+      "rows": 115191,
+      "count_columns_exact": true,
+      "all_score_and_status_cells_exact": true,
+      "score_rows": 921528,
+      "inputs": {
+        "type_denominators": "d4b992cbaa94d822854db0608cc8deaa5ff4a89e7dd4a47c670d23b65764dedc",
+        "type_citations": "a6816da4ad5d304091228465a8699cb1a30650d0d6ba05eaf5c5f0b8dfdc8f9c",
+        "population": "8055f5c0386016cb3110544c96f59121e8a310c836f9337a09c6e09414a287c9",
+        "counts": "a933d7be8738caed11f475852bb1ec55398ff1318034ffe2fb02966e86df722d",
+        "scores": "dcfc5be366ca17f045da25c6face64d2dba69e4ce9f080580337659cbf49fa38"
+      }
+    },
+    {
+      "year": 2026,
+      "rows": 117435,
+      "count_columns_exact": true,
+      "all_score_and_status_cells_exact": true,
+      "score_rows": 939480,
+      "inputs": {
+        "type_denominators": "7063595f132674d051484c08b4bfd0b8cec016517bd394f9adc0fa111b3905dc",
+        "type_citations": "99049f98cffe884a8b2856534e8cc3d753cc5554a5d8b49ef1709ce92fbf1822",
+        "population": "00600dc3b278d0a75fd2c8b5815c8e2527c14bb9059c042c8695058d8e2b964b",
+        "counts": "237318ef85602f0ab58c9536b2d84ef47f698d83f4c00663f232554bf874b0f3",
+        "scores": "c4cb96eee29dd284f100d23b59e360108e7028dec1430c327f0a3fc074efe59a"
+      }
+    }
+  ],
+  "total_journal_years": 578622,
+  "all_cells_exact": true,
+  "source_sha256": {
+    "assembly.py": "e7e3f6755e64745100ed78619e3275fe0c205b0eeb721f77e145e0c49b942506",
+    "checkpoint.py": "440af0edfb062c7f3937dab5904e44ec5a48122130afad3cce974ab126216d0b",
+    "counting_base.py": "0910f5c5534621c26751f45eb406523df3923750f3715db8a9adc234e57b7951",
+    "engine.py": "d5a768b19744610e19b8e82dd8fe9482fcdb22c3e3dba82f10f806edc6aee9a1",
+    "pipeline.py": "9077aaa975d7232f9066837d29092186cb0610338568e59d0a961f7c0b21e1a4",
+    "publication.py": "0a7641a79eea515c709299e33d4570734f89b1cb528e510832d5b014cd3d164b",
+    "__init__.py": "bccc98eac70b133f123e474f6ce0b271850ef48ca64d431c968b0e8b4cd7af6d"
+  }
+}

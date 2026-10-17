@@ -42,7 +42,7 @@ def release_validation(root):
         raise ValueError('Changed source requires a new replay or an approved additive validation record')
     record = json.loads(path.read_text(encoding='utf-8'))
     version = json.loads((root / 'configs/zenodo-software.json').read_text())['metadata']['version']
-    if (record.get('status') != 'PASS' or record.get('mode') != 'approved-additive-update'
+    if (record.get('status') != 'PASS' or record.get('mode') not in ['approved-additive-update','approved-ojf-extension']
             or record.get('software_version') != version or not record.get('owner_approved')):
         raise ValueError('Additive exception is not approved for this software version')
     if record.get('validated_source_sha256') != current:
@@ -67,6 +67,26 @@ def release_validation(root):
         raise ValueError('Additive counts or unchanged-score checks failed')
     if any(not row.get('csv_all_cells_exact') or not row.get('xlsx_all_cells_verified') for row in formats['annual']):
         raise ValueError('Annual format verification failed')
+    if record['mode']=='approved-ojf-extension':
+        names=['ojf-validation.json','ojf-frozen-replay.json','ojf-format-validation.json']
+        for name in names:
+            if record['evidence_sha256'].get(name)!=digest(root/'docs'/name):raise ValueError('OJF evidence changed: '+name)
+        check=json.loads((root/'docs/ojf-validation.json').read_text())
+        replay=json.loads((root/'docs/ojf-frozen-replay.json').read_text())
+        formats=json.loads((root/'docs/ojf-format-validation.json').read_text())
+        expected={k:v for k,v in current.items() if k.startswith('src/opindx_replication/ojf/') or k=='src/opindx_replication/datasets.py'}
+        if check.get('status')!='PASS' or check.get('validated_source_sha256')!=expected:
+            raise ValueError('OJF implementation changed after validation')
+        if not check.get('open_metadata_replay_pass') or check.get('synthetic_engine_tests_passed',0)<9:
+            raise ValueError('OJF metadata or independent fixtures failed')
+        if replay.get('status')!='PASS' or not replay.get('all_cells_exact') or sorted(r['year'] for r in replay['years'])!=years:
+            raise ValueError('Incomplete OJF frozen-input replay')
+        for name,sha in replay['source_sha256'].items():
+            if digest(root/'src/opindx_replication/ojf'/name)!=sha:raise ValueError('OJF replay engine changed')
+        if formats.get('status')!='PASS' or sorted(r['year'] for r in formats['annual'])!=years or any(
+                not r.get('csv_all_cells_exact') or not r.get('xlsx_all_cells_verified') for r in formats['annual']):
+            raise ValueError('Incomplete OJF format validation')
+        return 'Preserved NF/ANS baseline and values; exact five-year OJF frozen-type-count replay and open metadata matching; independent fixtures and all-cell formats; no repeated raw-snapshot scan'
     return 'Owner-approved additive update: unchanged baseline calculation core and all prior values, graph/solver count reconciliation, all-cell formats, tests and archive integrity; no new raw-input replay'
 
 

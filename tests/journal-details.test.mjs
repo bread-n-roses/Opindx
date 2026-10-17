@@ -56,16 +56,16 @@ await check('Unclassified publications and data errors do not display 100 percen
   assert.doesNotMatch(D.fieldsTable(meta,unknown,2026),/>100%/);
   assert.match(D.fieldsTable(meta,null,2026),/Field breakdown unavailable/);
 });
-await check('Grouped percentile header follows the selected indicator and disappears when disabled', () => {
+await check('Grouped percentile header stays concise and disappears when disabled', () => {
   const history = [[entry(2026),meta]];
   const html = D.metricsTable(history,2026,settings,metrics);
-  assert.match(html,/scope="colgroup" colspan="2"[^>]*>Pctiles &middot; ANS/);
+  assert.match(html,/scope="colgroup" colspan="2"[^>]*>Percentiles/);
   assert.match(html,/<th scope="col">Field<\/th><th scope="col">Total<\/th>/);
   assert.match(html,/rowspan="2"/); assert.doesNotMatch(html,/OA · NR|Journal universe/); assert.match(html,/Citations/);
   assert.doesNotMatch(html,/Ref\. coverage/);
-  assert.match(D.metricsTable(history,2026,{...settings,metric:'share'},metrics),/Pctiles &middot; NF/);
+  assert.match(D.metricsTable(history,2026,{...settings,metric:'share'},metrics),/Percentiles/);
   const off = D.metricsTable(history,2026,{...settings,showPercentiles:false},metrics);
-  assert.doesNotMatch(off,/Pctiles|rowspan="2"|Loading field/);
+  assert.doesNotMatch(off,/Percentiles|rowspan="2"|Loading field/);
 });
 await check('Each historical year uses its own ranking population, including field-only percentiles', () => {
   const first = [journal('S10',10),meta,journal('S30',30)], second = first.slice(0,2);
@@ -168,7 +168,7 @@ const coordinator = app.slice(app.indexOf('const historicalRankFiles ='),app.ind
 function harness(percentiles) {
   const elements = Object.fromEntries(['history','field-breakdown','register-details','history-percentile-status'].map(id=>[id,{innerHTML:'',textContent:''}]));
   let reads = 0;
-  const context = {E,D,METRICS:metrics,state:{...settings,showPercentiles:percentiles},year:2026,rows:[meta],historyRequest:0,
+  const context = {E,D,METRICS:metrics,metricSet:()=>metrics,state:{...settings,showPercentiles:percentiles},year:2026,rows:[meta],historyRequest:0,
     index:{journal_details:{rank_path:'ranks-test',rank_layout:'metric-treatment'}},$:id=>elements[id],
     journalHistory:async()=>[[entry(2026),{...meta,...detail}],[entry(2025),{...meta,...detail}]],
     fetchOk:async(url)=>{assert.match(url,/2025-n-per_article-filtered\.parquet$/);reads++;return {arrayBuffer:async()=>new ArrayBuffer(0)};},parquetReadObjects:async()=>[meta]};

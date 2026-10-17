@@ -8,7 +8,7 @@ on:
     types: [published, deleted]
   push:
     branches: [main]
-    paths: ["site/**", "tests/**", "tools/build_site_data.py", "tools/version_site_assets.py", "score-years.json", ".github/workflows/deploy.yml"]
+    paths: ["site/**", "tests/**", "tools/build_site_data.py", "tools/build_ojf_site_data.py", "tools/version_site_assets.py", "replication/src/opindx_replication/ojf/**", "score-years.json", ".github/workflows/deploy.yml"]
   workflow_dispatch:
 
 permissions:
@@ -48,6 +48,7 @@ jobs:
             [ -d "runs/$tag" ] || gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern 'manifest.json' --pattern 'scores_*.parquet' --dir "runs/$tag"
           done
           echo "LATEST_RUN=$latest" >> "$GITHUB_ENV"
+          gh release download "$latest" --repo "$GITHUB_REPOSITORY" --pattern 'ojf_manifest.json' --pattern 'ojf_scores_*.parquet' --dir "runs/$latest"
 
       - uses: actions/setup-python@v7
         with:
@@ -55,9 +56,10 @@ jobs:
 
       - name: Check the data and add it to the site
         run: |
-          pip install pyarrow
+          pip install pyarrow pandas
           python -m unittest discover -s tests -p 'test_*.py'
           python tools/build_site_data.py runs "$LATEST_RUN" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases"
+          python tools/build_ojf_site_data.py "runs/$LATEST_RUN" site/data
 
       - name: Add a version to the code links, so browsers never mix old and new files
         run: python tools/version_site_assets.py site "${GITHUB_SHA::7}"

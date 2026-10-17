@@ -1,5 +1,9 @@
 // Presets define the metrics and comparison pool. Search/display filters are independent.
 export const PRESETS = Object.freeze({
+  'jif': Object.freeze({universe:'n', treatment:'filtered', showPercentiles:true, percentileMode:'field',
+    metric:'ojf', minCoverage:10, minYears:0, topPercent:100, poolOnly:true, averagePercentiles:false}),
+  'ojf-full': Object.freeze({universe:'oa', treatment:'filtered', showPercentiles:true, percentileMode:'field',
+    metric:'ojf', minCoverage:10, minYears:0, topPercent:100, poolOnly:false, averagePercentiles:false}),
   full: Object.freeze({universe: 'oa', treatment: 'filtered', showPercentiles: true, percentileMode: 'field',
     metric: 'per_article', minCoverage: 10, minYears: 4, topPercent: 100, poolOnly: false, averagePercentiles: false}),
   'ef-ais': Object.freeze({universe: 'n', treatment: 'filtered', showPercentiles: true, percentileMode: 'field',

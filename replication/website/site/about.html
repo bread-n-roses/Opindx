@@ -10,6 +10,7 @@
   <link rel="icon" href="assets/favicon-round.ico" sizes="any">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
+  <script data-goatcounter="https://opindx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
   <header class="masthead">
@@ -21,36 +22,20 @@
       <p class="subtitle">Open citation metrics. Openly calculated.</p>
     </div></div>
 
-    <section class="panel">
-      <h2>Metrics</h2>
-      <p>The journal scores follow the recursive citation-network method of Bergstrom, West and Wiseman (2008). Imagine a reader who keeps following references from one journal to another, and now and then jumps to a random journal. Journals that this reader visits often carry more weight, and a citation from a journal with more weight counts for more than one from a peripheral journal. Journal self-citations are left out.</p>
+
+
+    <section class="panel" aria-labelledby="research">
+      <h2 id="research">Why Opindx?</h2>
+      <p>Journal metrics like the Journal Impact Factor&trade; and the Article Influence Score&trade; influence where researchers publish and how they are evaluated. Yet they are calculated from closed commercial data, sit behind a paywall, cover only about 22,000 journals, and cannot be independently checked.</p>
+      <p>Opindx calculates comparable metrics entirely from open data. Every score can be downloaded, checked against its source data and recalculated with our open-source code, free of charge.</p>
+      <p><strong>Does it work?</strong> Two studies compared the open metrics with the official ones for 16,000 to 20,000 journals in 2023 and 2024:</p>
       <ul>
-        <li><strong>Network Factor (NF)</strong>: a journal’s share of all citation flow within a journal universe, on a scale that sums to 100. It grows with the number of articles a journal publishes. The Network Factor follows an Eigenfactor&reg;-like methodology.</li>
-        <li><strong>Article Network Score (ANS)</strong>: the NF divided by the journal’s share of articles, so it measures influence per article. The article-weighted average is 1; an ANS of 2 means twice the average influence per article. The Article Network Score follows an Article Influence&reg; Score-like methodology.</li>
+        <li>The <strong>Open Journal Factor (OJF)</strong> counts how often a journal’s recent articles are cited, like the Journal Impact Factor. It ranks journals very similarly to the official metric (rank correlation 0.96, where 1 means identical rankings). Its values are typically about 13% lower, so OJF and JIF values should not be mixed in one comparison. Unlike the official metric, it can also score journals outside the commercial list. Many of these are small journals with few or no citations from approved scholarly sources, so their scores are at or near zero. <a href="https://doi.org/10.5281/zenodo.23437993" target="_blank" rel="noopener noreferrer">Read the OJF study</a></li>
+        <li>The <strong>Article Network Score (ANS)</strong> also counts citations but gives more weight to citations from influential journals, like the Article Influence Score. It also ranks journals very similarly to the official metric (rank correlation 0.95). <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">Read the ANS study</a></li>
       </ul>
-      <p>For score year <em>t</em>, the scores use citations made in year <em>t</em> to articles and reviews published in the five years before (<em>t</em>−5 to <em>t</em>−1). Duplicate records of the same journal in OpenAlex are combined before the calculation.</p>
-      <p>‘Eigenfactor’ and ‘Article Influence’ are registered trademarks of the University of Washington. The abbreviations EF and AIS refer to the official metrics.</p>
-      <p class="citation"><strong>Reference</strong><br>Bergstrom, C. T., West, J. D., &amp; Wiseman, M. A. (2008). The Eigenfactor&trade; metrics. <em>Journal of Neuroscience, 28</em>(45), 11433&ndash;11434. DOI: 10.1523/JNEUROSCI.0003-08.2008.</p>
-    </section>
-
-    <section class="panel">
-      <h2>Journal universes</h2>
-      <p>Only journals in the chosen universe, and citations between them, take part in the network score calculation. The same journal can therefore have different scores in different universes.</p>
-      <ul>
-        <li><strong>Norwegian Register</strong>: the journals approved at Level 1 or Level 2 in the <a href="https://kanalregister.hkdir.no/en" target="_blank" rel="noopener noreferrer">Norwegian Register for Scientific Journals, Series and Publishers</a>. The register is reviewed by disciplinary expert panels and maintained every year, which makes it an open, curated journal list.</li>
-        <li><strong>OpenAlex</strong>: all sources that <a href="https://openalex.org" target="_blank" rel="noopener noreferrer">OpenAlex</a> classifies as journals and where at least one open score is available. This is a much broader list.</li>
-      </ul>
-    </section>
-
-    <section class="panel">
-      <h2>Filtered and Raw scores</h2>
-      <p>Open datasets are not perfect. Sometimes OpenAlex does not record references for publications. That can mean a publication really has no bibliography, but also that its references are missing from the data. <strong>Filtered</strong> scores only count publications with at least one recorded reference; <strong>Raw</strong> scores count all of them. The website shows filtered scores by default. 'Pubs. w/out refs.' shows the share of eligible publications of a journal that are recorded without a reference.</p>
-    </section>
-
-    <section class="panel">
-      <h2 id="research">The research behind it</h2>
-      <p>This <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">study</a> compares open scores calculated from OpenAlex with a benchmark from a commercial citation index, for score years 2023 and 2024. It separates two choices that open reconstructions make at the same time: which publications count (Raw or Filtered) and which journal universe is used. Its main findings are that filtered scores agree better with the benchmark in every universe and that the Norwegian Register gives results that are closest to the benchmark. This setting can be chosen as preset "Close to EF &amp; AIS".</p>
-      <p class="citation"><strong>How to cite</strong><br>Weitzel, U. (2026). <em><a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">Reference Observability and Journal Universe Choice in Open Reconstructions of Recursive Journal Metrics.</a></em> Working paper. DOI: <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">10.31235/osf.io/x9b8q_v1</a>.</p>
+      <p>Overall rankings agree well, but individual journals can differ from their official values.</p>
+      <p>The studies also tested the practical choices behind each metric, such as which publications to count and which journals to include. In both studies, an openly licensed journal list curated by expert panels in Norway matched the official metrics almost as well as the commercial list did. The site’s current default settings follow these findings.</p>
+      <p>Note that Opindx percentiles rank journals within Opindx’s own selection. They are not official ranks or quartiles.</p>
     </section>
 
     <section class="panel">
@@ -65,7 +50,13 @@
       <p>Journal metadata, publications and citations come from <a href="https://openalex.org/" target="_blank" rel="noopener noreferrer">OpenAlex</a> (CC0 license). The Norwegian journal list and journal levels come from the <a href="https://kanalregister.hkdir.no/en" target="_blank" rel="noopener noreferrer">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (Norwegian Licence for Open Government Data, NLOD 2.0).</p>
     </section>
 
-    <footer class="page-footer"><span>Opindx · License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a></span><span>Open Data · Open Source · Nonprofit · Made at Vrije Universiteit Amsterdam by Utz Weitzel</span></footer>
+    <section class="panel" aria-labelledby="independence">
+      <h2 id="independence">Independence and trademarks</h2>
+      <p>Opindx is independent of, and is not endorsed or sponsored by, Clarivate or the University of Washington. OJF, ANS and NF are independently calculated indicators, not official benchmark values. References to established indicators identify the methods and comparisons discussed in the studies.</p>
+      <p>“Journal Impact Factor”, “JIF” and “Journal Citation Reports” are trademarks of Clarivate. “Eigenfactor” and “Article Influence” are trademarks of the University of Washington. JIF, AIS and EF refer to the official indicators.</p>
+      <p>Author-created score datasets and website text are available under CC BY 4.0; software is released under the MIT license. Source-data licenses remain those of their providers.</p>
+    </section>
+    <footer class="page-footer"><p>Opindx &middot; Open Data &middot; Open Source &middot; Nonprofit &middot; Made at Vrije Universiteit Amsterdam by Utz Weitzel &middot; License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a> &middot; Opindx is independent of, and is not endorsed or sponsored by, Clarivate or the University of Washington. Metrics are calculated from OpenAlex and Norwegian Register data. No journal-level Journal Citation Reports data are displayed. <a href="about.html#independence" target="_blank" rel="noopener noreferrer">Details</a></p></footer>
   </main>
   <script type="module">
     const escape = value => String(value ?? '—').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "date": "2026-10-17",
+  "scope": "Exact frozen open-input type-count replay and open Source/Norwegian metadata replay, not a repeated raw-snapshot scan",
+  "validated_source_sha256": {
+    "src/opindx_replication/datasets.py": "8efd89afd53478eb9aec47650a2433bac145768035beb407ad87525efd99ea61",
+    "src/opindx_replication/ojf/__init__.py": "bccc98eac70b133f123e474f6ce0b271850ef48ca64d431c968b0e8b4cd7af6d",
+    "src/opindx_replication/ojf/assembly.py": "e7e3f6755e64745100ed78619e3275fe0c205b0eeb721f77e145e0c49b942506",
+    "src/opindx_replication/ojf/checkpoint.py": "440af0edfb062c7f3937dab5904e44ec5a48122130afad3cce974ab126216d0b",
+    "src/opindx_replication/ojf/counting_base.py": "0910f5c5534621c26751f45eb406523df3923750f3715db8a9adc234e57b7951",
+    "src/opindx_replication/ojf/engine.py": "d5a768b19744610e19b8e82dd8fe9482fcdb22c3e3dba82f10f806edc6aee9a1",
+    "src/opindx_replication/ojf/pipeline.py": "9077aaa975d7232f9066837d29092186cb0610338568e59d0a961f7c0b21e1a4",
+    "src/opindx_replication/ojf/publication.py": "0a7641a79eea515c709299e33d4570734f89b1cb528e510832d5b014cd3d164b"
+  },
+  "open_metadata_replay_pass": true,
+  "open_metadata_annual": [
+    {
+      "year": 2022,
+      "all_open_metadata_columns_exact": true,
+      "n_members": 25375
+    },
+    {
+      "year": 2023,
+      "all_open_metadata_columns_exact": true,
+      "n_members": 25846
+    },
+    {
+      "year": 2024,
+      "all_open_metadata_columns_exact": true,
+      "n_members": 24684
+    },
+    {
+      "year": 2025,
+      "all_open_metadata_columns_exact": true,
+      "n_members": 25067
+    },
+    {
+      "year": 2026,
+      "all_open_metadata_columns_exact": true,
+      "n_members": 24836
+    }
+  ],
+  "timestamp_comparison": "Equivalent timestamps normalized to the same storage unit before exact comparison",
+  "work_identity_ledgers_exact": true,
+  "synthetic_engine_tests_passed": 10,
+  "replication_tests_passed": 136,
+  "all_fifteen_published_nf_ans_files_byte_identical": true,
+  "browser_qa": "DOM-based behavior tests; interactive browser unavailable in this session",
+  "paper_analysis_validation": "Separate package: 8 exact table fragments, 8 exact CSVs, 85 claims; no empirical output bundled"
+}

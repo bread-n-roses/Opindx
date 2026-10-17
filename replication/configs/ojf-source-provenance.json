@@ -1,0 +1,14 @@
+{
+  "author": "Utz Weitzel",
+  "source_revision": "Paper D finalization, 15-16 October 2026",
+  "source_sha256": {
+    "counting.py": "e1ce127024bd72c508bfbdb66241c0ad02b6434cb047980b9a62999b34a46aa9",
+    "counting_revised.py": "985a5105588c6b6bead0ca879126ace9771ef0331e7ad9bac4d996aa67e95bd7",
+    "finalize_opindx_jif.py": "5ffa4a0c2d653fd2a0db9fca5c4ce7f2fcafdd5c607457db052892902e18894c",
+    "extract_checkpoint.py": "f1ad6f2a67986018a60a92fda145604fedc2190b2fc8a0a01c5f7fa0e156b1b5",
+    "extract_finalization_checkpoint.py": "3fd3e5c42709d806ea8d2a66291d2c621d1f6b172590e3366731301923be60a2"
+  },
+  "public_scope": "Pure N-citing count/extraction/assembly helpers plus portable open-input orchestration; benchmark loaders, J membership, comparisons and research paths excluded.",
+  "software_version": "0.4.0",
+  "existing_nf_ans_core_unchanged": true
+}

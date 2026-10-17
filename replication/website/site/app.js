@@ -8,7 +8,12 @@ import { workbookBytes } from './selection-download.js';
 
 const $ = id => document.getElementById(id);
 const PAGE_SIZE = 25;
+const isOjf = () => state.metric === 'ojf';
+const windowYears = () => isOjf() ? 2 : 5;
+const metricSet = settings => settings.metric === 'ojf' ? {ojf:METRICS.ojf} : {share:METRICS.share,per_article:METRICS.per_article};
+const PRESET_LABELS = {'ef-ais':'AIS-oriented',full:'Full coverage (noisy)','vu-sbe':'AIS-oriented (select)',jif:'JIF-oriented','ojf-full':'Full coverage (noisy)',custom:'Custom'};
 const METRICS = {
+  ojf: {short:'OJF', name:'Open Journal Factor', note:'citations from Norwegian Register sources per citable item in the preceding two years', digits:1},
   share: {short: 'NF', name: 'Network Factor', note: 'share of citation-network prestige; sums to 100 over the universe', digits: 5},
   per_article: {short: 'ANS', name: 'Article Network Score', note: 'network share per article; article-weighted mean 1', digits: 3},
 };
@@ -17,24 +22,26 @@ const FILTERS = {
 };
 let index, year, rows = [], state = {...P.DEFAULTS, fields: []};
 let ranks, ranksKey, visible = [], hiddenMatches = [], columns = [], memberCount = 0, yearRequest = 0, loading = true;
-let explicitCustom = false, downloadBusy = false;
+let explicitCustom = false, downloadBusy = false, committedSettings = null;
 let annualRows = [], periodRows = new Map(), pendingYear = null, committedAverage = false;
 const annualFiles = new Map();
 function averagingAvailable(selectedYear) {
   return selectedYear >= 2024 && [0, 1, 2].every(offset =>
     index?.years.some(entry => entry.year === selectedYear - offset));
 }
-function annualFile(selectedYear) {
-  if (!annualFiles.has(selectedYear)) annualFiles.set(selectedYear,
-    fetchOk(`data/scores_${selectedYear}.parquet`).then(response => response.arrayBuffer())
+function annualFile(selectedYear, metric = state.metric) {
+  const key = `${metric}:${selectedYear}`, path = metric === 'ojf' ? 'ojf/' : '';
+  if (!annualFiles.has(key)) annualFiles.set(key,
+    fetchOk(`data/${path}scores_${selectedYear}.parquet`).then(response => response.arrayBuffer())
       .then(file => parquetReadObjects({file})).then(data => E.prepareRows(data))
-      .catch(error => { annualFiles.delete(selectedYear); throw error; }));
-  return annualFiles.get(selectedYear);
+      .catch(error => { annualFiles.delete(key); throw error; }));
+  return annualFiles.get(key);
 }
 // A display preference for this visit; never part of a preset or ranking pool.
 const hiddenColumns = new Set();
 const addedColumns = new Set();
 const OPTIONAL_COLUMNS = [
+  {key:'score:share', label:'NF', downloadLabel:'Network Factor (NF)', scoreExtra:true, title:'Network Factor in the selected universe'},
   {key:'active_years', label:'Publ. years', downloadLabel:'Publication years', title:'Years with recorded publications in the preceding five years'},
   {key:'publications_raw', label:'Publ. recorded', downloadLabel:'Publications recorded', title:'All recorded articles and reviews in the preceding five years'},
   {key:'citations_raw', label:'Citations recorded', title:'Recorded non-self citations from all available sources'},
@@ -46,7 +53,9 @@ const OPTIONAL_COLUMNS = [
 function syncAddedColumns() {
   let shown = 0;
   for (const col of OPTIONAL_COLUMNS) {
-    const visible = addedColumns.has(col.key) && !hiddenColumns.has(col.key);
+    if (col.scoreExtra) $('add-nf-choice').hidden = isOjf();
+    if (col.key === 'active_years') $('add-publication-years-choice').hidden = isOjf();
+    const visible = addedColumns.has(col.key) && !hiddenColumns.has(col.key) && !(isOjf() && (col.scoreExtra || col.key === 'active_years'));
     $(`add-${col.key}`).checked = visible;
     if (visible) shown++;
   }
@@ -62,7 +71,7 @@ const option = (value, label) => `<option value="${escape(value)}">${escape(labe
 const count = n => n.toLocaleString('en-US');
 const fmt = (value, digits = 0) => E.isNumber(value)
   ? value.toLocaleString('en-US', {minimumFractionDigits: digits, maximumFractionDigits: digits}) : '—';
-const fmtScore = (value, metric) => E.isNumber(value) && value > 0 && value < 10 ** -METRICS[metric].digits
+const fmtScore = (value, metric) => metric === 'ojf' ? fmt(value, 1) : E.isNumber(value) && value > 0 && value < 10 ** -METRICS[metric].digits
   ? value.toExponential(2) : fmt(value, METRICS[metric].digits);
 const publishedYear = () => index.years.find(entry => entry.year === year);
 const universeIds = () => Object.keys(publishedYear().universes);
@@ -88,7 +97,7 @@ function setLoading(value) {
   if (value) toggleDownloads(false);
   $('search').disabled = !index;
   $('search-controls').disabled = !index;
-  $('field-picker').querySelector('fieldset').disabled = year == null && !index?.years.find(entry => entry.year === Number($('year').value))?.fields;
+  $('field-picker').querySelector('fieldset').disabled = year == null && !index?.years.find(entry => entry.year === Number($('year').value))?.[isOjf() ? 'ojf_fields' : 'fields'];
   $('reset').disabled = !index;
   if (value) { $('previous').disabled = true; $('next').disabled = true; }
 }
@@ -119,16 +128,18 @@ async function loadYear(newYear) {
   $('selection-summary').hidden = true;
   try {
     if (year == null) { fillFilters(); syncControls(); renderInitialTable(newYear); }
-    const data = await Promise.all(requestedYears.map(annualFile));
+    const requestedMetric = state.metric;
+    const data = await Promise.all(requestedYears.map(value => annualFile(value, requestedMetric)));
     if (request !== yearRequest) return;
     year = newYear;
     pendingYear = null;
     committedAverage = useAverage;
+    committedSettings = {...state, fields:[...state.fields]};
     annualRows = data[0];
     rows = annualRows;
     periodRows = new Map(requestedYears.map((value, i) => [value, data[i]]));
     // Bound the full-year cache to the current window (at most three datasets).
-    for (const cachedYear of annualFiles.keys()) if (!periodRows.has(cachedYear)) annualFiles.delete(cachedYear);
+    for (const cachedYear of annualFiles.keys()) if (![...periodRows.keys()].some(y => cachedYear === `${requestedMetric}:${y}`)) annualFiles.delete(cachedYear);
     ranksKey = null;
     state.page = 0;
     const ids = universeIds();
@@ -146,6 +157,7 @@ async function loadYear(newYear) {
   } catch (error) {
     if (request !== yearRequest) return;
     pendingYear = null;
+    if (committedSettings && state.metric !== committedSettings.metric) state = {...committedSettings,fields:[...committedSettings.fields]};
     state.averagePercentiles = committedAverage;
     setLoading(false);
     $('download-view').disabled = year == null || downloadBusy;
@@ -154,22 +166,30 @@ async function loadYear(newYear) {
   }
 }
 
+function switchMetric(metric = $('metric').value) {
+  if (metric === 'ojf' && !index.ojf) { $('metric').value = state.metric; return; }
+  explicitCustom = false;
+  state = {...state, ...P.PRESETS[metric === 'ojf' ? 'jif' : 'ef-ais'], fields:[], sortKey:`score:${metric}`, sortDirection:-1, page:0};
+  ranksKey = null; toggleSettings(false);
+  return loadYear(pendingYear ?? year ?? Number($('year').value));
+}
+
 // ---- Table ----
 function getColumns(entry = publishedYear()) {
   const cols = [
     {key:'title', label:'Journal title', className:'journal-column align-left', title:'Open more info for journal details'},
     {key:'oa_field', label:'OpenAlex field', className:'align-left', title:'Predominant field and its share of classified publications'},
-    {key:'publications', label:'Publications used', title:`Articles and reviews ${entry.year - 5}–${entry.year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
-    {key:'citations', label:'Citations used', title:`Citations in ${entry.year}, excluding journal self-citations`},
+    {key:'publications', label:isOjf() ? 'Citable items used' : 'Publications used', title:`${isOjf() ? 'Citable items' : 'Articles and reviews'} ${entry.year - windowYears()}–${entry.year - 1}${state.treatment === 'raw' ? '' : ' with linked references'}`},
+    {key:'citations', label:'Citations used', title:`Citations in ${entry.year}, ${isOjf() ? 'including' : 'excluding'} journal self-citations`},
     {key:'publications_without_references_pct', label:'Pubs. w/out refs.', title:'Share of publications without a recorded OpenAlex reference'},
   ];
-  for (const [metric, m] of Object.entries(METRICS)) cols.push({key:`score:${metric}`, label:m.short,
-    className:metric === 'share' ? 'group-start' : '', score:true, title:`${m.name} in the ${entry.universes[state.universe] ?? state.universe.toUpperCase()} universe (${m.note})`});
+  for (const [metric, m] of Object.entries(isOjf() ? {ojf:METRICS.ojf} : {per_article:METRICS.per_article})) cols.push({key:`score:${metric}`, label:m.short,
+    className:metric === 'share' ? 'group-start' : '', score:true, title:isOjf() ? 'Open Journal Factor; citations always counted from Norwegian Register sources' : `${m.name} in the ${entry.universes[state.universe] ?? state.universe.toUpperCase()} universe (${m.note})`});
   for (const key of E.percentileKeys(state)) cols.push(key === 'fieldPct'
     ? {key, label:'Field', className:'group-start percentile-cell', title:'Percentile within the assigned field, after eligibility requirements'}
     : {key, label:'Total', className:'percentile-cell', title:'Percentile among all retained journals; 100 is highest'});
-  for (const col of OPTIONAL_COLUMNS.filter(col => addedColumns.has(col.key))) cols.push({...col, extra:true,
-    className:`${col.text ? 'align-left ' : ''}${col.key === 'issns' ? 'issns-cell ' : ''}${cols.some(item => item.extra) ? '' : 'group-start'}`});
+  for (const sourceCol of OPTIONAL_COLUMNS.filter(col => addedColumns.has(col.key) && !(isOjf() && (col.scoreExtra || col.key === 'active_years')))) cols.push({...sourceCol, ...(isOjf() && sourceCol.key === 'publications_raw' ? {label:'Items recorded',downloadLabel:'Citable items recorded',title:'All recorded citable items in the preceding two years'} : {}), ...(isOjf() && sourceCol.key === 'citations_raw' ? {title:'Raw citations from Norwegian Register sources, including journal self-citations'} : {}), extra:true,
+    className:`${sourceCol.text ? 'align-left ' : ''}${sourceCol.key === 'issns' ? 'issns-cell ' : ''}${cols.some(item => item.extra) ? '' : 'group-start'}`});
   return cols;
 }
 function renderHead(entry = publishedYear(), headerColumns = columns, interactive = true) {
@@ -179,11 +199,10 @@ function renderHead(entry = publishedYear(), headerColumns = columns, interactiv
   const pctCount = headerColumns.filter(col => col.key.endsWith('Pct')).length;
   const extraCount = headerColumns.filter(col => col.extra).length;
   const profileCount = headerColumns.length - scoreCount - pctCount - extraCount;
-  const groups = `<th scope="colgroup" colspan="${profileCount}" class="meta-group"><span>Publications: ${entry.year - 5}–${entry.year - 1} · Citations: ${entry.year}${state.averagePercentiles ? ` · Percentiles avg: ${entry.year - 2}–${entry.year}` : ''} · OpenAlex data: ${escape(month)}</span> ` +
-    '<a class="table-help" href="journal-help.html#journal-table" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a>' +
+  const groups = `<th scope="colgroup" colspan="${profileCount + scoreCount}" class="meta-group"><span>Publications: ${entry.year - windowYears()}–${entry.year - 1} · Citations: ${entry.year}${state.averagePercentiles ? ` · Percentiles avg: ${entry.year - 2}–${entry.year}` : ''} · OpenAlex data: ${escape(month)}</span> ` +
+    '<a class="table-help" href="journal-help.html#journal-table-main" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a>' +
     `<button type="button" class="text-button table-help add-columns-trigger" data-add-columns aria-haspopup="dialog" aria-controls="columns-dialog"${index ? '' : ' disabled'}>Add columns${extraCount ? ` (${extraCount})` : ''}</button></th>` +
-    (scoreCount ? `<th scope="colgroup" colspan="${scoreCount}" class="score-group ${escape(state.universe)}">${escape(entry.universes[state.universe] ?? state.universe.toUpperCase())}</th>` : '') +
-    (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">${state.averagePercentiles ? 'Avg percentiles' : 'Percentiles'} · ${METRICS[state.metric].short}</th>` : '') +
+    (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">${state.averagePercentiles ? 'Avg percentiles' : 'Percentiles'}</th>` : '') +
     (extraCount ? `<th scope="colgroup" colspan="${extraCount}" class="extra-group group-start">Additional columns</th>` : '');
   const headers = headerColumns.map(col => {
     if (!interactive) return `<th scope="col" class="${col.className || ''}">${col.label}</th>`;
@@ -215,7 +234,7 @@ function cell(row, col) {
       ? link(`https://openalex.org/${encodeURIComponent(value)}`, value)
       : col.key === 'norwegian_register_ids' && value
         ? E.registerIds(row).map(id => link(`https://kanalregister.hkdir.no/en/tidsskrift?id=${id}`, id)).join(', ')
-        : typeof value === 'string' ? escape(value) : fmt(value);
+        : col.scoreExtra ? fmtScore(value, 'share') : typeof value === 'string' ? escape(value) : fmt(value);
     return `<td class="${col.className || ''} ${value == null ? 'missing' : ''}">${text}</td>`;
   }
   if (col.key === 'publications_without_references_pct') {
@@ -231,7 +250,7 @@ function cell(row, col) {
   }
   if (col.score) {
     const metric = col.key.split(':')[1];
-    return `<td class="metric-cell ${col.className || ''} ${metric === 'per_article' ? 'per-article-cell' : ''} ${value == null ? 'missing' : ''}" title="${value == null ? 'Metric unavailable' : escape(value)}">${fmtScore(value, metric)}</td>`;
+    return `<td class="metric-cell ${col.className || ''} ${['per_article','ojf'].includes(metric) ? 'per-article-cell' : ''} ${value == null ? 'missing' : ''}" title="${value == null ? 'Metric unavailable' : escape(metric === 'ojf' ? fmtScore(value, metric) : value)}">${fmtScore(value, metric)}</td>`;
   }
   return `<td>${fmt(value)}</td>`;
 }
@@ -249,7 +268,7 @@ function render() {
     }
   } else rows = annualRows;
   const available = getColumns();
-  if (!available.some(col => col.key === state.sortKey)) Object.assign(state, {sortKey:'score:per_article', sortDirection:-1});
+  if (!available.some(col => col.key === state.sortKey)) Object.assign(state, {sortKey:`score:${state.metric}`, sortDirection:-1});
   columns = available.filter(col => !hiddenColumns.has(col.key));
   const firstScore = columns.find(col => col.score), firstPct = columns.find(col => col.key.endsWith('Pct'));
   for (const col of [firstScore, firstPct].filter(Boolean)) {
@@ -301,14 +320,14 @@ function drawPage() {
 }
 
 // ---- Controls ----
-const SELECTS = {metric:'metric', coverage:'minCoverage', 'min-years':'minYears'};
+const SELECTS = { coverage:'minCoverage', 'min-years':'minYears'};
 const NUMERIC = new Set(['minCoverage','minYears']);
 const CHECKBOXES = {'oa-only':'oaOnly', 'pool-only':'poolOnly', 'average-percentiles':'averagePercentiles'};
 const uniqueValues = values => [...new Set(values.filter(Boolean))].sort(E.compareText);
 function fillFilters() {
   const inUniverse = rows.filter(row => E.inViewUniverse(row, state, ranks));
   for (const [key, filter] of Object.entries(FILTERS)) {
-    const initialFields = index?.years.find(entry => entry.year === Number($('year').value))?.fields;
+    const initialFields = index?.years.find(entry => entry.year === Number($('year').value))?.[isOjf() ? 'ojf_fields' : 'fields'];
     filterValues[key] = uniqueValues(year == null ? (initialFields?.[state.universe] ?? []) : inUniverse.map(row => row[filter.column]));
     state[key] = state[key].filter(value => filterValues[key].includes(value));
     drawFilter(key);
@@ -328,6 +347,16 @@ function drawFilter(key) {
     (values.length ? '' : '<p class="hint">No fields available.</p>');
 }
 function syncControls() {
+  $('metric').value = state.metric;
+  $('universe-label').textContent = isOjf() ? 'Show journals from' : 'Journal universe';
+  $('metric').querySelector('option[value="ojf"]').disabled = !index?.ojf;
+  $('metric-independence-text').textContent = isOjf() ? 'Independently calculated OJF values, not official Journal Impact Factors' : 'Independently calculated ANS values, not official Article Influence Scores';
+  $('metric-details').setAttribute('href', `journal-help.html#${isOjf() ? 'ojf' : 'ans'}`);
+  $('add-publications-label').textContent = isOjf() ? 'Citable items recorded' : 'Publications recorded';
+  $('publication-years-control').hidden = isOjf();
+  $('min-years').disabled = isOjf();
+  const keys = isOjf() ? ['jif','ojf-full','custom'] : ['ef-ais','full','vu-sbe','custom'];
+  $('preset').innerHTML = keys.map(key => option(key, PRESET_LABELS[key])).join('');
   syncAddedColumns();
   for (const [id, key] of Object.entries(SELECTS)) $(id).value = state[key];
   for (const [id, key] of Object.entries(CHECKBOXES)) $(id).checked = state[key];
@@ -344,6 +373,9 @@ function syncControls() {
   $('percentiles-field').checked = selected.includes('fieldPct');
   $('percentiles-total').checked = selected.includes('poolPct');
   $('percentile-summary').textContent = !selected.length ? 'None' : selected.length === 2 ? 'Field and Total' : selected[0] === 'fieldPct' ? 'Field percentiles' : 'Total percentiles';
+  $('retain-control').hidden = !selected.includes('poolPct');
+  $('retain-label').textContent = selected.length === 2 ? 'For total: retain top % per field' : 'Retain top % per field';
+  $('top-percent').disabled = !selected.includes('poolPct');
   $('percentile-settings').disabled = !state.showPercentiles;
   $('pool-only').disabled = !state.showPercentiles;
   $('average-percentiles').disabled = !state.showPercentiles || !averagingAvailable(selectedYear);
@@ -363,7 +395,6 @@ function update(changes) {
   if (Object.hasOwn(changes, 'percentileMode')) changes = {...changes, showPercentiles:changes.percentileMode !== 'none'};
   Object.assign(state, changes, {page:0});
   if (!state.showPercentiles || !averagingAvailable(targetYear)) state.averagePercentiles = false;
-  if (Object.keys(changes).some(key => key in P.PRESETS.full) && P.identifyPreset(state, averagingAvailable(targetYear)) === 'custom') toggleSettings(true);
   if (previousAverage !== Boolean(state.averagePercentiles)) return loadYear(targetYear);
   if (loading && year != null) { syncControls(); return; }
   if (year == null) {
@@ -397,7 +428,7 @@ function showJournal(id) {
     '<div class="dialog-section-heading"><h3 id="details-title" tabindex="-1">Details</h3><a class="table-help" href="journal-help.html#journal-details" target="_blank" rel="noopener noreferrer" aria-label="Details: What is what? (new tab)">What is what?</a></div>' +
     `<dl id="journal-metadata" aria-labelledby="details-title">${details.map(([key, value]) => `<dt>${key}</dt><dd>${value}</dd>`).join('')}</dl>` +
     '<div class="dialog-section-heading"><h3 id="fields-title" tabindex="-1">Fields covered</h3><a class="table-help" href="journal-help.html#fields-covered" target="_blank" rel="noopener noreferrer" aria-label="Fields covered: What is what? (new tab)">What is what?</a></div><div id="field-breakdown" aria-live="polite"><p>Loading fields…</p></div>' +
-    `<div class="dialog-section-heading"><h3 id="metrics-title" tabindex="-1">Metrics by year · ${escape(universeName(state.universe))} universe · ${state.treatment === 'raw' ? 'Raw' : 'Filtered'}</h3><a class="table-help" href="journal-help.html#yearly-metrics" target="_blank" rel="noopener noreferrer" aria-label="Metrics by year: What is what? (new tab)">What is what?</a></div>` +
+    `<div class="dialog-section-heading"><h3 id="metrics-title" tabindex="-1">Metrics by year · ${state.metric === 'ojf' ? 'OJF' : escape(universeName(state.universe)) + ' universe'} · ${state.treatment === 'raw' ? 'Raw' : 'Filtered'}</h3><a class="table-help" href="journal-help.html#yearly-metrics" target="_blank" rel="noopener noreferrer" aria-label="Metrics by year: What is what? (new tab)">What is what?</a></div>` +
     '<div id="history" class="dialog-table-scroll" role="region" aria-labelledby="metrics-title" tabindex="0"></div>' +
     '<p id="history-percentile-status" role="status"></p>';
   $('journal-dialog').showModal();
@@ -430,8 +461,8 @@ function navigateJournalSection(event) {
 }
 
 // One small history file contains every score year for this journal.
-async function journalHistory(id) {
-  const folder = index.journal_details?.history_path ?? index.field_breakdown?.history_path ?? 'history';
+async function journalHistory(id, metric = state.metric) {
+  const folder = (metric === 'ojf' ? index.ojf : index.journal_details)?.history_path ?? index.field_breakdown?.history_path ?? 'history';
   const url = `data/${folder}/${id.slice(-2)}.parquet`;
   if (!historyFiles.has(url)) historyFiles.set(url, fetchOk(url).then(response => response.arrayBuffer())
     .catch(error => { historyFiles.delete(url); throw error; }));
@@ -445,8 +476,9 @@ let historicalRankKey = '', historicalRanks = new Map();
 
 async function rankYear(entry, settings, selectedYear, selectedRows) {
   if (entry.year === selectedYear) return E.rank(selectedRows, settings);
-  const folder = index.journal_details?.rank_path;
-  const suffix = index.journal_details?.rank_layout === 'metric-treatment' ? `-${settings.metric}-${settings.treatment}` : '';
+  const details = settings.metric === 'ojf' ? index.ojf : index.journal_details;
+  const folder = details?.rank_path;
+  const suffix = (settings.metric === 'ojf' || index.journal_details?.rank_layout === 'metric-treatment') ? `-${settings.metric}-${settings.treatment}` : '';
   const url = folder ? `data/${folder}/${entry.year}-${settings.universe}${suffix}.parquet` : `data/scores_${entry.year}.parquet`;
   if (!historicalRankFiles.has(url)) historicalRankFiles.set(url, fetchOk(url)
     .then(response => response.arrayBuffer()).then(file => parquetReadObjects({ file }))
@@ -460,12 +492,12 @@ async function showHistory(id, metadata) {
   const selectedYear = year, selectedRows = rows, settings = { ...state, averagePercentiles:false };
   $('history').innerHTML = '<p>Loading the other years…</p>';
   try {
-    const history = await journalHistory(id);
+    const history = await journalHistory(id, settings.metric);
     if (request !== historyRequest) return;
     const detail = history.find(([entry]) => entry.year === selectedYear)?.[1];
-    $('field-breakdown').innerHTML = D.fieldsTable(metadata, detail, selectedYear);
+    $('field-breakdown').innerHTML = D.fieldsTable(metadata, detail, selectedYear, settings);
     if ($('register-details')) $('register-details').innerHTML = D.registerLinks(metadata, detail);
-    $('history').innerHTML = D.metricsTable(history, selectedYear, settings, METRICS);
+    $('history').innerHTML = D.metricsTable(history, selectedYear, settings, metricSet(settings));
     if (!settings.showPercentiles) return;
     $('history-percentile-status').textContent = 'Loading yearly percentiles…';
     // Search, field filters and display-only choices do not define the ranking pool.
@@ -482,13 +514,13 @@ async function showHistory(id, metadata) {
       } catch { return [entry.year, { error: true }]; }
     }));
     if (request !== historyRequest) return;
-    $('history').innerHTML = D.metricsTable(history, selectedYear, settings, METRICS, new Map(results));
+    $('history').innerHTML = D.metricsTable(history, selectedYear, settings, metricSet(settings), new Map(results));
     $('history-percentile-status').textContent = results.some(([, result]) => result.error)
       ? 'Some yearly percentiles could not be loaded. Close and reopen this journal to retry.' : '';
   } catch (error) {
     if (request === historyRequest) {
       $('history').textContent = `The other years could not be loaded (${error.message}).`;
-      $('field-breakdown').innerHTML = D.fieldsTable(metadata, null, selectedYear);
+      $('field-breakdown').innerHTML = D.fieldsTable(metadata, null, selectedYear, settings);
       $('history-percentile-status').textContent = '';
     }
   }
@@ -503,7 +535,11 @@ function csvCell(value) {
   const text = /^[=+@\-\t\r]/.test(value) ? "'" + value : value; // keep spreadsheet formulas as plain text
   return '"' + text.replace(/"/g, '""') + '"';
 }
-const csvLines = lines => lines.map(line => line.map(csvCell).join(',')).join('\r\n');
+const csvLines = lines => {
+  const ojfColumn = lines[0]?.indexOf('OJF') ?? -1;
+  return lines.map((line, row) => line.map((value, column) => row > 0 && column === ojfColumn && E.isNumber(value)
+    ? value.toFixed(3) : csvCell(value)).join(',')).join('\r\n');
+};
 
 // Saves a CSV from text parts; the byte order mark makes Excel read the file as UTF-8.
 function saveCsv(filename, parts) {
@@ -528,11 +564,14 @@ function selectionExport() {
     ];
     const label = col.key.endsWith('Pct')
       ? `${state.averagePercentiles ? 'Avg ' : ''}${col.label} percentile (${METRICS[state.metric].short}${state.averagePercentiles ? `; ${year - 2}-${year}` : ''})` : (col.downloadLabel ?? col.label);
-    return [{label, value:row => E.columnValue(row, state, ranks, col.key)}];
+    return [{label, value:row => {
+      const value = E.columnValue(row, state, ranks, col.key);
+      return col.key === 'score:ojf' && E.isNumber(value) ? Math.round(value * 1000) / 1000 : value;
+    }}];
   });
   const header = downloadColumns.map(col => col.label);
   const lines = visible.map(row => downloadColumns.map(col => col.value(row)));
-  return {filename:`opindx-${year}-${state.treatment}${state.averagePercentiles ? `-avg-percentiles-${year - 2}-${year}` : ''}-view`, matrix:[header, ...lines]};
+  return {filename:`opindx-${state.metric === 'ojf' ? 'ojf' : 'ans'}-${year}-${state.treatment}${state.averagePercentiles ? `-avg-percentiles-${year - 2}-${year}` : ''}-view`, matrix:[header, ...lines]};
 }
 function downloadView() {
   const {filename, matrix} = selectionExport();
@@ -680,7 +719,7 @@ document.addEventListener('keydown', event => {
 $('dialog-content').addEventListener('click', navigateJournalSection);
 $('journal-dialog').addEventListener('close', () => { historyRequest++; stopJournalTracking(); });
 $('reset').addEventListener('click', () => {
-  const reload = Boolean(state.averagePercentiles) || loading;
+  const reload = state.metric !== P.DEFAULTS.metric || Boolean(state.averagePercentiles) || loading;
   const targetYear = pendingYear ?? year ?? Number($('year').value);
   explicitCustom = false;
   hiddenColumns.clear();
@@ -695,7 +734,8 @@ $('reset').addEventListener('click', () => {
 });
 
 // ---- Start ----
-$('metric').innerHTML = Object.entries(METRICS).map(([metric, m]) => option(metric, m.short)).join('');
+$('metric').addEventListener('change', () => switchMetric());
+
 try {
   index = await (await fetchOk('data/index.json')).json();
   const initial = P.startingSelection(index.years, location.search);
