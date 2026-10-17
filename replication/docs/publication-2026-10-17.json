@@ -1,0 +1,97 @@
+{
+  "date": "2026-10-17",
+  "website": "https://opindx.org",
+  "initial_website_commit": "43ca8d6d3d101bf1659a1913b3e6596018d0e94d",
+  "software": {
+    "kind": "software",
+    "version": "0.4.0",
+    "id": 23437873,
+    "doi": "10.5281/zenodo.23437873",
+    "submitted": true,
+    "state": "done",
+    "url": "https://zenodo.org/record/23437873",
+    "files_verified": 6
+  },
+  "dataset": {
+    "kind": "dataset",
+    "version": "2026-09-v4",
+    "id": 23437876,
+    "doi": "10.5281/zenodo.23437876",
+    "submitted": true,
+    "state": "done",
+    "url": "https://zenodo.org/record/23437876",
+    "files_verified": 43
+  },
+  "paper_replication": {
+    "kind": "paper_replication",
+    "version": "0.1.0",
+    "id": 23437878,
+    "doi": "10.5281/zenodo.23437878",
+    "submitted": true,
+    "state": "done",
+    "url": "https://zenodo.org/record/23437878",
+    "files_verified": 6
+  },
+  "paper": {
+    "kind": "preprint",
+    "version": "1.0",
+    "id": 23437993,
+    "doi": "10.5281/zenodo.23437993",
+    "submitted": true,
+    "state": "done",
+    "url": "https://zenodo.org/record/23437993",
+    "files_verified": 1
+  },
+  "supplement": {
+    "kind": "supplement",
+    "version": "1.0",
+    "id": 23434971,
+    "doi": "10.5281/zenodo.23434971",
+    "submitted": true,
+    "state": "done",
+    "url": "https://zenodo.org/record/23434971",
+    "files_verified": 1
+  },
+  "github": {
+    "v0.1.0": {
+      "url": "https://github.com/bread-n-roses/Paper_Replication_OJF/releases/tag/v0.1.0",
+      "id": 415858162,
+      "draft": false,
+      "files_verified": 6
+    },
+    "software-v0.4.0": {
+      "url": "https://github.com/bread-n-roses/Opindx/releases/tag/software-v0.4.0",
+      "id": 415858210,
+      "draft": false,
+      "files_verified": 6
+    },
+    "data-2026-09-v4": {
+      "url": "https://github.com/bread-n-roses/Opindx/releases/tag/data-2026-09-v4",
+      "id": 415858379,
+      "draft": false,
+      "files_verified": 43
+    }
+  },
+  "source_tag": "software-v0.4.0",
+  "dataset_tag": "data-2026-09-v4",
+  "paper_replication_repo": "https://github.com/bread-n-roses/Paper_Replication_OJF",
+  "nf_ans_all_fifteen_annual_files_unchanged": true,
+  "nf_ans_frozen_year_pins_unchanged": true,
+  "data_sources": [
+    "OpenAlex (CC0)",
+    "Norwegian Register (NLOD 2.0)"
+  ],
+  "proprietary_data_in_public_bundles": false,
+  "validation": "136 replication tests, website DOM tests and 6 builder tests; exact OJF frozen-count replay for 578622 journal-years and five-year open metadata parity; all-cell CSV/XLSX checks; all ten live annual Parquet hashes verified. No new full raw-snapshot replay.",
+  "paper_validation": "8 table fragments byte-identical; 8 result CSVs exact; 85 claims verified; final changes limited to DOI/repository links and references; final PDF links and changed-page rendering checked.",
+  "paper_supplement_reciprocal_links": true,
+  "website_visual_browser_qa": false,
+  "website_live_assets_verified": true,
+  "workflow_runs": {
+    "website": 39044385612,
+    "zenodo_software": 39043584710,
+    "zenodo_dataset": 39043587099
+  },
+  "ordinary_pushes_publish_zenodo": false,
+  "archive_note": "Release tags and archives are immutable. These outcome receipts were added after publication; use the release tag to rebuild the exact source archive."
+}

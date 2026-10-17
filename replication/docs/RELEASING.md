@@ -1,3 +1,21 @@
+## Published 17 October 2026
+
+- Opindx software 0.4.0: https://doi.org/10.5281/zenodo.23437873
+- Complete datasets 2026-09-v4: https://doi.org/10.5281/zenodo.23437876
+- Paper replication 0.1.0: https://doi.org/10.5281/zenodo.23437878
+- Paper D preprint: https://doi.org/10.5281/zenodo.23437993
+- Supplementary material: https://doi.org/10.5281/zenodo.23434971
+
+The website deployed from `43ca8d6`; live pages, all ten annual Parquet hashes
+and public record links passed verification. All prior NF/ANS annual files and
+frozen-year pins remain unchanged. Public inputs are OpenAlex and Norwegian
+Register only; restricted comparison inputs and outputs stay outside releases.
+Paper D and the supplement changed only for DOI/repository links and references.
+See `publication-2026-10-17.json` for receipts and workflow IDs. The large dataset
+upload completed through the configured GitHub release workflow after a local
+Windows connection interrupted the initial transfer. Ordinary code pushes do
+not publish Zenodo records. Build exact release archives from the immutable tag.
+
 # Separate software and dataset releases
 
 Status: first software and complete dataset releases published on 2026-10-02.
