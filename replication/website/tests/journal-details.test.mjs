@@ -40,7 +40,7 @@ await check('A unique primary link preserves plain primary ID and linked alterna
 await check('Field shares total in the header; each Norwegian assignment keeps its correct ID', () => {
   const html = D.fieldsTable(meta,detail,2026);
   assert.match(html,/2021–2025 publications/); assert.match(html,/>100%<\/th>/);
-  assert.doesNotMatch(html,/<tfoot>|>Total</);
+  assert.doesNotMatch(html,/<tfoot>|>Total · ANP</);
   assert.match(html,/Norwegian Register field \(2026\)<\/th>/);
   assert.match(html,/Economics <span class="register-field-id">\(ID: 10\)/);
   assert.match(html,/Business and Finance <span class="register-field-id">\(ID: 20\)/);
@@ -60,7 +60,7 @@ await check('Grouped percentile header stays concise and disappears when disable
   const history = [[entry(2026),meta]];
   const html = D.metricsTable(history,2026,settings,metrics);
   assert.match(html,/scope="colgroup" colspan="2"[^>]*>Percentiles/);
-  assert.match(html,/<th scope="col">Field<\/th><th scope="col">Total<\/th>/);
+  assert.match(html,/<th scope="col">Field · ANP<\/th><th scope="col">Total · ANP<\/th>/);
   assert.match(html,/rowspan="2"/); assert.doesNotMatch(html,/OA · NR|Journal universe/); assert.match(html,/Citations/);
   assert.doesNotMatch(html,/Ref\. coverage/);
   assert.match(D.metricsTable(history,2026,{...settings,metric:'share'},metrics),/Percentiles/);
@@ -212,8 +212,8 @@ await check('Every history row has only the selected percentile columns, includi
       const body = table.split('<tbody>')[1];
       assert.equal([...body.matchAll(/<td\b/g)].length,row.in_n ? 6+expected : 1,mode);
       if (!row.in_n) assert.ok(body.includes(`colspan="${6+expected}"`));
-      assert.equal(table.includes('>Field</th>'),['field','both'].includes(mode));
-      assert.equal(table.includes('>Total</th>'),['total','both'].includes(mode));
+      assert.equal(table.includes('>Field · ANP</th>'),['field','both'].includes(mode));
+      assert.equal(table.includes('>Total · ANP</th>'),['total','both'].includes(mode));
     }
     const absent = D.metricsTable([[entry(2026),null]],2026,state,metrics);
     assert.ok(absent.includes(`colspan="${6+expected}"`));

@@ -143,7 +143,7 @@ await check('Presets, fields and search apply before the first journal table arr
   assert.equal(h.api.getState().universe,'n');
   assert.equal(h.api.getState().percentileMode,'total');
   assert.doesNotMatch(h.elements.get('field-filter').innerHTML,/Medicine/);
-  assert.match(h.elements.get('table-head').innerHTML,/>Total<\/th>/);
+  assert.match(h.elements.get('table-head').innerHTML,/>Total · ANP<\/th>/);
   h.elements.get('field-filter').events.change({target:{value:'Economics',checked:true}});
   assert.equal(h.elements.get('field-summary').textContent,'Economics');
   h.api.update({query:'Journal 01'});
@@ -384,7 +384,7 @@ await check('Selection CSV follows ANS columns; NF is exported only when added',
   const h = harness(); await h.api.loadYear(2025);
   const csv = h.api.csv(), lines = csv.parts.join('').split('\r\n');
   assert.equal(lines.length,41);
-  assert.equal(lines[0], '"Journal title","OpenAlex field","OpenAlex field (%)","Publications used","Citations used","Pubs. w/out refs.","ANS","Field percentile (ANS)"');
+  assert.equal(lines[0], '"Journal title","OpenAlex field","OpenAlex field (%)","Publications used","Citations used","Pubs. w/out refs.","ANS","Field percentile (ANP)"');
   const matrix = h.api.selectionExport().matrix;
   const row = matrix.find(row => row[0] === 'Journal 01');
   assert.equal(row[6],1);
@@ -421,7 +421,7 @@ await check('Hiding columns removes them from downloads while preserving sorting
   assert.doesNotMatch(h.elements.get('table-head').innerHTML,/class="percentile-group"|data-sort="poolPct"|data-sort="score:per_article"/);
   const popup = D.metricsTable([[years[1],records[0]]],2025,h.api.getState(),{share:{short:'NF',digits:5},per_article:{short:'ANS',digits:3}});
   assert.match(popup,/class="percentile-heading">Percentiles<\/th>/);
-  assert.doesNotMatch(popup,/>Field<\/th>/); assert.match(popup,/>Total<\/th>/);
+  assert.doesNotMatch(popup,/>Field · ANP<\/th>/); assert.match(popup,/>Total · ANP<\/th>/);
   h.elements.get('restore-columns').emit('click');
   assert.equal(h.api.getDisplayColumns().length,7);
   assert.equal(h.elements.get('restore-columns').hidden,true);
@@ -677,9 +677,9 @@ await check('Select preset initially loads all three years and defaults to avera
   assert.equal(h.elements.get('preset').value,'vu-sbe');
   assert.equal(h.elements.get('average-percentiles').checked,true);
   assert.equal(h.elements.get('settings').hidden,true);
-  assert.match(h.elements.get('table-head').innerHTML,/Avg percentiles/);
+  assert.match(h.elements.get('table-head').innerHTML,/ANP3/);
   const output=h.api.selectionExport();
-  assert.equal(output.matrix[0].at(-1),'Avg Total percentile (ANS; 2023-2025)');
+  assert.equal(output.matrix[0].at(-1),'Avg Total percentile (ANP3; 2023-2025)');
   assert.equal(output.matrix.some(row=>row[0]==='Journal B'),false);
   assert.ok(Math.abs(output.matrix.find(row=>row[0]==='Current A').at(-1) - (50+100/3)/2)<1e-10);
   assert.equal(h.api.getVisible().length,2);
@@ -713,7 +713,7 @@ await check('Select keeps its name in unavailable years and resumes averaging on
   await h.api.loadYear(2024);
   assert.equal(h.api.getState().averagePercentiles,true);
   assert.equal(h.elements.get('preset').value,'vu-sbe');
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2022.2024/);
+  assert.match(h.elements.get('table-head').innerHTML,/ANP3: 2022.2024/);
   await h.elements.get('average-percentiles').emit('change',{checked:false});
   assert.equal(h.elements.get('preset').value,'custom');
   await h.api.loadYear(2025);
@@ -733,14 +733,14 @@ await check('Averaged percentile selection preserves selected-year data, require
   await h.elements.get('average-percentiles').emit('change',{checked:true});
   assert.equal(h.api.getState().averagePercentiles,true);
   assert.equal(h.elements.get('preset').value,'custom');
-  assert.match(h.elements.get('table-head').innerHTML,/class="percentile-group">Avg percentiles<\/th>/);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2023–2025/);
+  assert.match(h.elements.get('table-head').innerHTML,/class="percentile-group">Percentiles<\/th>/);
+  assert.match(h.elements.get('table-head').innerHTML,/ANP3: 2023–2025/);
   assert.match(h.elements.get('pool-summary').innerHTML,/<strong>2<\/strong>/);
   assert.equal(h.api.getVisible().length,2);
   const out=h.api.selectionExport(),header=out.matrix[0];
   const col=label=>header.indexOf(label),byTitle=title=>out.matrix.find(r=>r[0]===title);
   assert.ok(out.filename.includes('avg-percentiles-2023-2025'));
-  assert.ok(Math.abs(byTitle('Current A')[col('Avg Field percentile (ANS; 2023-2025)')] - (50+100/3)/2)<1e-10);
+  assert.ok(Math.abs(byTitle('Current A')[col('Avg Field percentile (ANP3; 2023-2025)')] - (50+100/3)/2)<1e-10);
   assert.equal(byTitle('Current A')[col('ANS')],3);
   assert.equal(byTitle('Current A')[col('Publications used')],2025);
   for (const title of ['Journal B','Journal C','Journal H']) assert.equal(byTitle(title),undefined);
@@ -784,7 +784,7 @@ await check('A journal missing its current percentile disappears and returns wit
   const returned=output.matrix.find(row=>row[0]==='Journal R');
   assert.equal(returned.at(-1),75); // Mean of 2026 (100) and 2024 (50); omit 2025 and exclude 2023.
   assert.equal(returned[output.matrix[0].indexOf('ANS')],2);
-  assert.match(h.elements.get('table-head').innerHTML,/Publications: 2021–2025 · Citations: 2026 · Percentiles avg: 2024–2026 · OpenAlex data:/);
+  assert.match(h.elements.get('table-head').innerHTML,/Publications: 2021–2025 · Citations: 2026 · ANP3: 2024–2026 · OpenAlex data:/);
 });
 await check('Averaging label, earliest-year gate, None and Reset remain consistent', async()=>{
   const h=averageHarness(); await h.api.loadYear(2023);
@@ -812,7 +812,7 @@ await check('Loading failure never substitutes a partial averaging window and re
   await h.api.loadYear(2025);
   await h.api.update({averagePercentiles:true});
   assert.equal(h.api.getState().averagePercentiles,false);
-  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/Avg percentiles/);
+  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/ANP3/);
   assert.match(h.elements.get('notice-message').textContent,/offline/);
   fail=false;await h.api.update({averagePercentiles:true});
   assert.equal(h.api.getVisible().length,2);
@@ -826,10 +826,10 @@ await check('Late average loading cannot overwrite a newer citation year', async
   const latest=h.elements.get('year').emit('change',{value:'2026'});
   await latest;
   assert.equal(h.api.getYear(),2026);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2024–2026/);
+  assert.match(h.elements.get('table-head').innerHTML,/ANP3: 2024–2026/);
   resolve();await old;
   assert.equal(h.api.getYear(),2026);
-  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2024–2026/);
+  assert.match(h.elements.get('table-head').innerHTML,/ANP3: 2024–2026/);
 });
 
 
@@ -860,7 +860,7 @@ await check('Averaging can be cancelled during loading without applying partial 
   assert.equal(h.api.getVisible().length,2);
   release();await pending;
   assert.equal(h.api.getState().averagePercentiles,false);
-  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/Avg percentiles/);
+  assert.doesNotMatch(h.elements.get('table-head').innerHTML,/ANP3/);
   assert.equal(h.api.getVisible().length,2);
   assert.ok(html.indexOf('id="pool-only"')<html.indexOf('id="average-percentiles"'));
   assert.ok(html.indexOf('id="average-percentiles"')<html.indexOf('class="advanced-general"'));

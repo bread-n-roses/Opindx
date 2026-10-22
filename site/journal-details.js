@@ -118,7 +118,7 @@ export function metricsTable(history, year, state, metrics, annualRanks = new Ma
     return html + (pct ? percentileCells(r, entry) : '');
   };
   return '<table class="metrics-table"><thead><tr>' + headings.map((h, i) => `<th scope="col"${pct ? ' rowspan="2"' : ''}${i === 0 ? ' class="align-left"' : ''}>${h.map(line => `<span class="metric-heading-line">${escape(line)}</span>`).join(' ')}</th>`).join('') +
-    (pct ? `<th scope="colgroup" colspan="${pct}" class="percentile-heading">Percentiles</th></tr><tr>${pctKeys.map(key => `<th scope="col">${key === 'fieldPct' ? 'Field' : 'Total'}</th>`).join('')}` : '') +
+    (pct ? `<th scope="colgroup" colspan="${pct}" class="percentile-heading">Percentiles</th></tr><tr>${pctKeys.map(key => `<th scope="col">${key === 'fieldPct' ? 'Field' : 'Total'}${state.metric === 'per_article' ? ' · ANP' : ''}</th>`).join('')}` : '') +
     '</tr></thead><tbody>' + history.map(([entry, r]) => `<tr class="${entry.year === year ? 'current-year' : ''}">` +
       `<th scope="row" class="align-left">${entry.year}<span class="vintage">${escape(entry.status)} · ${escape((entry.openalex_snapshot ?? '').slice(0, 7))}</span></th>${cells(r, entry)}</tr>`).join('') +
     '</tbody></table>';

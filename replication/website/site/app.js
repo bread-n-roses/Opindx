@@ -11,6 +11,7 @@ const PAGE_SIZE = 25;
 const isOjf = () => state.metric === 'ojf';
 const windowYears = () => isOjf() ? 2 : 5;
 const metricSet = settings => settings.metric === 'ojf' ? {ojf:METRICS.ojf} : {share:METRICS.share,per_article:METRICS.per_article};
+const percentileHeading = (settings, average = settings.averagePercentiles) => settings.metric === 'per_article' ? (average ? 'ANP3' : 'ANP') : (average ? 'Avg percentiles' : 'Percentiles');
 const PRESET_LABELS = {'ef-ais':'AIS-oriented',full:'Full coverage (noisy)','vu-sbe':'AIS-oriented (select)',jif:'JIF-oriented','ojf-full':'Full coverage (noisy)',custom:'Custom'};
 const METRICS = {
   ojf: {short:'OJF', name:'Open Journal Factor', note:'citations from Norwegian Register sources per citable item in the preceding two years', digits:1},
@@ -199,20 +200,21 @@ function renderHead(entry = publishedYear(), headerColumns = columns, interactiv
   const pctCount = headerColumns.filter(col => col.key.endsWith('Pct')).length;
   const extraCount = headerColumns.filter(col => col.extra).length;
   const profileCount = headerColumns.length - scoreCount - pctCount - extraCount;
-  const groups = `<th scope="colgroup" colspan="${profileCount + scoreCount}" class="meta-group"><span>Publications: ${entry.year - windowYears()}–${entry.year - 1} · Citations: ${entry.year}${state.averagePercentiles ? ` · Percentiles avg: ${entry.year - 2}–${entry.year}` : ''} · OpenAlex data: ${escape(month)}</span> ` +
+  const groups = `<th scope="colgroup" colspan="${profileCount + scoreCount}" class="meta-group"><span>Publications: ${entry.year - windowYears()}–${entry.year - 1} · Citations: ${entry.year}${state.averagePercentiles ? ` · ${state.metric === 'per_article' ? 'ANP3' : 'Percentiles avg'}: ${entry.year - 2}–${entry.year}` : ''} · OpenAlex data: ${escape(month)}</span> ` +
     '<a class="table-help" href="journal-help.html#journal-table-main" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a>' +
     `<button type="button" class="text-button table-help add-columns-trigger" data-add-columns aria-haspopup="dialog" aria-controls="columns-dialog"${index ? '' : ' disabled'}>Add columns${extraCount ? ` (${extraCount})` : ''}</button></th>` +
-    (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">${state.averagePercentiles ? 'Avg percentiles' : 'Percentiles'}</th>` : '') +
+    (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">${state.metric === 'per_article' ? 'Percentiles' : percentileHeading(state)}</th>` : '') +
     (extraCount ? `<th scope="colgroup" colspan="${extraCount}" class="extra-group group-start">Additional columns</th>` : '');
   const headers = headerColumns.map(col => {
-    if (!interactive) return `<th scope="col" class="${col.className || ''}">${col.label}</th>`;
+    const displayLabel = col.key.endsWith('Pct') && state.metric === 'per_article' ? `${col.label} · ${percentileHeading(state)}` : col.label;
+    if (!interactive) return `<th scope="col" class="${col.className || ''}">${displayLabel}</th>`;
     const sorted = state.sortKey === col.key;
     const direction = state.sortDirection === 1 ? 'ascending' : 'descending';
     const arrow = sorted ? (state.sortDirection === 1 ? '↑' : '↓') : '↕';
     const label = col.key.endsWith('Pct') ? `${col.label} percentile` : col.label;
     const hide = col.key === 'title' ? '' : `<button type="button" class="hide-column" data-hide-column="${col.key}" aria-label="Hide ${escape(label)} column" title="Hide ${escape(label)} column"><span aria-hidden="true">×</span></button>`;
     return `<th scope="col" class="${col.className || ''} ${sorted ? 'sorted' : ''}" aria-sort="${sorted ? direction : 'none'}" title="${escape(col.title || col.label)}">` +
-      `<div class="column-heading"><button type="button" class="sort-button" data-sort="${col.key}">${col.label}<span class="sort-indicator" aria-hidden="true">${arrow}</span></button>${hide}</div></th>`;
+      `<div class="column-heading"><button type="button" class="sort-button" data-sort="${col.key}">${displayLabel}<span class="sort-indicator" aria-hidden="true">${arrow}</span></button>${hide}</div></th>`;
   }).join('');
   $('table-head').innerHTML = `<tr class="group-row">${groups}</tr><tr>${headers}</tr>`;
 }
@@ -563,7 +565,7 @@ function selectionExport() {
       }},
     ];
     const label = col.key.endsWith('Pct')
-      ? `${state.averagePercentiles ? 'Avg ' : ''}${col.label} percentile (${METRICS[state.metric].short}${state.averagePercentiles ? `; ${year - 2}-${year}` : ''})` : (col.downloadLabel ?? col.label);
+      ? `${state.averagePercentiles ? 'Avg ' : ''}${col.label} percentile (${state.metric === 'per_article' ? percentileHeading(state) : METRICS[state.metric].short}${state.averagePercentiles ? `; ${year - 2}-${year}` : ''})` : (col.downloadLabel ?? col.label);
     return [{label, value:row => {
       const value = E.columnValue(row, state, ranks, col.key);
       return col.key === 'score:ojf' && E.isNumber(value) ? Math.round(value * 1000) / 1000 : value;
