@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "annual": [
+    {
+      "year": 2022,
+      "both_window_values_exact": true,
+      "union_rows": 125801,
+      "nf_ans_run": "2026-09-v3"
+    },
+    {
+      "year": 2023,
+      "both_window_values_exact": true,
+      "union_rows": 128367,
+      "nf_ans_run": "2026-09-v3"
+    },
+    {
+      "year": 2024,
+      "both_window_values_exact": true,
+      "union_rows": 129862,
+      "nf_ans_run": "2026-09-v3"
+    },
+    {
+      "year": 2025,
+      "both_window_values_exact": true,
+      "union_rows": 130362,
+      "nf_ans_run": "data-2026-09-v5"
+    },
+    {
+      "year": 2026,
+      "both_window_values_exact": true,
+      "union_rows": 126802,
+      "nf_ans_run": "data-2026-09-v5"
+    }
+  ]
+}

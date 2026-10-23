@@ -8,13 +8,16 @@ import { workbookBytes } from './selection-download.js';
 
 const $ = id => document.getElementById(id);
 const PAGE_SIZE = 25;
-const isOjf = () => state.metric === 'ojf';
-const windowYears = () => isOjf() ? 2 : 5;
-const metricSet = settings => settings.metric === 'ojf' ? {ojf:METRICS.ojf} : {share:METRICS.share,per_article:METRICS.per_article};
+const isOjf = () => E.isOjf(state.metric);
+const windowYears = () => E.windowYears(state.metric);
+const metricSet = settings => E.isOjf(settings.metric) ? {[settings.metric]:METRICS[settings.metric]} : {share:METRICS.share,per_article:METRICS.per_article};
+const ojfData = metric => metric === 'ojf5' ? index?.ojf5 : index?.ojf;
+const fieldIndexKey = () => isOjf() ? (state.metric === 'ojf5' ? 'ojf5_fields' : 'ojf_fields') : 'fields';
 const percentileHeading = (settings, average = settings.averagePercentiles) => settings.metric === 'per_article' ? (average ? 'ANP3' : 'ANP') : (average ? 'Avg percentiles' : 'Percentiles');
-const PRESET_LABELS = {'ef-ais':'AIS-oriented',full:'Full coverage (noisy)','vu-sbe':'AIS-oriented (select)',jif:'JIF-oriented','ojf-full':'Full coverage (noisy)',custom:'Custom'};
+const PRESET_LABELS = {'ef-ais':'AIS-oriented',full:'Full coverage (noisy)','vu-sbe':'AIS-oriented (select)',jif:'JIF-oriented','ojf-full':'Full coverage (noisy)',jif5:'JIF-oriented','ojf5-full':'Full coverage (noisy)',custom:'Custom'};
 const METRICS = {
-  ojf: {short:'OJF', name:'Open Journal Factor', note:'citations from Norwegian Register sources per citable item in the preceding two years', digits:1},
+  ojf: {short:'OJF2', name:'Open Journal Factor · 2 years', note:'citations from Norwegian Register sources per citable item in the preceding two years', digits:1},
+  ojf5: {short:'OJF5', name:'Open Journal Factor · 5 years', note:'citations from Norwegian Register sources per citable item in the preceding five years', digits:1},
   share: {short: 'NF', name: 'Network Factor', note: 'share of citation-network prestige; sums to 100 over the universe', digits: 5},
   per_article: {short: 'ANS', name: 'Article Network Score', note: 'network share per article; article-weighted mean 1', digits: 3},
 };
@@ -31,7 +34,7 @@ function averagingAvailable(selectedYear) {
     index?.years.some(entry => entry.year === selectedYear - offset));
 }
 function annualFile(selectedYear, metric = state.metric) {
-  const key = `${metric}:${selectedYear}`, path = metric === 'ojf' ? 'ojf/' : '';
+  const key = `${metric}:${selectedYear}`, path = E.isOjf(metric) ? `${ojfData(metric)?.annual_path ?? (metric === 'ojf5' ? 'ojf5' : 'ojf')}/` : '';
   if (!annualFiles.has(key)) annualFiles.set(key,
     fetchOk(`data/${path}scores_${selectedYear}.parquet`).then(response => response.arrayBuffer())
       .then(file => parquetReadObjects({file})).then(data => E.prepareRows(data))
@@ -43,6 +46,8 @@ const hiddenColumns = new Set();
 const addedColumns = new Set();
 const OPTIONAL_COLUMNS = [
   {key:'score:share', label:'NF', downloadLabel:'Network Factor (NF)', scoreExtra:true, title:'Network Factor in the selected universe'},
+  {key:'score:ojf', label:'OJF2', scoreExtra:true, title:'Open Journal Factor for the preceding two publication years'},
+  {key:'score:ojf5', label:'OJF5', scoreExtra:true, title:'Open Journal Factor for the preceding five publication years'},
   {key:'active_years', label:'Publ. years', downloadLabel:'Publication years', title:'Years with recorded publications in the preceding five years'},
   {key:'publications_raw', label:'Publ. recorded', downloadLabel:'Publications recorded', title:'All recorded articles and reviews in the preceding five years'},
   {key:'citations_raw', label:'Citations recorded', title:'Recorded non-self citations from all available sources'},
@@ -51,12 +56,19 @@ const OPTIONAL_COLUMNS = [
   {key:'norwegian_level', label:'Norw. Reg. level', downloadLabel:'Norwegian Register level', title:'Approved Norwegian Register level in the selected year'},
   {key:'issns', label:'ISSNs', text:true, title:'All available journal ISSNs'},
 ];
+function optionalColumnAvailable(col) {
+  if (col.key === 'score:share' || col.key === 'active_years') return !isOjf();
+  if (col.key === 'score:ojf' || col.key === 'score:ojf5') return isOjf() && col.key !== `score:${state.metric}` && Boolean(ojfData(col.key.split(':')[1]));
+  return true;
+}
 function syncAddedColumns() {
   let shown = 0;
   for (const col of OPTIONAL_COLUMNS) {
-    if (col.scoreExtra) $('add-nf-choice').hidden = isOjf();
+    if (col.key === 'score:share') $('add-nf-choice').hidden = !optionalColumnAvailable(col);
+    if (col.key === 'score:ojf') $('add-ojf2-choice').hidden = !optionalColumnAvailable(col);
+    if (col.key === 'score:ojf5') $('add-ojf5-choice').hidden = !optionalColumnAvailable(col);
     if (col.key === 'active_years') $('add-publication-years-choice').hidden = isOjf();
-    const visible = addedColumns.has(col.key) && !hiddenColumns.has(col.key) && !(isOjf() && (col.scoreExtra || col.key === 'active_years'));
+    const visible = addedColumns.has(col.key) && !hiddenColumns.has(col.key) && optionalColumnAvailable(col);
     $(`add-${col.key}`).checked = visible;
     if (visible) shown++;
   }
@@ -72,7 +84,7 @@ const option = (value, label) => `<option value="${escape(value)}">${escape(labe
 const count = n => n.toLocaleString('en-US');
 const fmt = (value, digits = 0) => E.isNumber(value)
   ? value.toLocaleString('en-US', {minimumFractionDigits: digits, maximumFractionDigits: digits}) : '—';
-const fmtScore = (value, metric) => metric === 'ojf' ? fmt(value, 1) : E.isNumber(value) && value > 0 && value < 10 ** -METRICS[metric].digits
+const fmtScore = (value, metric) => E.isOjf(metric) ? fmt(value, 1) : E.isNumber(value) && value > 0 && value < 10 ** -METRICS[metric].digits
   ? value.toExponential(2) : fmt(value, METRICS[metric].digits);
 const publishedYear = () => index.years.find(entry => entry.year === year);
 const universeIds = () => Object.keys(publishedYear().universes);
@@ -98,7 +110,7 @@ function setLoading(value) {
   if (value) toggleDownloads(false);
   $('search').disabled = !index;
   $('search-controls').disabled = !index;
-  $('field-picker').querySelector('fieldset').disabled = year == null && !index?.years.find(entry => entry.year === Number($('year').value))?.[isOjf() ? 'ojf_fields' : 'fields'];
+  $('field-picker').querySelector('fieldset').disabled = year == null && !index?.years.find(entry => entry.year === Number($('year').value))?.[fieldIndexKey()];
   $('reset').disabled = !index;
   if (value) { $('previous').disabled = true; $('next').disabled = true; }
 }
@@ -168,9 +180,13 @@ async function loadYear(newYear) {
 }
 
 function switchMetric(metric = $('metric').value) {
-  if (metric === 'ojf' && !index.ojf) { $('metric').value = state.metric; return; }
+  if (E.isOjf(metric) && !ojfData(metric)) { $('metric').value = state.metric; return; }
+  const oldPreset = explicitCustom ? 'custom' : P.identifyPreset(state, averagingAvailable(pendingYear ?? year ?? Number($('year').value)));
+  const withinOjf = E.isOjf(metric) && isOjf();
+  const preset = withinOjf && oldPreset === 'custom' ? null
+    : E.isOjf(metric) ? (metric === 'ojf5' ? (['ojf-full','ojf5-full'].includes(oldPreset) ? 'ojf5-full' : 'jif5') : (['ojf-full','ojf5-full'].includes(oldPreset) ? 'ojf-full' : 'jif')) : 'ef-ais';
   explicitCustom = false;
-  state = {...state, ...P.PRESETS[metric === 'ojf' ? 'jif' : 'ef-ais'], fields:[], sortKey:`score:${metric}`, sortDirection:-1, page:0};
+  state = {...state, ...(preset ? P.PRESETS[preset] : {}), metric, fields:[], sortKey:`score:${metric}`, sortDirection:-1, page:0};
   ranksKey = null; toggleSettings(false);
   return loadYear(pendingYear ?? year ?? Number($('year').value));
 }
@@ -184,12 +200,12 @@ function getColumns(entry = publishedYear()) {
     {key:'citations', label:'Citations used', title:`Citations in ${entry.year}, ${isOjf() ? 'including' : 'excluding'} journal self-citations`},
     {key:'publications_without_references_pct', label:'Pubs. w/out refs.', title:'Share of publications without a recorded OpenAlex reference'},
   ];
-  for (const [metric, m] of Object.entries(isOjf() ? {ojf:METRICS.ojf} : {per_article:METRICS.per_article})) cols.push({key:`score:${metric}`, label:m.short,
+  for (const [metric, m] of Object.entries(isOjf() ? {[state.metric]:METRICS[state.metric]} : {per_article:METRICS.per_article})) cols.push({key:`score:${metric}`, label:m.short,
     className:metric === 'share' ? 'group-start' : '', score:true, title:isOjf() ? 'Open Journal Factor; citations always counted from Norwegian Register sources' : `${m.name} in the ${entry.universes[state.universe] ?? state.universe.toUpperCase()} universe (${m.note})`});
   for (const key of E.percentileKeys(state)) cols.push(key === 'fieldPct'
     ? {key, label:'Field', className:'group-start percentile-cell', title:'Percentile within the assigned field, after eligibility requirements'}
     : {key, label:'Total', className:'percentile-cell', title:'Percentile among all retained journals; 100 is highest'});
-  for (const sourceCol of OPTIONAL_COLUMNS.filter(col => addedColumns.has(col.key) && !(isOjf() && (col.scoreExtra || col.key === 'active_years')))) cols.push({...sourceCol, ...(isOjf() && sourceCol.key === 'publications_raw' ? {label:'Items recorded',downloadLabel:'Citable items recorded',title:'All recorded citable items in the preceding two years'} : {}), ...(isOjf() && sourceCol.key === 'citations_raw' ? {title:'Raw citations from Norwegian Register sources, including journal self-citations'} : {}), extra:true,
+  for (const sourceCol of OPTIONAL_COLUMNS.filter(col => addedColumns.has(col.key) && optionalColumnAvailable(col))) cols.push({...sourceCol, ...(isOjf() && sourceCol.key === 'publications_raw' ? {label:'Items recorded',downloadLabel:'Citable items recorded',title:`All recorded citable items in the preceding ${windowYears()} years`} : {}), ...(isOjf() && sourceCol.key === 'citations_raw' ? {title:'Raw citations from Norwegian Register sources, including journal self-citations'} : {}), extra:true,
     className:`${sourceCol.text ? 'align-left ' : ''}${sourceCol.key === 'issns' ? 'issns-cell ' : ''}${cols.some(item => item.extra) ? '' : 'group-start'}`});
   return cols;
 }
@@ -200,13 +216,13 @@ function renderHead(entry = publishedYear(), headerColumns = columns, interactiv
   const pctCount = headerColumns.filter(col => col.key.endsWith('Pct')).length;
   const extraCount = headerColumns.filter(col => col.extra).length;
   const profileCount = headerColumns.length - scoreCount - pctCount - extraCount;
-  const groups = `<th scope="colgroup" colspan="${profileCount + scoreCount}" class="meta-group"><span>Publications: ${entry.year - windowYears()}–${entry.year - 1} · Citations: ${entry.year}${state.averagePercentiles ? ` · ${state.metric === 'per_article' ? 'ANP3' : 'Percentiles avg'}: ${entry.year - 2}–${entry.year}` : ''} · OpenAlex data: ${escape(month)}</span> ` +
+  const groups = `<th scope="colgroup" colspan="${profileCount + scoreCount}" class="meta-group"><span>Publications${isOjf() ? ` (${METRICS[state.metric].short})` : ''}: ${entry.year - windowYears()}–${entry.year - 1} · Citations: ${entry.year}${state.averagePercentiles ? ` · ${state.metric === 'per_article' ? 'ANP3' : 'Percentiles avg'}: ${entry.year - 2}–${entry.year}` : ''} · OpenAlex data: ${escape(month)}</span> ` +
     '<a class="table-help" href="journal-help.html#journal-table-main" target="_blank" rel="noopener noreferrer" aria-label="Journal table: What is what? (new tab)">What is what?</a>' +
     `<button type="button" class="text-button table-help add-columns-trigger" data-add-columns aria-haspopup="dialog" aria-controls="columns-dialog"${index ? '' : ' disabled'}>Add columns${extraCount ? ` (${extraCount})` : ''}</button></th>` +
     (pctCount ? `<th scope="colgroup" colspan="${pctCount}" class="percentile-group">${state.metric === 'per_article' ? 'Percentiles' : percentileHeading(state)}</th>` : '') +
     (extraCount ? `<th scope="colgroup" colspan="${extraCount}" class="extra-group group-start">Additional columns</th>` : '');
   const headers = headerColumns.map(col => {
-    const displayLabel = col.key.endsWith('Pct') && state.metric === 'per_article' ? `${col.label} · ${percentileHeading(state)}` : col.label;
+    const displayLabel = col.key.endsWith('Pct') ? `${col.label} · ${state.metric === 'per_article' ? percentileHeading(state) : METRICS[state.metric].short}` : col.label;
     if (!interactive) return `<th scope="col" class="${col.className || ''}">${displayLabel}</th>`;
     const sorted = state.sortKey === col.key;
     const direction = state.sortDirection === 1 ? 'ascending' : 'descending';
@@ -236,7 +252,7 @@ function cell(row, col) {
       ? link(`https://openalex.org/${encodeURIComponent(value)}`, value)
       : col.key === 'norwegian_register_ids' && value
         ? E.registerIds(row).map(id => link(`https://kanalregister.hkdir.no/en/tidsskrift?id=${id}`, id)).join(', ')
-        : col.scoreExtra ? fmtScore(value, 'share') : typeof value === 'string' ? escape(value) : fmt(value);
+        : col.scoreExtra ? fmtScore(value, col.key.split(':')[1]) : typeof value === 'string' ? escape(value) : fmt(value);
     return `<td class="${col.className || ''} ${value == null ? 'missing' : ''}">${text}</td>`;
   }
   if (col.key === 'publications_without_references_pct') {
@@ -252,7 +268,7 @@ function cell(row, col) {
   }
   if (col.score) {
     const metric = col.key.split(':')[1];
-    return `<td class="metric-cell ${col.className || ''} ${['per_article','ojf'].includes(metric) ? 'per-article-cell' : ''} ${value == null ? 'missing' : ''}" title="${value == null ? 'Metric unavailable' : escape(metric === 'ojf' ? fmtScore(value, metric) : value)}">${fmtScore(value, metric)}</td>`;
+    return `<td class="metric-cell ${col.className || ''} ${metric === 'per_article' || E.isOjf(metric) ? 'per-article-cell' : ''} ${value == null ? 'missing' : ''}" title="${value == null ? 'Metric unavailable' : escape(E.isOjf(metric) ? fmtScore(value, metric) : value)}">${fmtScore(value, metric)}</td>`;
   }
   return `<td>${fmt(value)}</td>`;
 }
@@ -329,7 +345,7 @@ const uniqueValues = values => [...new Set(values.filter(Boolean))].sort(E.compa
 function fillFilters() {
   const inUniverse = rows.filter(row => E.inViewUniverse(row, state, ranks));
   for (const [key, filter] of Object.entries(FILTERS)) {
-    const initialFields = index?.years.find(entry => entry.year === Number($('year').value))?.[isOjf() ? 'ojf_fields' : 'fields'];
+    const initialFields = index?.years.find(entry => entry.year === Number($('year').value))?.[fieldIndexKey()];
     filterValues[key] = uniqueValues(year == null ? (initialFields?.[state.universe] ?? []) : inUniverse.map(row => row[filter.column]));
     state[key] = state[key].filter(value => filterValues[key].includes(value));
     drawFilter(key);
@@ -352,12 +368,13 @@ function syncControls() {
   $('metric').value = state.metric;
   $('universe-label').textContent = isOjf() ? 'Show journals from' : 'Journal universe';
   $('metric').querySelector('option[value="ojf"]').disabled = !index?.ojf;
+  $('metric').querySelector('option[value="ojf5"]').disabled = !index?.ojf5;
   $('metric-independence-text').textContent = isOjf() ? 'Independently calculated OJF values, not official Journal Impact Factors' : 'Independently calculated ANS values, not official Article Influence Scores';
-  $('metric-details').setAttribute('href', `journal-help.html#${isOjf() ? 'ojf' : 'ans'}`);
+  $('metric-details').setAttribute('href', `journal-help.html#${state.metric === 'ojf5' ? 'ojf5' : isOjf() ? 'ojf' : 'ans'}`);
   $('add-publications-label').textContent = isOjf() ? 'Citable items recorded' : 'Publications recorded';
   $('publication-years-control').hidden = isOjf();
   $('min-years').disabled = isOjf();
-  const keys = isOjf() ? ['jif','ojf-full','custom'] : ['ef-ais','full','vu-sbe','custom'];
+  const keys = state.metric === 'ojf5' ? ['jif5','ojf5-full','custom'] : isOjf() ? ['jif','ojf-full','custom'] : ['ef-ais','full','vu-sbe','custom'];
   $('preset').innerHTML = keys.map(key => option(key, PRESET_LABELS[key])).join('');
   syncAddedColumns();
   for (const [id, key] of Object.entries(SELECTS)) $(id).value = state[key];
@@ -421,7 +438,7 @@ function showJournal(id) {
   if (!row) return;
   stopJournalTracking();
   const details = D.metadataRows(row, state);
-  $('dialog-content').innerHTML = `<p class="dialog-label">JOURNAL DETAILS · ${year} · ${state.treatment.toUpperCase()}</p><h2 id="dialog-title">${escape(row.title)}</h2>` +
+  $('dialog-content').innerHTML = `<p class="dialog-label">JOURNAL DETAILS · ${year} · ${state.treatment.toUpperCase()}${isOjf() ? ` · ${METRICS[state.metric].short}` : ''}</p><h2 id="dialog-title">${escape(row.title)}</h2>` +
     '<nav id="journal-sections" class="journal-section-nav" aria-label="Journal detail sections">' +
     '<a href="#details-title" data-journal-section="details-title">Details</a>' +
     '<a href="#fields-title" data-journal-section="fields-title">Fields covered</a>' +
@@ -430,7 +447,7 @@ function showJournal(id) {
     '<div class="dialog-section-heading"><h3 id="details-title" tabindex="-1">Details</h3><a class="table-help" href="journal-help.html#journal-details" target="_blank" rel="noopener noreferrer" aria-label="Details: What is what? (new tab)">What is what?</a></div>' +
     `<dl id="journal-metadata" aria-labelledby="details-title">${details.map(([key, value]) => `<dt>${key}</dt><dd>${value}</dd>`).join('')}</dl>` +
     '<div class="dialog-section-heading"><h3 id="fields-title" tabindex="-1">Fields covered</h3><a class="table-help" href="journal-help.html#fields-covered" target="_blank" rel="noopener noreferrer" aria-label="Fields covered: What is what? (new tab)">What is what?</a></div><div id="field-breakdown" aria-live="polite"><p>Loading fields…</p></div>' +
-    `<div class="dialog-section-heading"><h3 id="metrics-title" tabindex="-1">Metrics by year · ${state.metric === 'ojf' ? 'OJF' : escape(universeName(state.universe)) + ' universe'} · ${state.treatment === 'raw' ? 'Raw' : 'Filtered'}</h3><a class="table-help" href="journal-help.html#yearly-metrics" target="_blank" rel="noopener noreferrer" aria-label="Metrics by year: What is what? (new tab)">What is what?</a></div>` +
+    `<div class="dialog-section-heading"><h3 id="metrics-title" tabindex="-1">Metrics by year · ${isOjf() ? METRICS[state.metric].short : escape(universeName(state.universe)) + ' universe'} · ${state.treatment === 'raw' ? 'Raw' : 'Filtered'}</h3><a class="table-help" href="journal-help.html#yearly-metrics" target="_blank" rel="noopener noreferrer" aria-label="Metrics by year: What is what? (new tab)">What is what?</a></div>` +
     '<div id="history" class="dialog-table-scroll" role="region" aria-labelledby="metrics-title" tabindex="0"></div>' +
     '<p id="history-percentile-status" role="status"></p>';
   $('journal-dialog').showModal();
@@ -464,7 +481,7 @@ function navigateJournalSection(event) {
 
 // One small history file contains every score year for this journal.
 async function journalHistory(id, metric = state.metric) {
-  const folder = (metric === 'ojf' ? index.ojf : index.journal_details)?.history_path ?? index.field_breakdown?.history_path ?? 'history';
+  const folder = (E.isOjf(metric) ? ojfData(metric) : index.journal_details)?.history_path ?? index.field_breakdown?.history_path ?? 'history';
   const url = `data/${folder}/${id.slice(-2)}.parquet`;
   if (!historyFiles.has(url)) historyFiles.set(url, fetchOk(url).then(response => response.arrayBuffer())
     .catch(error => { historyFiles.delete(url); throw error; }));
@@ -478,9 +495,9 @@ let historicalRankKey = '', historicalRanks = new Map();
 
 async function rankYear(entry, settings, selectedYear, selectedRows) {
   if (entry.year === selectedYear) return E.rank(selectedRows, settings);
-  const details = settings.metric === 'ojf' ? index.ojf : index.journal_details;
+  const details = E.isOjf(settings.metric) ? ojfData(settings.metric) : index.journal_details;
   const folder = details?.rank_path;
-  const suffix = (settings.metric === 'ojf' || index.journal_details?.rank_layout === 'metric-treatment') ? `-${settings.metric}-${settings.treatment}` : '';
+  const suffix = (E.isOjf(settings.metric) || index.journal_details?.rank_layout === 'metric-treatment') ? `-${settings.metric}-${settings.treatment}` : '';
   const url = folder ? `data/${folder}/${entry.year}-${settings.universe}${suffix}.parquet` : `data/scores_${entry.year}.parquet`;
   if (!historicalRankFiles.has(url)) historicalRankFiles.set(url, fetchOk(url)
     .then(response => response.arrayBuffer()).then(file => parquetReadObjects({ file }))
@@ -538,8 +555,8 @@ function csvCell(value) {
   return '"' + text.replace(/"/g, '""') + '"';
 }
 const csvLines = lines => {
-  const ojfColumn = lines[0]?.indexOf('OJF') ?? -1;
-  return lines.map((line, row) => line.map((value, column) => row > 0 && column === ojfColumn && E.isNumber(value)
+  const ojfColumns = new Set(lines[0]?.flatMap((label, i) => /^OJF[25]?$/.test(label) ? [i] : []) ?? []);
+  return lines.map((line, row) => line.map((value, column) => row > 0 && ojfColumns.has(column) && E.isNumber(value)
     ? value.toFixed(3) : csvCell(value)).join(',')).join('\r\n');
 };
 
@@ -568,12 +585,12 @@ function selectionExport() {
       ? `${state.averagePercentiles ? 'Avg ' : ''}${col.label} percentile (${state.metric === 'per_article' ? percentileHeading(state) : METRICS[state.metric].short}${state.averagePercentiles ? `; ${year - 2}-${year}` : ''})` : (col.downloadLabel ?? col.label);
     return [{label, value:row => {
       const value = E.columnValue(row, state, ranks, col.key);
-      return col.key === 'score:ojf' && E.isNumber(value) ? Math.round(value * 1000) / 1000 : value;
+      return col.key.startsWith('score:') && E.isOjf(col.key.split(':')[1]) && E.isNumber(value) ? Math.round(value * 1000) / 1000 : value;
     }}];
   });
   const header = downloadColumns.map(col => col.label);
   const lines = visible.map(row => downloadColumns.map(col => col.value(row)));
-  return {filename:`opindx-${state.metric === 'ojf' ? 'ojf' : 'ans'}-${year}-${state.treatment}${state.averagePercentiles ? `-avg-percentiles-${year - 2}-${year}` : ''}-view`, matrix:[header, ...lines]};
+  return {filename:`opindx-${isOjf() ? METRICS[state.metric].short.toLowerCase() : 'ans'}-${year}-${state.treatment}${state.averagePercentiles ? `-avg-percentiles-${year - 2}-${year}` : ''}-view`, matrix:[header, ...lines]};
 }
 function downloadView() {
   const {filename, matrix} = selectionExport();

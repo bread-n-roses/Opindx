@@ -8,6 +8,7 @@ graph as an OJF citation graph.
 from __future__ import annotations
 import argparse
 from dataclasses import asdict
+from numbers import Real
 import json
 from pathlib import Path
 
@@ -98,11 +99,12 @@ def annual_inputs(year, latest_path, pairs_path, register, destination):
     for name,frame in frames.items(): frame.to_parquet(destination/f'{name}_{year}.parquet',index=False)
     return frames
 
-def annual(year, checkpoint, frames, inputs, overrides, exclusions, website, out, *, memory='8GB',threads=4):
+def annual(year, checkpoint, frames, inputs, overrides, exclusions, website, out, *, memory='8GB',threads=4,window_years=2):
     """Count OJF directly from the deduplicated all-type checkpoint."""
+    if isinstance(window_years,bool) or window_years not in (2,5):raise ValueError('window_years must be 2 or 5')
     out=Path(out);out.mkdir(parents=True,exist_ok=True)
     q=io.sql_literal
-    contract={'year':year,'checkpoint_sha256':io.hash_file(checkpoint),
+    contract={'year':year,'window_years':window_years,'checkpoint_sha256':io.hash_file(checkpoint),
         'inputs':{n:io.hash_file(Path(inputs)/f'{n}_{year}.parquet') for n in frames},
         'work_overrides_sha256':io.hash_file(overrides),'work_exclusions_sha256':io.hash_file(exclusions),
         'website_sha256':io.hash_file(website),
@@ -122,17 +124,17 @@ def annual(year, checkpoint, frames, inputs, overrides, exclusions, website, out
           coalesce(o.target_source_id,w.source_id) AS source_id,coalesce(o.target_raw_issn_l,w.raw_issn_l) AS raw_issn_l
           FROM raw w LEFT JOIN read_parquet({q(overrides)}) o USING(work_id)
           LEFT JOIN read_parquet({q(exclusions)}) x USING(work_id)
-          WHERE x.work_id IS NULL AND w.year BETWEEN {year-2} AND {year}''')
+          WHERE x.work_id IS NULL AND w.year BETWEEN {year-window_years} AND {year}''')
         audit,query=assembly.projection_sql(year,inputs)
         if len(con.execute(audit).df()):raise ValueError('Changed Source correction preimage')
         metadata=io.completed_stage(con,out/'work_metadata.parquet',query,io.hash_json(contract))
         con.execute(f'CREATE TEMP VIEW m AS SELECT * FROM read_parquet({q(metadata["path"])})')
         totals=con.execute(f'''SELECT effective_issn_l AS journal_id,count(*)::BIGINT AS d_raw,
           count(*) FILTER(refs_count_reported>0)::BIGINT AS d_ref FROM m
-          WHERE year BETWEEN {year-2} AND {year-1} AND NOT is_paratext AND work_type IN {TYPES}
+          WHERE year BETWEEN {year-window_years} AND {year-1} AND NOT is_paratext AND work_type IN {TYPES}
           GROUP BY 1''').df()
         votes=con.execute(f'''SELECT effective_issn_l AS journal_id,primary_field,count(*)::BIGINT AS works
-          FROM m WHERE year BETWEEN {year-2} AND {year-1} AND NOT is_paratext AND is_ar GROUP BY 1,2''').df()
+          FROM m WHERE year BETWEEN {year-window_years} AND {year-1} AND NOT is_paratext AND is_ar GROUP BY 1,2''').df()
         fields=assembly.field_modes(votes)
         population=assembly.reporting_population(pd.read_parquet(website),frames['sources'],totals,fields,year)
         norwegian=frames['norwegian']
@@ -140,21 +142,25 @@ def annual(year, checkpoint, frames, inputs, overrides, exclusions, website, out
         population['norwegian_register_ids_json']=population.journal_id.map(ids).fillna('[]')
         level=norwegian.groupby('issn_l').norwegian_level.max()
         population['norwegian_level']=population.norwegian_level.fillna(population.journal_id.map(level))
+        # New recipients can have numeric levels alongside existing text such as
+        # "1 | 2". Keep display metadata in one Arrow-compatible interchange type.
+        population['norwegian_level']=population.norwegian_level.map(
+            lambda v:str(int(v)) if isinstance(v,Real) and pd.notna(v) and float(v).is_integer() else v).astype('string')
         con.register('evaluation',population[['journal_id']])
         con.execute(f'''CREATE TEMP VIEW targets AS SELECT work_id,effective_issn_l AS journal_id,year AS publication_year,
           coalesce(work_type,'other') AS work_type,refs_count_reported AS observed_references,
           (is_retracted OR coalesce(work_type='retraction',false)) AS is_retracted
-          FROM m WHERE year BETWEEN {year-2} AND {year-1} AND NOT is_paratext;
+          FROM m WHERE year BETWEEN {year-window_years} AND {year-1} AND NOT is_paratext;
           CREATE TEMP VIEW citing AS SELECT m.work_id,m.effective_issn_l AS journal_id,m.year AS publication_year,w.refs AS "references",
           (m.is_retracted OR coalesce(m.work_type='retraction',false)) AS is_retracted,
           true AS in_n,(m.effective_source_type='journal') AS in_n_journals,true AS in_a_expanded,
           CASE WHEN m.effective_source_type='journal' THEN 'N-journal' ELSE 'N-nonjournal' END AS source_component
           FROM m JOIN raw w USING(work_id) WHERE m.year={year} AND m.in_n AND NOT m.is_paratext''')
-        grouped=engine.build_type_counts(con,citation_year=year)
+        grouped=engine.build_type_counts(con,citation_year=year,window_years=window_years)
         counts=engine.derive_counts(grouped,policies={'AR_DP_SP':TYPES});scores=engine.build_scores(counts)
         expected=population[['journal_id']].merge(totals,on='journal_id',how='left').fillna({'d_raw':0,'d_ref':0}).set_index('journal_id')
         assembly.assert_denominator_parity(counts,expected)
-        output=assembly.wide_export(population,counts,scores,year)
+        output=assembly.wide_export(population,counts,scores,year,window_years=window_years)
         for name,frame in [('population',population),('field_votes',votes),('counts',counts),('scores',scores),('annual',output)]:
             frame.to_parquet(out/f'{name}.parquet',index=False)
     return output
@@ -163,12 +169,13 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--nfans-run',type=Path,required=True,help='Completed public opindx-replicate working directory')
     p.add_argument('--work',type=Path,required=True,help='Separate OJF working directory')
+    p.add_argument('--window-years',type=int,choices=(2,5),default=2,help='OJF publication window; use a separate work directory for each')
     p.add_argument('--threads',type=int,default=4);p.add_argument('--memory',default='8GB')
     args=p.parse_args();nfans=args.nfans_run.resolve();work=args.work.resolve()
     config=nf.read(nfans/'config/run.json')
     nf.prepare(config['raw_snapshot_root'],nfans/config['norwegian_register_input'],nfans)
     if work==nfans or work.is_relative_to(nfans):raise ValueError('Use a separate OJF work directory')
-    extracted=io.run(nfans,work/'extraction',threads=args.threads,memory_limit=args.memory)
+    extracted=io.run(nfans,work/'extraction',threads=args.threads,memory_limit=args.memory,start_year=2022-args.window_years)
     repair=nfans/'intermediates/source-repair-v1'
     overrides=nf.verified(repair/'work_overrides.parquet');exclusions=nf.verified(repair/'excluded_works.parquet')
     latest=nf.verified(repair/'latest_sources.parquet')
@@ -177,9 +184,9 @@ def main():
         frames=annual_inputs(year,latest,nf.verified(repair/f'graph/{year}/annual_pairs.parquet'),
                              nfans/config['norwegian_register_input'],work/'inputs')
         annual(year,Path(extracted['works']['path']),frames,work/'inputs',overrides,exclusions,
-               nfans/f'exports/scores_{year}.parquet',work/str(year),memory=args.memory,threads=args.threads)
+               nfans/f'exports/scores_{year}.parquet',work/str(year),memory=args.memory,threads=args.threads,window_years=args.window_years)
     from .publication import export_run
-    export_run(work,nfans/'exports',work/'annual')
+    export_run(work,nfans/'exports',work/'annual',window_years=args.window_years)
     print('OJF complete annual Parquets and manifest created; use opindx-ojf-export for CSV/XLSX.',flush=True)
 
 if __name__=='__main__': main()

@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "source_licenses": {
+    "OpenAlex": "CC0-1.0",
+    "Norwegian Register": "NLOD-2.0"
+  },
+  "prior_thirty_annual_files_match_public_github_assets": true,
+  "proprietary_inputs_or_benchmark_outputs_in_release": false,
+  "annual": [
+    {
+      "year": 2022,
+      "public_schema_columns": 54,
+      "restricted_columns_absent": true,
+      "parquet_sha256": "8f01305789d3f1e54587b6d3814bcd4b107cfbff26c9a3b6741d777d00beb21f"
+    },
+    {
+      "year": 2023,
+      "public_schema_columns": 54,
+      "restricted_columns_absent": true,
+      "parquet_sha256": "5520ccc6d3cb9988cc735fb00650e10ffb02d5ddd9448ed1d64a895d12532802"
+    },
+    {
+      "year": 2024,
+      "public_schema_columns": 54,
+      "restricted_columns_absent": true,
+      "parquet_sha256": "6247573765560e5204618a0503b07b01d12bd95b2e46f8523f718b168aa0ddf0"
+    },
+    {
+      "year": 2025,
+      "public_schema_columns": 54,
+      "restricted_columns_absent": true,
+      "parquet_sha256": "3038de3adc796b15aeb1d39a75f480ffb7049a838123a3faea3b47cd5a46f5ae"
+    },
+    {
+      "year": 2026,
+      "public_schema_columns": 54,
+      "restricted_columns_absent": true,
+      "parquet_sha256": "71416f6b8d9fbefac251513801591df1badc3b308c560cbfefdbac84bdc1cbdf"
+    }
+  ]
+}

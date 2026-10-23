@@ -1,3 +1,13 @@
+## Software 0.5.0 and data 2026-09-v5 (23 October 2026)
+
+This authorized release adds OJF5 and the corresponding website. Software DOI:
+https://doi.org/10.5281/zenodo.23599868 . Dataset DOI: https://doi.org/10.5281/zenodo.23599869 .
+All thirty prior NF/ANS and OJF2 annual files remain byte-identical. New OJF5
+files have full annual CSV/XLSX/Parquet exports and all-cell validation. Prior
+published versions and NF/ANS frozen-year pins remain unchanged.
+The version-specific source and calculation evidence are checked by the software
+archive gate; source archives are made from the immutable software tag.
+
 ## Published 17 October 2026
 
 - Opindx software 0.4.0: https://doi.org/10.5281/zenodo.23437873

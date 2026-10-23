@@ -13,4 +13,8 @@ from opindx_replication.ojf.publication import install
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('annual',type=Path);p.add_argument('site_data',type=Path)
-    a=p.parse_args();print(json.dumps(install(a.annual,a.site_data),indent=2))
+    p.add_argument('--five-year',type=Path,help='Verified OJF5 annual directory; installs both OJF windows and comparison columns')
+    a=p.parse_args()
+    result=install(a.annual,a.site_data,other_annual=a.five_year)
+    if a.five_year is not None:result['ojf5']=install(a.five_year,a.site_data,window_years=5,other_annual=a.annual)
+    print(json.dumps(result,indent=2))

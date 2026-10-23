@@ -1,0 +1,77 @@
+{
+  "status": "PASS",
+  "scope": "Source-bound OJF5 counting run, saved-count score/status replay and rebuilt open annual metadata; no repeated full raw-snapshot scan",
+  "source_pins_verified": true,
+  "validated_source_sha256": {
+    "src/opindx_replication/datasets.py": "7cde959df9cbcb367ed302cebbdcb8fce688f8555be1d87295ea9139c7ff17a2",
+    "src/opindx_replication/ojf/assembly.py": "597424167ee92de992b2a4bff5ffadc9c625f2724a7cff0ba077484c67808c3b",
+    "src/opindx_replication/ojf/checkpoint.py": "3a83407161ba515905c68f951e5a4a00095edc4ab22c1fa40f7d55a83bb59024",
+    "src/opindx_replication/ojf/counting_base.py": "0910f5c5534621c26751f45eb406523df3923750f3715db8a9adc234e57b7951",
+    "src/opindx_replication/ojf/engine.py": "7812a118cfa2492c2307b5c59f9e2efee6c2a497c1f9d338096bd10695812237",
+    "src/opindx_replication/ojf/pipeline.py": "add707f8abcc833238b80d5e4b83ec559cebc160d0cff3d0d2b08df5c82455f4",
+    "src/opindx_replication/ojf/publication.py": "beda56f78f419aabffc82207fc837a7ff5073cfbfc91d8a32e1906fffb864dc7",
+    "src/opindx_replication/ojf/__init__.py": "bccc98eac70b133f123e474f6ce0b271850ef48ca64d431c968b0e8b4cd7af6d"
+  },
+  "annual": [
+    {
+      "year": 2022,
+      "rows": 125801,
+      "count_score_status_replay_exact": true,
+      "annual_metadata_rebuilt_exact": true,
+      "schema_normalization_values_exact": true,
+      "source_contract_sha256": "e60d551f0a138d7016580b7e9b3f8cf5526be5047ff5e38155db870f3df98be9",
+      "count_sha256": "8747b9adebd2a3bbed936777ae32c7729bc1e6c9263107a24cc330f5d2f8e80b",
+      "scores_sha256": "8e7814dee58e212c16478e066807977f65ab516289b303e76bde157c423623a0",
+      "published_parquet_sha256": "8f01305789d3f1e54587b6d3814bcd4b107cfbff26c9a3b6741d777d00beb21f"
+    },
+    {
+      "year": 2023,
+      "rows": 128367,
+      "count_score_status_replay_exact": true,
+      "annual_metadata_rebuilt_exact": true,
+      "schema_normalization_values_exact": true,
+      "source_contract_sha256": "7a76daa3943ee43a4f4e6648be4e5471c5ddf1940b62071d52bac7d5b36556ce",
+      "count_sha256": "30fc9465b5fa7c3613530db601b2b872402b3db42aa3bd7e2927984e5dcf9df9",
+      "scores_sha256": "377421a5648042b96bcadd02856556d7a38a1407af06984941769b574367e610",
+      "published_parquet_sha256": "5520ccc6d3cb9988cc735fb00650e10ffb02d5ddd9448ed1d64a895d12532802"
+    },
+    {
+      "year": 2024,
+      "rows": 129862,
+      "count_score_status_replay_exact": true,
+      "annual_metadata_rebuilt_exact": true,
+      "schema_normalization_values_exact": true,
+      "source_contract_sha256": "993aeb021a21ca919b0fe12ea28f62169fe6e9fde880a24a14768a0e12759717",
+      "count_sha256": "b1d531181fe757bf0a6cde484f0cbb9ddcfc31209c5804ad049447c0e8e8099f",
+      "scores_sha256": "a48a0425dbdacfcf641bf05f3c5357be57575639ae662706ab12a0ad2ebf2430",
+      "published_parquet_sha256": "6247573765560e5204618a0503b07b01d12bd95b2e46f8523f718b168aa0ddf0"
+    },
+    {
+      "year": 2025,
+      "rows": 130362,
+      "count_score_status_replay_exact": true,
+      "annual_metadata_rebuilt_exact": true,
+      "schema_normalization_values_exact": true,
+      "source_contract_sha256": "ff2848272542140cb98af87452e46255a2065ca538f7b522c63f809e6840d228",
+      "count_sha256": "e3e4dfbb840922468e7c0122158cdb7afadbde9e99108fd2c720f3ec446a5b2b",
+      "scores_sha256": "cd96e3fb21b3de930be4a5823058d34e4d8f299bb3f0475c2e9a5438fd6aea0e",
+      "published_parquet_sha256": "3038de3adc796b15aeb1d39a75f480ffb7049a838123a3faea3b47cd5a46f5ae"
+    },
+    {
+      "year": 2026,
+      "rows": 126802,
+      "count_score_status_replay_exact": true,
+      "annual_metadata_rebuilt_exact": true,
+      "schema_normalization_values_exact": true,
+      "source_contract_sha256": "ced4222d1274beacefbf51aad1c113ed9036579b7cd82ae652a0ce7d8169cb92",
+      "count_sha256": "714f294bcc0f9040d50f2364836a62646827a54339242304e83263fa651a4768",
+      "scores_sha256": "f73a771f2131dbeb97dad4380c42519e7ddfddebe1170fc2fcc10209c2d81436",
+      "published_parquet_sha256": "71416f6b8d9fbefac251513801591df1badc3b308c560cbfefdbac84bdc1cbdf"
+    }
+  ],
+  "checkpoint_source_change": "Only the diagnostic report version label uses the actual start year; extraction SQL is unchanged. CRLF/LF differences are normalized for this exact comparison.",
+  "source_licenses": {
+    "OpenAlex": "CC0-1.0",
+    "Norwegian Register": "NLOD-2.0"
+  }
+}

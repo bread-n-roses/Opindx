@@ -84,7 +84,7 @@ def reporting_population(website,sources,denominators,fields,year):
     if pop.journal_id.isna().any() or pop.journal_id.duplicated().any():raise ValueError('Invalid recipient keys')
     return pop
 
-def wide_export(pop,counts,scores,year):
+def wide_export(pop,counts,scores,year,*,window_years=2):
     mode=primary(year);suffix='' if mode=='all' else '_exclude_snapshot'
     cols=['c_raw','c_ref','c_non_citable','c_self','c_ref_self','c_raw_n_nonjournal','c_ref_n_nonjournal']
     c=counts[['journal_id','d_raw','d_ref']+[n+suffix for n in cols]].rename(columns={n+suffix:n for n in cols})
@@ -96,7 +96,7 @@ def wide_export(pop,counts,scores,year):
         out=out.merge(v.rename(columns={'score':'ojf_'+tag,'score_status':'status_'+tag}),on='journal_id',how='left',sort=False,validate='one_to_one')
     out['zero_ref_citable_items']=out.d_raw-out.d_ref;out['zero_ref_citable_target_citations']=out.c_raw-out.c_ref
     out['snapshot_date']='2026-09-23';out['method_version']='ojf-n-citing-v1';out['citable_policy']='AR_DP_SP';out['citing_universe']='N'
-    out['primary_retraction_mode']=mode;out['target_start_year']=year-2;out['target_end_year']=year-1
+    out['primary_retraction_mode']=mode;out['target_start_year']=year-window_years;out['target_end_year']=year-1
     out['maturity_status']='provisional' if year>=2025 else 'freeze_eligible'
     out['citation_year_complete']=year<2026;out['freeze_eligible_from']=f'{year+2}-01-01'
     if not out.journal_id.equals(pop.journal_id):raise AssertionError('Recipient order changed')

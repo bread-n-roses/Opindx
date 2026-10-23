@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opindx-replication"
-version = "0.4.0"
+version = "0.5.0"
 authors = [{name = "Utz Weitzel"}]
 description = "Reproduce Opindx journal metrics from OpenAlex and the Norwegian Register"
 requires-python = ">=3.12"

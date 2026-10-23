@@ -1,5 +1,15 @@
 # Changes
 
+## 0.5.0 - 2026-10-23
+
+- Adds five-year OJF5 alongside two-year OJF2, using the same fixed Norwegian Register citing sources and open-input policies.
+- Extends the target metadata window to 2017 for the 2022-2026 calculations and preserves verified citing reference arrays.
+- Adds metric-specific fields, counts, reference shares and percentile pools; the alternate OJF remains an optional table column.
+- Preserves all thirty prior NF/ANS and OJF2 annual CSV/XLSX/Parquet files byte-for-byte, and keeps existing NF/ANS frozen-year pins.
+- Adds complete OJF5 annual exports, dictionaries, all-cell format checks and release-layout builder verification.
+- Includes ANP/ANP3 labels and the reviewed concise help text. OJF tables show one decimal place; selection downloads show three, and ranks use unrounded values.
+- Keeps the original baseline replay evidence. Validates the source-bound OJF5 calculation, exact OJF2 frozen-count replay and window-specific browser behavior; no repeated complete scan for prior data is claimed.
+
 ## 0.4.0 - 2026-10-17
 
 - Adds independently calculated Open Journal Factor (OJF), with fixed Norwegian Register citing sources, two-year counts, raw/filtered scores and explicit zero/missing statuses.

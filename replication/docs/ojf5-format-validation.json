@@ -1,0 +1,121 @@
+{
+  "status": "PASS",
+  "annual": [
+    {
+      "year": 2022,
+      "rows": 125801,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2022.parquet": {
+          "sha256": "8f01305789d3f1e54587b6d3814bcd4b107cfbff26c9a3b6741d777d00beb21f",
+          "bytes": 11989837
+        },
+        "scores_2022.csv": {
+          "sha256": "76699ee9028a054d99f537d9e1cf28ec013ab4fdee88897c6006d7096fd158da",
+          "bytes": 55420194
+        },
+        "scores_2022.xlsx": {
+          "sha256": "d26637e8b2a70ed21c286f34f26062eab4e7de3e587108dcb47807505af09aab",
+          "bytes": 34121938
+        }
+      }
+    },
+    {
+      "year": 2023,
+      "rows": 128367,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2023.parquet": {
+          "sha256": "5520ccc6d3cb9988cc735fb00650e10ffb02d5ddd9448ed1d64a895d12532802",
+          "bytes": 12267531
+        },
+        "scores_2023.csv": {
+          "sha256": "c0e12feee71bf60bcb723306c18d1a9325835be14ffcec32da78f646a2895acf",
+          "bytes": 56579456
+        },
+        "scores_2023.xlsx": {
+          "sha256": "e0d2c3f86c79a1c2070cb284a9e66460f6d40d33adf4512982eac176e024c0f0",
+          "bytes": 34906776
+        }
+      }
+    },
+    {
+      "year": 2024,
+      "rows": 129862,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2024.parquet": {
+          "sha256": "6247573765560e5204618a0503b07b01d12bd95b2e46f8523f718b168aa0ddf0",
+          "bytes": 12427972
+        },
+        "scores_2024.csv": {
+          "sha256": "fb3ed292eaf045d0426a07bbd844b539d1b75a1638d4c6835a2a003d8d113b7a",
+          "bytes": 59028988
+        },
+        "scores_2024.xlsx": {
+          "sha256": "963e2831e27839b1bed35cd1a12f7ba990bf4e3cad1aaf89fcd08e1bbc778dcc",
+          "bytes": 35480200
+        }
+      }
+    },
+    {
+      "year": 2025,
+      "rows": 130362,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2025.parquet": {
+          "sha256": "3038de3adc796b15aeb1d39a75f480ffb7049a838123a3faea3b47cd5a46f5ae",
+          "bytes": 12581235
+        },
+        "scores_2025.csv": {
+          "sha256": "4340b09458ff59f275861aec86353a94f0c7396ca306dd1e6d7e046b06ad85cc",
+          "bytes": 58938091
+        },
+        "scores_2025.xlsx": {
+          "sha256": "116cb0d58e5728244d5edeefc58d178935e9f6056d2dbe093f2d26f46468bd22",
+          "bytes": 35756148
+        }
+      }
+    },
+    {
+      "year": 2026,
+      "rows": 126802,
+      "columns": 54,
+      "csv_all_cells_exact": true,
+      "xlsx_all_cells_verified": true,
+      "xlsx_float_relative_tolerance": 2e-15,
+      "xlsx_empty_string_equals_blank": true,
+      "files": {
+        "scores_2026.parquet": {
+          "sha256": "71416f6b8d9fbefac251513801591df1badc3b308c560cbfefdbac84bdc1cbdf",
+          "bytes": 12328273
+        },
+        "scores_2026.csv": {
+          "sha256": "82233a73e9bb99abb325a7896f47e48c059f0f331dae0b7435959f5d725103d7",
+          "bytes": 57662763
+        },
+        "scores_2026.xlsx": {
+          "sha256": "b557fea45a0b6146ea771b26bc4243187e71b4fbf5ed4b116ba78218ff764e4b",
+          "bytes": 35004283
+        }
+      }
+    }
+  ],
+  "total_rows": 641194
+}

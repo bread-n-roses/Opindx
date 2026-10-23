@@ -1,6 +1,6 @@
 {
   "status": "PASS",
-  "scope": "Replay from hash-bound frozen open-input type counts, not a repeated raw-snapshot scan",
+  "scope": "Current-source replay of hash-bound open OJF2 type counts; no repeated raw-snapshot scan",
   "years": [
     {
       "year": 2022,
@@ -76,12 +76,12 @@
   "total_journal_years": 578622,
   "all_cells_exact": true,
   "source_sha256": {
-    "assembly.py": "e7e3f6755e64745100ed78619e3275fe0c205b0eeb721f77e145e0c49b942506",
-    "checkpoint.py": "440af0edfb062c7f3937dab5904e44ec5a48122130afad3cce974ab126216d0b",
+    "assembly.py": "597424167ee92de992b2a4bff5ffadc9c625f2724a7cff0ba077484c67808c3b",
+    "checkpoint.py": "3a83407161ba515905c68f951e5a4a00095edc4ab22c1fa40f7d55a83bb59024",
     "counting_base.py": "0910f5c5534621c26751f45eb406523df3923750f3715db8a9adc234e57b7951",
-    "engine.py": "d5a768b19744610e19b8e82dd8fe9482fcdb22c3e3dba82f10f806edc6aee9a1",
-    "pipeline.py": "9077aaa975d7232f9066837d29092186cb0610338568e59d0a961f7c0b21e1a4",
-    "publication.py": "0a7641a79eea515c709299e33d4570734f89b1cb528e510832d5b014cd3d164b",
+    "engine.py": "7812a118cfa2492c2307b5c59f9e2efee6c2a497c1f9d338096bd10695812237",
+    "pipeline.py": "add707f8abcc833238b80d5e4b83ec559cebc160d0cff3d0d2b08df5c82455f4",
+    "publication.py": "beda56f78f419aabffc82207fc837a7ff5073cfbfc91d8a32e1906fffb864dc7",
     "__init__.py": "bccc98eac70b133f123e474f6ce0b271850ef48ca64d431c968b0e8b4cd7af6d"
   }
 }

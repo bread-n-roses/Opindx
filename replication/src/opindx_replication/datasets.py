@@ -67,7 +67,7 @@ def validate_values(expected, observed, *, spreadsheet=False):
         assert isinstance(observed, (int,float)) and not isinstance(observed,bool)
         assert math.isclose(expected,observed,rel_tol=2e-15,abs_tol=0), (expected,observed)
 
-def ojf_description(name):
+def ojf_description(name, window_years=2):
     known={
         'canonical_journal_key':'Reviewed identity: valid ISSN-L, or oa: followed by an OpenAlex source URL when no valid linking ISSN is available.',
         'oa_field':'Most frequent named primary-topic field among Raw articles/reviews in t-2 through t-1; Unknown when none is classified.',
@@ -103,7 +103,8 @@ def ojf_description(name):
         'publication_start_year':'First publication year in the OJF denominator window, t-2.',
         'publication_end_year':'Last publication year in the OJF denominator window, t-1.',
     }
-    return known[name] if name in known else description(name).replace('five-year','two-year')
+    value=known[name] if name in known else description(name).replace('five-year','two-year')
+    return value.replace('two-year','five-year').replace('two years','five years').replace('t-2','t-5') if window_years==5 else value
 
 def export(source, output):
     import xlsxwriter
@@ -111,8 +112,9 @@ def export(source, output):
     source,output=Path(source),Path(output)
     output.mkdir(parents=True,exist_ok=True)
     manifest=json.loads((source/'manifest.json').read_text(encoding='utf-8'))
-    is_ojf=manifest.get('metric')=='OJF'
-    define=ojf_description if is_ojf else description
+    is_ojf=manifest.get('metric') in ('OJF','OJF2','OJF5')
+    window_years=manifest.get('window_years',5 if manifest.get('metric')=='OJF5' else 2)
+    define=(lambda name:ojf_description(name,window_years)) if is_ojf else description
     reports=[]
     schema=None
     for year in manifest['years']:
@@ -171,7 +173,7 @@ def export(source, output):
                 f'Opindx complete annual dataset: citation year {year}',
                 'OJF = Open Journal Factor; see ojf_raw and ojf_filtered. Full definitions are in Data dictionary.' if is_ojf else 'NF = share_* columns; ANS = per_article_* columns. Full definitions are in Data dictionary.',
                 'Raw includes all eligible publications; Filtered requires recorded references.',
-                'All OJF citing sources are approved Norwegian Register channels. Publication window: t-2 through t-1.' if is_ojf else 'n = Norwegian Register; oa = OpenAlex. Publication window: t-5 through t-1.',
+                f'All OJF citing sources are approved Norwegian Register channels. Publication window: t-{window_years} through t-1.' if is_ojf else 'n = Norwegian Register; oa = OpenAlex. Publication window: t-5 through t-1.',
                 'Source snapshot: '+manifest['openalex_snapshot']+'; Norwegian Register: '+manifest['norwegian_register_snapshot'],
                 'CC BY 4.0. OpenAlex and Norwegian Register numerical inputs; documented identity corrections.',
                 'Missing values are blank; zero is a defined value. Excel numeric precision is approximately 15 digits.',

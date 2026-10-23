@@ -1,10 +1,10 @@
 # Opindx replication package
 
-Version 0.4.0: [10.5281/zenodo.23437873](https://doi.org/10.5281/zenodo.23437873). Creator: Utz Weitzel
+Version 0.5.0: [10.5281/zenodo.23599868](https://doi.org/10.5281/zenodo.23599868). Creator: Utz Weitzel
 (VU Amsterdam; Radboud University Nijmegen). Complete datasets: [versioned Zenodo series](https://doi.org/10.5281/zenodo.23108620).
 See `docs/VALIDATION.md` for measured validation and `docs/publication.json` for release receipts.
-This version adds the independent Open Journal Factor (OJF), its complete annual
-downloads and the matching website. Earlier software versions and frozen NF/ANS
+This version adds the five-year Open Journal Factor (OJF5), alongside OJF2,
+its complete annual downloads and the matching website. Earlier software versions and frozen NF/ANS
 data remain unchanged. OJF paper-analysis code is in the separate
 [Paper_Replication_OJF repository](https://github.com/bread-n-roses/Paper_Replication_OJF).
 
@@ -87,7 +87,7 @@ they pass. It requires the source inventory recorded as described in
 
 ## OJF calculation
 
-Version 0.4.0 adds opindx-ojf and opindx-ojf-export. See [the OJF workflow](docs/OJF.md) for commands, the two-year window, fixed Norwegian citing sources and validation scope. NF/ANS files and calculation remain unchanged.
+Use opindx-ojf and opindx-ojf-export for OJF2 and OJF5. See [the OJF workflow](docs/OJF.md) for both publication windows, fixed Norwegian citing sources and validation scope. All prior NF/ANS and OJF2 annual files remain unchanged.
 
 ## Results
 

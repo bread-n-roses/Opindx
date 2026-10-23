@@ -66,7 +66,8 @@ def completed_stage(con, path: Path, sql: str, contract: str) -> dict:
     atomic_json(receipt_path, receipt)
     return {**receipt, "path": path.as_posix(), "reused": False}
 
-def checkpoint_sql(files):
+def checkpoint_sql(files, *, start_year=2020):
+    if start_year not in (2017,2020):raise ValueError('start_year must be 2017 or 2020')
     paths = '[' + ','.join(sql_literal(p) for p in files) + ']'
     return f"""
       SELECT id AS work_id, primary_location.source.id AS source_id,
@@ -84,10 +85,11 @@ def checkpoint_sql(files):
         coalesce(nullif(primary_topic.domain.display_name,''),'Unknown') AS primary_domain,
         filename AS source_file, file_row_number AS source_row
       FROM read_parquet({paths},filename=true,file_row_number=true,hive_partitioning=false,union_by_name=true)
-      WHERE publication_year BETWEEN 2020 AND 2026
+      WHERE publication_year BETWEEN {start_year} AND 2026
     """
 
-def run(nfans_run, output, *, chunk_size=40, threads=4, memory_limit='8GB'):
+def run(nfans_run, output, *, chunk_size=40, threads=4, memory_limit='8GB',start_year=2020):
+    if start_year not in (2017,2020):raise ValueError('start_year must be 2017 or 2020')
     output=Path(output).resolve()
     nfans_run=Path(nfans_run).resolve()
     config=read_json(nfans_run/'config/run.json')
@@ -102,7 +104,7 @@ def run(nfans_run, output, *, chunk_size=40, threads=4, memory_limit='8GB'):
         schema=pq.ParquetFile(rec['path']).schema_arrow
         schema.field('primary_topic').type.field('field').type.field('display_name')
         schema.field('primary_topic').type.field('domain').type.field('display_name')
-    contract=dict(version='ojf-wide-2020-2026-v1',snapshot=inventory,years=list(range(2020,2027)),
+    contract=dict(version=f'ojf-wide-{start_year}-2026-v1',snapshot=inventory,years=list(range(start_year,2027)),
         reference_array_years=list(range(2022,2027)),chunk_size=chunk_size,
         extractor_sha256=hash_file(Path(__file__)),
         duckdb_version=duckdb.__version__,raw_filters='publication year only; all sources, types and paratext',
@@ -112,7 +114,7 @@ def run(nfans_run, output, *, chunk_size=40, threads=4, memory_limit='8GB'):
         if read_json(cp)!=contract:raise ValueError('Changed extraction contract; preserve and use a new version')
     else:atomic_json(cp,contract)
     digest=hash_json(contract)
-    print({'status':'PREFLIGHT_PASS','files':len(inventory['files']),'scope':'2020-2026'},flush=True)
+    print({'status':'PREFLIGHT_PASS','files':len(inventory['files']),'scope':f'{start_year}-2026'},flush=True)
     lock=output/'extraction.lock'
     with lock.open('x') as stream:stream.write(str(os.getpid()))
     start=time.monotonic()
@@ -124,7 +126,7 @@ def run(nfans_run, output, *, chunk_size=40, threads=4, memory_limit='8GB'):
             con.execute('SET preserve_insertion_order=false')
             files=[r['path'] for r in inventory['files']];stages=[]
             for i,offset in enumerate(range(0,len(files),chunk_size)):
-                rec=completed_stage(con,output/'chunks'/f'works_{i:04d}.parquet',checkpoint_sql(files[offset:offset+chunk_size]),digest)
+                rec=completed_stage(con,output/'chunks'/f'works_{i:04d}.parquet',checkpoint_sql(files[offset:offset+chunk_size],start_year=start_year),digest)
                 stages.append(rec)
                 print({'files_completed':min(offset+chunk_size,len(files)),'rows':rec['rows'],'seconds':round(time.monotonic()-start,1),'reused':rec['reused']},flush=True)
             paths='['+','.join(sql_literal(r['path']) for r in stages)+']'
@@ -137,7 +139,7 @@ def run(nfans_run, output, *, chunk_size=40, threads=4, memory_limit='8GB'):
               FROM read_parquet({sql_literal(output/'works.parquet')}) GROUP BY year ORDER BY year""").df().to_dict('records')
             if any(r['null_ids'] for r in diagnostic):raise ValueError('Null Work ID')
             if hash_file(Path(__file__))!=contract['extractor_sha256']:raise ValueError('Extractor changed during execution')
-            report=dict(status='PASS',version='ojf-wide-2020-2026-v1',completed_utc=datetime.now(timezone.utc).isoformat(),
+            report=dict(status='PASS',version=f'ojf-wide-{start_year}-2026-v1',completed_utc=datetime.now(timezone.utc).isoformat(),
                 contract_sha256=digest,works=works,chunk_stages=stages,diagnostics=diagnostic,
                 raw_rows_selected=sum(r['rows'] for r in stages),duplicates_removed=sum(r['rows'] for r in stages)-works['rows'])
             atomic_json(output/'report.json',report)

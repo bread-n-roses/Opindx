@@ -993,13 +993,13 @@ await check('OJF selector uses its own files, preset, two-year counts and field 
   assert.equal(h.elements.get('settings').hidden,true);
   assert.equal(h.elements.get('metric-details').attrs.href,'journal-help.html#ojf');
   assert.equal(h.elements.get('metric-independence-text').textContent,'Independently calculated OJF values, not official Journal Impact Factors');
-  assert.match(h.elements.get('table-head').innerHTML,/Publications: 2023\u20132024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Publications \(OJF2\): 2023\u20132024/);
   assert.match(h.elements.get('table-head').innerHTML,/Citable items used/);
   assert.doesNotMatch(h.elements.get('table-head').innerHTML,/data-sort="score:share"|data-sort="score:per_article"/);
   const result=h.api.selectionExport();
   assert.equal(result.matrix.length,3);
   assert.equal(result.matrix.find(row=>row[0]==='OJF journal 0')[6],2);
-  assert.ok(result.filename.includes('ojf-2025'));
+  assert.ok(result.filename.includes('ojf2-2025'));
 });
 await check('OJF universe changes percentiles and membership, never scores, counts or settings visibility',async()=>{
   const h=ojfHarness(); await h.api.switchMetric('ojf');
@@ -1050,7 +1050,7 @@ await check('OJF has a text Details help link, independent labels and accessible
   assert.doesNotMatch(html,/id="citing-sources"|id="metric-maturity"/);
   assert.match(html,/id="metric-details" href="journal-help.html#ans" target="_blank" rel="noopener noreferrer">Details<\/a>/);
   assert.match(html,/Article Network Score \(ANS\)/);
-  assert.match(html,/Open Journal Factor \(OJF\)/);
+  assert.match(html,/Open Journal Factor · 2 years \(OJF2\)/);
   const help=readFileSync(new URL('../site/journal-help.html',import.meta.url),'utf8');
   assert.match(help,/id="ojf-citing-sources"/);
   assert.doesNotMatch(help,/Close to EF|Close to JIF|Ranking indicator<\/dt>/);
@@ -1063,8 +1063,8 @@ await check('OJF tables use one decimal and CSV/XLSX three decimals while percen
   const annualScores=h.api.getRows().filter(row=>row.in_n).map(row=>E.score(row,h.api.getState()));
   assert.deepEqual(Array.from(annualScores),[1.2134,1.2446]);
   let result=h.api.selectionExport();
-  const scoreCol=result.matrix[0].indexOf('OJF');
-  const fieldCol=result.matrix[0].indexOf('Field percentile (OJF)');
+  const scoreCol=result.matrix[0].indexOf('OJF2');
+  const fieldCol=result.matrix[0].indexOf('Field percentile (OJF2)');
   const first=result.matrix.find(row=>row[0]==='OJF journal 0');
   const second=result.matrix.find(row=>row[0]==='OJF journal 1');
   assert.equal(first[scoreCol],1.213); assert.equal(second[scoreCol],1.245);
@@ -1096,3 +1096,93 @@ await check('OJF tables use one decimal and CSV/XLSX three decimals while percen
   assert.match(details,/<td>0\.0<\/td>/); assert.doesNotMatch(details,/4\.00e|0\.040/);
 });
 console.log('7 OJF integration tests passed');
+
+const fiveValues=[8.2468,3.1111,1.5,0,2.2222];
+const dualTwo=ojfRecords.map((row,i)=>({...row,ojf2_raw:row.ojf_raw,ojf2_filtered:row.ojf_filtered,
+  ojf5_raw:fiveValues[i]+1,ojf5_filtered:fiveValues[i]}));
+const dualFive=dualTwo.map((row,i)=>({...row,metric_window_years:5,oa_field:'Economics',
+  publications_raw:100,publications_filtered:80,citations_raw:900,citations_filtered:660,
+  reference_coverage_pct:80,ojf_raw:row.ojf5_raw,ojf_filtered:row.ojf5_filtered,ojf_status_filtered:'defined'}));
+function dualHarness(fetcher) {
+  const fetchRows=async url=>({ok:true,arrayBuffer:async()=>{
+    const data=url.includes('/ojf5/') ? dualFive : url.includes('/ojf/') ? dualTwo : records;
+    return data.map(row=>({...row,score_year:Number(url.match(/scores_(\d+)/)?.[1] ?? 2025)}));
+  }});
+  const h=harness(fetcher ?? fetchRows);
+  h.api.init({years:averageYears,ojf:{annual_path:'ojf',history_path:'ojf/history',rank_path:'ojf/ranks'},
+    ojf5:{annual_path:'ojf5',history_path:'ojf5/history',rank_path:'ojf5/ranks'}},{});
+  h.elements.get('year').value='2025';
+  return h;
+}
+await check('OJF5 selection aligns its five-year counts, field, sort, presets and percentiles',async()=>{
+  assert.equal(E.score({ojf_filtered:2.,metric_window_years:5},{metric:'ojf5',treatment:'filtered'}),2.);
+  assert.equal(E.score({ojf_filtered:2.,metric_window_years:2},{metric:'ojf5',treatment:'filtered'}),null);
+  const h=dualHarness();await h.api.switchMetric('ojf5');
+  assert.equal(h.api.getState().metric,'ojf5');assert.equal(h.api.getState().sortKey,'score:ojf5');
+  assert.equal(h.elements.get('preset').value,'jif5');
+  assert.equal(h.elements.get('settings').hidden,true);
+  assert.equal(h.elements.get('publication-years-control').hidden,true);
+  assert.equal(h.elements.get('metric-details').attrs.href,'journal-help.html#ojf5');
+  assert.match(h.elements.get('table-head').innerHTML,/Publications \(OJF5\): 2020–2024/);
+  assert.match(h.elements.get('table-head').innerHTML,/Field · OJF5/);
+  const out=h.api.selectionExport(),row=out.matrix.find(r=>r[0]==='OJF journal 0');
+  assert.ok(out.filename.includes('ojf5-2025'));assert.equal(row[1],'Economics');
+  assert.equal(row[out.matrix[0].indexOf('Citable items used')],80);
+  assert.equal(row[out.matrix[0].indexOf('Citations used')],660);
+  assert.equal(row[out.matrix[0].indexOf('OJF5')],8.247);
+  assert.equal(row.at(-1),100);
+  assert.equal(out.matrix[0].includes('OJF2'),false);
+  assert.equal(h.elements.get('add-ojf2-choice').hidden,false);
+  assert.equal(h.elements.get('add-ojf5-choice').hidden,true);
+  assert.equal(h.elements.get('add-nf-choice').hidden,true);
+  await h.api.switchMetric('ojf');
+  const two=h.api.selectionExport();assert.equal(two.matrix.find(r=>r[0]==='OJF journal 0').at(-1),50);
+  assert.match(h.elements.get('table-head').innerHTML,/Publications \(OJF2\): 2023–2024/);
+});
+await check('Optional other OJF is formatted and exported without changing the selected window or percentiles',async()=>{
+  const h=dualHarness();await h.api.switchMetric('ojf5');h.api.applyPreset('ojf5-full');
+  const before=h.api.selectionExport().matrix.find(r=>r[0]==='OJF journal 0').at(-1);
+  add(h,'score:ojf');
+  assert.equal(h.elements.get('add-columns-summary').textContent,'1 selected');
+  let out=h.api.selectionExport(),head=out.matrix[0];
+  assert.ok(head.includes('OJF2'));assert.ok(head.includes('OJF5'));
+  assert.equal(out.matrix.find(r=>r[0]==='OJF journal 0')[head.indexOf('Field percentile (OJF5)')],before);
+  assert.equal(out.matrix.find(r=>r[0]==='OJF journal 4')[head.indexOf('OJF2')],null);
+  assert.equal(out.matrix.find(r=>r[0]==='OJF journal 4')[head.indexOf('OJF5')],2.222);
+  assert.match(h.api.csv().parts.join(''),/,8\.247,/);
+  const file=await h.api.xlsx(),book=XLSX.read(file.bytes,{type:'array',cellNF:true});
+  const sheet=book.Sheets['Journal selection'],matrix=XLSX.utils.sheet_to_json(sheet,{header:1,defval:null});
+  const row=matrix.findIndex(r=>r[0]==='OJF journal 0');
+  for(const label of ['OJF2','OJF5'])assert.equal(sheet[XLSX.utils.encode_cell({r:row,c:head.indexOf(label)})].z,'0.000');
+  hide(h,'score:ojf');assert.equal(h.elements.get('add-columns-summary').textContent,'None');
+  assert.equal(h.api.selectionExport().matrix[0].includes('OJF2'),false);
+  h.elements.get('restore-columns').emit('click');
+  assert.equal(h.api.selectionExport().matrix[0].includes('OJF2'),true);
+  assert.equal(h.api.selectionExport().matrix[0].includes('Network Factor (NF)'),false);
+});
+await check('OJF window switches preserve Full or Custom settings and average only selected-metric percentiles',async()=>{
+  const h=dualHarness();await h.api.switchMetric('ojf');h.api.applyPreset('ojf-full');
+  await h.api.switchMetric('ojf5');assert.equal(h.elements.get('preset').value,'ojf5-full');
+  assert.equal(h.api.getState().universe,'oa');assert.equal(h.api.getState().poolOnly,false);
+  h.api.update({minCoverage:20,treatment:'raw'});
+  await h.api.switchMetric('ojf');
+  assert.equal(h.api.getState().minCoverage,20);assert.equal(h.api.getState().treatment,'raw');
+  assert.equal(h.elements.get('settings').hidden,true);
+  await h.api.switchMetric('ojf5');
+  await h.api.update({averagePercentiles:true});
+  const out=h.api.selectionExport();
+  assert.ok(out.matrix[0].includes('Avg Field percentile (OJF5; 2023-2025)'));
+  assert.equal(out.matrix.find(r=>r[0]==='OJF journal 0')[out.matrix[0].indexOf('Citable items used')],100);
+  assert.match(h.elements.get('table-head').innerHTML,/Percentiles avg: 2023–2025/);
+  assert.match(h.elements.get('table-head').innerHTML,/Field · OJF5/);
+});
+await check('OJF5 load failures restore OJF2; unavailable OJF5 cannot replace the current view',async()=>{
+  const h=dualHarness(async url=>{if(url.includes('/ojf5/'))throw Error('offline');return {ok:true,arrayBuffer:async()=>dualTwo};});
+  await h.api.switchMetric('ojf');await h.api.switchMetric('ojf5');
+  assert.equal(h.api.getState().metric,'ojf');assert.match(h.elements.get('table-head').innerHTML,/OJF2/);
+  assert.match(h.elements.get('notice-message').textContent,/could not be loaded/);
+  const absent=ojfHarness();await absent.api.switchMetric('ojf');await absent.api.switchMetric('ojf5');
+  assert.equal(absent.api.getState().metric,'ojf');
+  assert.equal(absent.elements.get('metric').querySelector('option[value="ojf5"]').disabled,true);
+});
+console.log('4 OJF2/OJF5 integration tests passed');

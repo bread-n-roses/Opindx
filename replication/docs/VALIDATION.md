@@ -1,3 +1,18 @@
+## Software 0.5.0 (23 October 2026)
+
+OJF5 is calculated from the source-pinned all-type open checkpoint extended to
+2017-2019. The verified 2022-2026 citing reference arrays are retained. Validation
+checks exact current-source OJF2 type-count replay, OJF5 saved-count score/status
+replay, rebuilt open annual metadata, window boundaries and all-cell annual
+CSV/XLSX values. All thirty prior NF/ANS and OJF2 annual files are byte-identical.
+The website builder is also exercised with the exact released two-window layout.
+
+No repeated full raw-snapshot replay of NF/ANS or OJF2 is claimed. The original
+baseline evidence is retained, with new source hashes and a version-specific
+release-validation record. See ojf5-validation.json and ojf5-format-validation.json.
+Interactive visual browser QA was unavailable; code, DOM, data and served-file
+checks are reported separately.
+
 ## Software 0.4.0 (17 October 2026)
 
 OJF is an additive open-input calculation. All count, score and status cells

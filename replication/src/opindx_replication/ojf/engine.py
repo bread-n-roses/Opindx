@@ -97,6 +97,7 @@ def build_type_counts(conn: Any, target_relation: str = "targets",
                       citing_relation: str = "citing",
                       evaluation_relation: str = "evaluation", *,
                       citation_year: int = 2024,
+                      window_years: int = 2,
                       aliases_relation: str | None = None) -> TypeCounts:
     """Count target-type/REF components in one reference-array streaming pass.
 
@@ -109,7 +110,9 @@ def build_type_counts(conn: Any, target_relation: str = "targets",
                                     (target_relation, citing_relation, evaluation_relation))
     if not isinstance(citation_year, int) or isinstance(citation_year, bool) or citation_year < 1902:
         raise ValueError("citation_year must be an integer >= 1902")
-    first, last = citation_year - 2, citation_year - 1
+    if isinstance(window_years, bool) or window_years not in (2, 5):
+        raise ValueError("window_years must be 2 or 5")
+    first, last = citation_year - window_years, citation_year - 1
     _guard(conn, f"SELECT count(*)-count(DISTINCT journal_id) FROM {evaluation}",
            "Evaluation journal IDs must be unique and nonmissing")
     conn.execute(f"CREATE OR REPLACE TEMP TABLE _ojf_eval AS SELECT journal_id FROM {evaluation}")
@@ -279,10 +282,11 @@ def derive_counts(components: TypeCounts, *,
 
 def build_counts(conn: Any, target_relation: str = "targets", citing_relation: str = "citing",
                  evaluation_relation: str = "evaluation", *, citation_year: int = 2024,
+                 window_years: int = 2,
                  aliases_relation: str | None = None,
                  policies: Mapping[str, Sequence[str]] = DEFAULT_POLICIES) -> pd.DataFrame:
     return derive_counts(build_type_counts(conn, target_relation, citing_relation,
-                         evaluation_relation, citation_year=citation_year,
+                         evaluation_relation, citation_year=citation_year, window_years=window_years,
                          aliases_relation=aliases_relation), policies=policies)
 
 

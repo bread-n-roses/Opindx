@@ -1,7 +1,7 @@
 # Reproduce Open Journal Factor
 
 OJF is calculated from OpenAlex and approved Norwegian Register sources only.
-It requires a separate two-year, all-type extraction; the NF/ANS five-year graph
+It requires a separate all-type extraction for OJF2 (two years) or OJF5 (five years); the NF/ANS five-year graph
 is not used as an OJF graph. No commercial membership or metric input is needed.
 
 First complete the public `opindx-replicate` workflow in the package README.
@@ -10,22 +10,24 @@ Then run, with a separate OJF work directory:
 ```sh
 opindx-ojf --nfans-run /path/to/nfans-run --work /path/to/ojf-run --threads 4 --memory 8GB
 opindx-ojf-export /path/to/ojf-run/annual /path/to/ojf-complete
+# For OJF5, use a separate run directory:
+opindx-ojf --nfans-run /path/to/nfans-run --work /path/to/ojf5-run --window-years 5 --threads 4 --memory 8GB
 ```
 
 The first command reads the original downloaded snapshot through the NF/ANS run's
 hash-pinned manifest and reuses its independently reproducible Source repair and
-Norwegian matching rules. It extracts all Work types for 2020-2026 and reference
+Norwegian matching rules. It extracts all Work types for 2020-2026 (OJF2) or 2017-2026 (OJF5), and reference
 arrays for 2022-2026. Work IDs are deduplicated by latest update, then stable file,
 linking-ISSN and row ordering. Work correction preimages are checked before use.
 Unmatched Norwegian entries remain unmatched and have an explicit audit.
 
 ## Calculation
 
-For citation year t, the denominator covers t-2 and t-1. Citable types are
+For citation year t, the denominator covers t-2 through t-1 for OJF2, or t-5 through t-1 for OJF5. Citable types are
 articles, reviews, data papers and software papers; paratext is excluded.
 
 - **Raw:** citations from all approved Norwegian Register channels in t to
-  eligible target content, divided by all citable items in the two-year window.
+  eligible target content, divided by all citable items in the selected publication window.
 - **Filtered:** remove citable items without a reported OpenAlex reference from
   the denominator and remove citations to those items from the numerator.
   Citations to non-citable content remain included.
@@ -40,7 +42,7 @@ articles, reviews, data papers and software papers; paratext is excluded.
   denominator gives a missing score; Filtered denominator collapse has a separate
   status. Never convert a missing score to zero.
 
-Fields use Raw articles/reviews in the same two-year window, named mode with
+Fields use Raw articles/reviews in the same selected publication window, named mode with
 alphabetical tie resolution and a separate Unknown group. The optional browser
 percentiles use the archived website engine and selected settings. Three-year
 percentile averages require an eligible current-year percentile and ignore
@@ -64,3 +66,14 @@ from the five frozen open-input type-count checkpoints, open metadata matching,
 synthetic engine tests, and all-cell format checks. A new raw-snapshot scan was
 not performed for this additive release. The extraction command is supplied for
 independent reproduction; it can require substantial disk space and time.
+
+
+## Version 0.5.0
+
+OJF2 and OJF5 are separate annual datasets and website choices. Use a separate
+work directory and `--window-years 5` for OJF5, then export its `annual/` folder.
+All annual register-level columns use a consistent text type so one export can
+cover every year. No numeric values are changed by that storage normalization.
+The added OJF comparison column does not substitute another window's counts,
+fields or missing values. Percentiles and reference eligibility follow the main
+selected metric. OJF values of zero remain valid scores.

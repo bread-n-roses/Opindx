@@ -42,7 +42,7 @@ def release_validation(root):
         raise ValueError('Changed source requires a new replay or an approved additive validation record')
     record = json.loads(path.read_text(encoding='utf-8'))
     version = json.loads((root / 'configs/zenodo-software.json').read_text())['metadata']['version']
-    if (record.get('status') != 'PASS' or record.get('mode') not in ['approved-additive-update','approved-ojf-extension']
+    if (record.get('status') != 'PASS' or record.get('mode') not in ['approved-additive-update','approved-ojf-extension','approved-ojf5-extension']
             or record.get('software_version') != version or not record.get('owner_approved')):
         raise ValueError('Additive exception is not approved for this software version')
     if record.get('validated_source_sha256') != current:
@@ -67,7 +67,7 @@ def release_validation(root):
         raise ValueError('Additive counts or unchanged-score checks failed')
     if any(not row.get('csv_all_cells_exact') or not row.get('xlsx_all_cells_verified') for row in formats['annual']):
         raise ValueError('Annual format verification failed')
-    if record['mode']=='approved-ojf-extension':
+    if record['mode'] in ['approved-ojf-extension','approved-ojf5-extension']:
         names=['ojf-validation.json','ojf-frozen-replay.json','ojf-format-validation.json']
         for name in names:
             if record['evidence_sha256'].get(name)!=digest(root/'docs'/name):raise ValueError('OJF evidence changed: '+name)
@@ -86,6 +86,23 @@ def release_validation(root):
         if formats.get('status')!='PASS' or sorted(r['year'] for r in formats['annual'])!=years or any(
                 not r.get('csv_all_cells_exact') or not r.get('xlsx_all_cells_verified') for r in formats['annual']):
             raise ValueError('Incomplete OJF format validation')
+        if record['mode']=='approved-ojf5-extension':
+            for name in ['ojf5-validation.json','ojf5-format-validation.json','prior-annual-preservation.json']:
+                if record['evidence_sha256'].get(name)!=digest(root/'docs'/name):raise ValueError('OJF5 evidence changed: '+name)
+            five=json.loads((root/'docs/ojf5-validation.json').read_text())
+            formats=json.loads((root/'docs/ojf5-format-validation.json').read_text())
+            prior=json.loads((root/'docs/prior-annual-preservation.json').read_text())
+            if five.get('status')!='PASS' or five.get('validated_source_sha256')!=expected or not five.get('source_pins_verified'):
+                raise ValueError('OJF5 source binding failed')
+            if sorted(r['year'] for r in five.get('annual',[]))!=years or any(
+                    not all(r.get(k) for k in ['count_score_status_replay_exact','annual_metadata_rebuilt_exact','schema_normalization_values_exact'])
+                    for r in five['annual']):raise ValueError('Incomplete OJF5 calculation validation')
+            if formats.get('status')!='PASS' or sorted(r['year'] for r in formats.get('annual',[]))!=years or any(
+                    not r.get('csv_all_cells_exact') or not r.get('xlsx_all_cells_verified') for r in formats['annual']):
+                raise ValueError('Incomplete OJF5 all-cell export validation')
+            if prior.get('status')!='PASS' or not prior.get('all_thirty_annual_files_byte_identical') or len(prior.get('files',{}))!=30:
+                raise ValueError('Prior NF/ANS and OJF2 annual files changed')
+            return 'Preserved NF/ANS baseline and thirty prior annual files; exact OJF2 frozen-type-count replay; source-bound OJF5 count/score/status and open metadata replay; independent fixtures, release-layout builder and all-cell format checks; no repeated full raw-snapshot scan for prior data'
         return 'Preserved NF/ANS baseline and values; exact five-year OJF frozen-type-count replay and open metadata matching; independent fixtures and all-cell formats; no repeated raw-snapshot scan'
     return 'Owner-approved additive update: unchanged baseline calculation core and all prior values, graph/solver count reconciliation, all-cell formats, tests and archive integrity; no new raw-input replay'
 

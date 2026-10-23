@@ -127,7 +127,7 @@ await check('Popup links reveal headings below the padded sticky bar, whose clos
     elements[id].getBoundingClientRect=()=>({top:40+1+targetContentTop-dialog.scrollTop});
     elements[id].focus=options=>{elements[id].focused=options;};
   }
-  const context={rows:[meta],D,year:2026,state:settings,$:id=>elements[id],escape:value=>value,universeName:()=> 'Norwegian Register',showHistory(){},stopJournalTracking(){},OpindxSections:{trackSections(){return () => {}; }}};
+  const context={rows:[meta],D,year:2026,state:settings,isOjf:()=>false,$:id=>elements[id],escape:value=>value,universeName:()=> 'Norwegian Register',showHistory(){},stopJournalTracking(){},OpindxSections:{trackSections(){return () => {}; }}};
   vm.createContext(context);vm.runInContext(source,context);
   context.showJournal(meta.openalex_id);
   assert.equal(dialog.scrollTop,0);
@@ -256,3 +256,21 @@ await check('Popup percentiles remain annual while the main table averages them'
 });
 
 console.log(`${passed} journal-details tests passed`);
+
+await check('OJF5 popup uses five-year counts, fields, availability and annual OJF5 percentiles',()=>{
+  const state={...settings,metric:'ojf5',percentileMode:'field'};
+  const row={...meta,...detail,score_year:2025,metric_window_years:5,
+    ojf_raw:2,ojf_filtered:1.2345,ojf2_filtered:null,ojf5_filtered:1.2345,
+    publications_raw:100,publications_filtered:80,citations_raw:200,citations_filtered:98,
+    ojf_status_filtered:'defined'};
+  const values=Object.fromEntries(D.metadataRows(row,state));
+  assert.match(values['Citable items recorded'],/100.*Used in filtered metrics: 80/);
+  assert.equal(values['Publication years'],undefined);
+  assert.match(D.fieldsTable(row,row,2025,state),/2020–2024 publications/);
+  const table=D.metricsTable([[entry(2025),row]],2025,state,{ojf5:{short:'OJF5',digits:1}},
+    new Map([[2025,{ranks:E.rank([row],state)}]]));
+  assert.match(table,/Field · OJF5/);assert.match(table,/<td>1\.2<\/td>/);
+  assert.match(table,/<td>80<\/td><td>98<\/td>/);
+  const missing={...row,ojf5_filtered:null,ojf_filtered:null,ojf_status_filtered:'ref_denominator_collapse'};
+  assert.match(Object.fromEntries(D.metadataRows(missing,state))['OJF5 availability'],/five-year window/);
+});

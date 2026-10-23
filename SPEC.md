@@ -6,6 +6,23 @@ The back-end is a separate project (currently run on a laptop, possibly Docker/c
 
 ## Architecture
 
+The Journal metric selector offers ANS (initial default), OJF2 and OJF5. NF remains
+an optional additional column in the ANS view. Each OJF view offers the other OJF
+through Add columns. Counts, missing-reference percentages, field assignments and
+percentiles always follow the main metric selection. Adding a comparison score
+does not change the ranking pool or supporting counts. OJF2 and OJF5 use the same
+Norwegian Register citing-source rules, with two and five preceding publication
+years respectively. Screen scores use one decimal and selection downloads three;
+ranking always uses full precision. Rolling means average annual percentiles with
+current-year eligibility, never the scores themselves.
+
+OJF browser files live separately in `site/data/ojf/` (OJF2) and `site/data/ojf5/`,
+with annual, history and rank sidecars described by `index.ojf` and `index.ojf5`.
+The internal `ojf` metric key retains OJF2 compatibility. Optional companion scores
+use explicit `ojf2_raw`, `ojf2_filtered`, `ojf5_raw` and `ojf5_filtered` fields;
+missing companion values never fall back to the selected window's score. Existing
+NF/ANS annual files and the original OJF2 score values remain unchanged.
+
 - Static website: plain HTML, CSS and JavaScript, no framework, no build step. Everything runs in the visitor's browser.
 - Hosted free on GitHub Pages, later with a custom domain.
 - Each data run is published as a GitHub Release of this repository. The releases are the permanent archive.

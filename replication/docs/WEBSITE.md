@@ -7,12 +7,14 @@ website changes in the main site; regenerate this copy when releasing software.
 
 To build from finalized release files:
 
-1. Put manifest.json and scores_YEAR.parquet files in website/runs/<manifest.run>/.
+1. Put manifest.json, scores_YEAR.parquet, ojf_manifest.json, ojf_scores_YEAR.parquet,
+   ojf5_manifest.json and ojf5_scores_YEAR.parquet in website/runs/<manifest.run>/.
 2. For a single-run local replay, write {} to website/score-years.json. This is a
    local preview instruction; retain the original file when reproducing a site
    assembled from several historical frozen releases.
 3. From website/, run:
    python tools/build_site_data.py runs <manifest.run>
+   python tools/build_ojf_site_data.py runs/<manifest.run> site/data --five-year runs/<manifest.run>
    python tools/version_site_assets.py site 0000000
    python -m http.server 8000 --bind 127.0.0.1
 4. Open http://127.0.0.1:8000/site/.

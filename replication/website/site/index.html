@@ -38,7 +38,7 @@
         <legend class="visually-hidden">Search and metric settings</legend>
         <div class="primary-controls">
           <label class="control">Citation year<select id="year"><option value="2025" selected>2025 (live)</option></select></label>
-          <label class="control">Journal metric<select id="metric"><option value="per_article" selected>Article Network Score (ANS)</option><option value="ojf">Open Journal Factor (OJF)</option></select></label>
+          <label class="control">Journal metric<select id="metric"><option value="per_article" selected>Article Network Score (ANS)</option><option value="ojf">Open Journal Factor · 2 years (OJF2)</option><option value="ojf5">Open Journal Factor · 5 years (OJF5)</option></select></label>
           <label class="control"><span id="universe-label">Journal universe</span><select id="universe"><option value="n" selected>Norwegian Register</option></select></label>
           <div class="control"><span id="field-label">Fields</span>
             <details class="picker" id="field-picker"><summary aria-labelledby="field-label field-summary"><span id="field-summary">All</span></summary>
@@ -122,6 +122,8 @@
     <p id="add-columns-summary" class="columns-dialog-summary" aria-live="polite">None</p>
     <fieldset id="add-columns-choices" class="column-choices">
       <legend class="visually-hidden">Additional table columns</legend><label class="check-line" id="add-nf-choice"><input id="add-score:share" type="checkbox" value="score:share">Network Factor (NF)</label>
+                <label class="check-line" id="add-ojf2-choice" hidden><input id="add-score:ojf" type="checkbox" value="score:ojf">Open Journal Factor · 2 years (OJF2)</label>
+                <label class="check-line" id="add-ojf5-choice" hidden><input id="add-score:ojf5" type="checkbox" value="score:ojf5">Open Journal Factor · 5 years (OJF5)</label>
                 <label class="check-line" id="add-publication-years-choice"><input id="add-active_years" type="checkbox" value="active_years">Publication years</label>
                 <label class="check-line"><input id="add-publications_raw" type="checkbox" value="publications_raw"><span id="add-publications-label">Publications recorded</span></label>
                 <label class="check-line"><input id="add-citations_raw" type="checkbox" value="citations_raw">Citations recorded</label>

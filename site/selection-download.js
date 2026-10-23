@@ -2,8 +2,8 @@
 export async function workbookBytes(matrix) {
   const XLSX = await import('./vendor/sheetjs-0.20.3.mjs');
   const sheet = XLSX.utils.aoa_to_sheet(matrix, {dense:true});
-  const ojfColumn = matrix[0].indexOf('OJF');
-  if (ojfColumn >= 0) {
+  const ojfColumns = matrix[0].flatMap((label, i) => /^OJF[25]?$/.test(label) ? [i] : []);
+  for (const ojfColumn of ojfColumns) {
     for (const row of sheet['!data'].slice(1)) {
       if (row[ojfColumn]?.t === 'n') row[ojfColumn].z = '0.000';
     }

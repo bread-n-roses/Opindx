@@ -2,7 +2,7 @@
   "metadata": {
     "title": "Opindx replication: Open Journal Factor, Network Factor and Article Network Score",
     "upload_type": "software",
-    "description": "Reproducible journal metrics from downloaded OpenAlex Works/Sources Parquet snapshots and the Norwegian Register. Includes the independent OJF two-year count workflow, raw/filtered scores, NF/ANS citation-network calculations, reviewed identity corrections, field metadata, complete annual CSV/XLSX/Parquet export, and the corresponding website and percentile engine. No licensed benchmark data, commercial roster, benchmark matches or empirical comparison outputs are bundled. Version 0.4.0 adds OJF; prior NF/ANS data and frozen-year pins remain unchanged. Validation includes the recorded NF/ANS baseline replay, exact OJF frozen-count replay for all five years, source metadata matching and all-cell export checks; no new full raw-snapshot replay was performed for this additive release.",
+    "description": "Reproducible journal metrics from downloaded OpenAlex Works/Sources Parquet snapshots and the Norwegian Register. Version 0.5.0 adds the five-year Open Journal Factor (OJF5) alongside OJF2, complete annual CSV/XLSX/Parquet export, and the matching website with independent percentile pools. Includes NF/ANS citation-network calculations, reviewed identity corrections, field metadata and the corresponding website and percentile engine. All thirty prior NF/ANS and OJF2 annual files and frozen-year NF/ANS pins remain unchanged. Validation includes the preserved NF/ANS baseline, exact OJF2 frozen-type-count replay, source-bound OJF5 calculation checks, independent fixtures, browser-window separation and all-cell export verification. The OJF5 target metadata was extended to 2017-2019 while retaining verified citing reference arrays. No repeated complete raw-snapshot replay of prior NF/ANS or OJF2 data is claimed. No proprietary metrics, commercial roster, benchmark matches or empirical paper-comparison outputs are bundled.",
     "creators": [
       {
         "name": "Weitzel, Utz",
@@ -11,17 +11,12 @@
     ],
     "access_right": "open",
     "license": "mit",
-    "version": "0.4.0",
+    "version": "0.5.0",
     "related_identifiers": [
       {
         "identifier": "10.31235/osf.io/x9b8q_v1",
         "relation": "isDocumentedBy",
         "resource_type": "publication-preprint"
-      },
-      {
-        "identifier": "10.5281/zenodo.23437876",
-        "relation": "compiles",
-        "resource_type": "dataset"
       },
       {
         "identifier": "10.5281/zenodo.23437878",
@@ -32,6 +27,11 @@
         "identifier": "10.5281/zenodo.23437993",
         "relation": "isDocumentedBy",
         "resource_type": "publication-preprint"
+      },
+      {
+        "identifier": "10.5281/zenodo.23599869",
+        "relation": "compiles",
+        "resource_type": "dataset"
       }
     ]
   }
