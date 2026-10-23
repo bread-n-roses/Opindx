@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="A guide to Opindx search, presets, fields, metrics and percentiles.">
+  <meta name="color-scheme" content="light">
+  <title>Journal metrics explained &middot; Opindx</title>
+  <link rel="icon" href="assets/favicon-round.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-round.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css?v=9a8e392">
+  <script defer src="section-nav.js?v=9a8e392"></script>
+  <script defer src="help.js?v=9a8e392"></script>
+  <script data-goatcounter="https://opindx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body class="journal-help">
+  <header class="masthead">
+    <a class="brand" href="index.html"><img class="brand-logo" src="assets/logo.png" width="174" height="58" alt="Op__ind_x"></a>
+    <nav class="nav" aria-label="Pages"><a href="index.html">Journal metrics</a><a href="about.html">About</a><a href="journal-help.html" aria-current="page">Journal help</a></nav>
+  </header>
+  <main class="about">
+    <h1>What is what?</h1>
+    <nav class="help-section-nav" id="help-sections" aria-label="Help sections"><div class="help-section-links"><a href="#search">Search</a><a href="#advanced-settings">Advanced settings</a><a href="#journal-table">Journal table</a><a href="#journal-info">Journal Info</a><a href="#data-versions">Data versions</a></div><button type="button" id="close-help" aria-label="Close help" title="Close help">&times;</button></nav>
+    <section class="panel" aria-labelledby="search">
+      <h2 id="search">Search</h2>
+      <dl>
+        <dt>Search</dt><dd>Enter all or part of a journal title, publisher, ISSN or OpenAlex ID. Matching journals in the database that are hidden by your settings are also shown, with buttons to reveal them.</dd>
+        <dt>Citation year</dt><dd>The year in which citations are counted. OJF2 uses the preceding two publication years; OJF5 and ANS use five. Live years can change with a newer snapshot. A year freezes twelve months after it ends: 2025 stays live through 31 December 2026.</dd>
+      </dl>
+      <dl>
+        <dt id="journal-metric"><span id="ans" class="section-anchor">Journal metric &middot; Article Network Score (ANS)</span></dt><dd><p>ANS measures influence per article. Citations from influential journals carry more weight, following the citation-network method of Bergstrom, West and Wiseman (2008). Journal self-citations are left out.</p>
+        <p>It uses citations in the selected year to articles and reviews from the five preceding years. Its publication-weighted average is 1; an ANS of 2 means twice that average. The Article Network Score follows an Article Influence&trade; Score-like methodology.</p>
+        <p>ANS values are independent calculations, not official Article Influence Scores. Comparisons are most useful within the same field and year.</p>
+        <p>See this <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">study</a> for a 2023&ndash;2024 comparison between ANS and AIS.</p>
+        <p class="citation" id="network-method"><strong>Reference</strong><br>Bergstrom, C. T., West, J. D., &amp; Wiseman, M. A. (2008). The Eigenfactor metrics. <em>Journal of Neuroscience, 28</em>(45), 11433&ndash;11434. DOI: 10.1523/JNEUROSCI.0003-08.2008.</p></dd>
+        <dt id="ojf"><span id="ojf-citing-sources" class="section-anchor">Journal metric &middot; Open Journal Factor &middot; 2 years (OJF2)</span></dt><dd><p>OJF2 is the number of citations received in the selected year per citable item published in the two preceding years. It counts citations from sources approved in the Norwegian Register. For example, OJF2 for 2025 covers 2023&ndash;2024 publications. The Open Journal Factor follows a Journal Impact Factor&trade;-like methodology.</p>
+        <p>Citable items are articles, reviews, data papers and software papers. Journal self-citations and citations to other content, such as editorials, are included. The journal itself need not be in the Norwegian Register.</p>
+        <p>OJF values are independent calculations, not official Journal Impact Factors. Tables show one decimal place; downloads show three. Percentiles use unrounded scores.</p>
+        <p>See this <a href="https://doi.org/10.5281/zenodo.23437993" target="_blank" rel="noopener noreferrer">OJF2 study</a> for a 2023&ndash;2024 comparison between OJF2 and JIF.</p>
+        <p class="citation">Weitzel, U. (2026). <a href="https://doi.org/10.5281/zenodo.23437993" target="_blank" rel="noopener noreferrer"><em>The Open Journal Factor: An Independent OpenAlex Reconstruction of the Journal Impact Factor.</em></a></p></dd>
+        <dt id="ojf5">Journal metric &middot; Open Journal Factor &middot; 5 years (OJF5)</dt><dd>OJF5 is the number of citations received in the selected year per citable item published in the five preceding years. It counts citations from sources approved in the Norwegian Register. For example, OJF5 for 2025 covers 2020&ndash;2024 publications. Its counts, fields, reference percentages and percentiles use this five-year window. The Open Journal Factor follows a Journal Impact Factor&trade;-like methodology.</dd>
+      </dl>
+      <dl>
+        <dt>Journal universe</dt><dd>For ANS and NF, only journals in the chosen universe, and citations between them, take part in the network score calculation. The selection also determines the journals compared for percentiles. Norwegian Register includes journals approved at Level 1 or 2 that year, an annually reviewed, curated list. OpenAlex includes all sources classified as journals with at least one open score, offering broader coverage. The same journal can have different ANS and NF values in different universes.</dd>
+        <dt>Show journals from</dt><dd>For OJF, 'Show journals from' selects Norwegian Register journals approved at Level 1 or 2 that year, or the broader OpenAlex journal group. It changes the journals displayed and compared for percentiles. A journal's OJF itself does not change.</dd>
+        <dt>Fields</dt><dd>The most frequent OpenAlex primary-topic broad field among the journal's articles and reviews in the preceding two years for OJF2, or five years for OJF5 and ANS. The percentage shows its share of classified publications. Journals without a field form the Unknown group.</dd>
+        <dt>Preset &middot; AIS-oriented</dt><dd>The default preset uses filtered ANS in the Norwegian Register universe. Field percentiles require below 90% of publications without references, at least four publication years, and 100% retained per field. Journals without percentiles are hidden. This <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">study</a> supports using filtered metrics and the Norwegian Register. ANS values are independent calculations, not official Article Influence Scores.</dd>
+        <dt>Preset &middot; JIF-oriented</dt><dd>Uses the selected OJF (OJF2 or OJF5), filtered, and Norwegian Register journals. Field percentiles require below 90% of citable items without references and 100% retained per field. Journals without percentiles are hidden. OJF values are independent calculations, not official Journal Impact Factors.</dd>
+        <dt>Preset &middot; Full coverage (noisy)</dt><dd>Uses filtered values and the OpenAlex journal group, showing journals with and without percentiles. Field percentiles require below 90% of publications without references and 100% retained per field. ANS also requires at least four publication years; OJF has no publication-years requirement. Broader coverage can include noisier scores.</dd>
+        <dt>Preset &middot; AIS-oriented (select)</dt><dd>Uses AIS-oriented with below 80% of publications without references and retains the top 75% per field. Shows Total ANP3, the average of annual ANS percentiles over the selected year and two preceding years when available. An eligible Total ANP in the selected year is required. These are Opindx percentiles, not official benchmark ranks or quartiles.</dd>
+        <dt>Preset &middot; Custom</dt><dd>Choose Custom to open Advanced settings. Changing a setting can also label the selection Custom without opening the panel. The Advanced settings link opens or closes it; choosing a named preset closes it. Reset restores the initial ANS settings while keeping the citation year.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="advanced-settings">
+      <h2 id="advanced-settings">Advanced settings</h2>
+      <dl>
+        <dt>Show percentiles</dt><dd>Field percentiles compare eligible journals within the same OpenAlex field. Total percentiles compare the journals retained across fields. Both use the selected metric and journal group. Choose OJF2 or OJF5 in Journal metric to change which OJF is ranked. A percentile of 90 means the score is at least as high as 90% of the comparison group; ties receive the same percentile.</dd>
+        <dt>Share of publications w/out references</dt><dd>The maximum percentage of publications without recorded OpenAlex references. Below 80% excludes journals with 80% or more missing references. No maximum also includes journals whose percentage is unavailable.</dd>
+        <dt>Years with publications</dt><dd>For ANS only: the minimum number of years with articles or reviews in the preceding five years. At least 4 years requires publications in four or five of those years. This setting is not used for OJF.</dd>
+        <dt>Retain top % per field</dt><dd>Shown when Total percentiles are selected. The share of highest-ranked journals retained from each field for Total percentiles. Journals outside this selection can still have a Field percentile. Equal scores receive the same percentile and stay together at the selection cutoff.</dd>
+        <dt>Hide journals without percentiles</dt><dd>Shows only journals with a Field percentile when Field alone is selected, or a Total percentile when Total is selected. None turns this filter off.</dd>
+        <dt>Average percentiles over &hellip;</dt><dd>The mean of annual percentiles in the selected year and two preceding calendar years, for the chosen metric and settings. For ANS, this average is labelled ANP3. For OJF, it averages the annual percentiles of the selected OJF2 or OJF5. A journal needs an eligible percentile in the selected year. Missing earlier percentiles are ignored, not counted as zero. Scores and counts remain those of the selected year. Available from 2024 onward.</dd>
+        <dt>Open access journals only</dt><dd>Restricts the displayed selection to journals marked open access in the OpenAlex source metadata. This describes the journal, rather than the access status of each individual publication.</dd>
+        <dt>Include publications without references (noisy)</dt><dd>Switches from filtered to raw values. OpenAlex sometimes has no recorded references for a publication. For ANS, filtered values use only articles and reviews with recorded references. For OJF, filtering excludes citable items without recorded references and citations to those items. Raw values include them. Missing references can reflect incomplete records as well as publications that have no references in reality. The website uses filtered values by default. See this <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">study</a> for ANS and the <a href="#ojf">OJF explanation</a>.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="journal-table">
+      <h2 id="journal-table">Journal table</h2>
+      <h3 id="journal-table-main">Main</h3>
+      <dl>
+        <dt>Table header</dt><dd>Shows the publication window, citation year and OpenAlex data month. In an OJF view, counts, field assignments and reference percentages follow the selected OJF2 or OJF5; adding the other score does not change them. When averaging is selected, it also shows the three years used for percentiles, labelled ANP3 for ANS.</dd>
+        <dt>OpenAlex field</dt><dd>The most frequent primary-topic broad field among the journal's articles and reviews: two publication years for OJF2, five for OJF5 and ANS. The percentage is its share of classified articles and reviews, including those without references. Unknown means there are no classified publications.</dd>
+        <dt>Publications used</dt><dd>For ANS: articles and reviews from the preceding five years used in the selected calculation. Filtered values include only those with recorded references.</dd>
+        <dt>Citable items used</dt><dd>For OJF: articles, reviews, data papers and software papers from the preceding two years for OJF2, or five years for OJF5. Filtered OJF uses only those with a recorded reference. Citations to other content can increase the citation count without adding to the citable-item count.</dd>
+        <dt>Citations used</dt><dd>Citations in the selected year used to calculate the metric. ANS counts citations from journals in the selected universe and excludes journal self-citations. OJF counts citations from Norwegian Register sources and includes journal self-citations and citations to other journal content, such as editorials.</dd>
+        <dt>Pubs. w/out refs.</dt><dd>The percentage without a recorded OpenAlex reference in the publication window: five years of articles and reviews for ANS, or two years of citable items for OJF2 and five for OJF5. Missing references can reflect incomplete records or publications with no references in reality. A dash means the percentage is unavailable. Calculated as 100 &times; (Raw &minus; Filtered publications) &divide; Raw publications.</dd>
+        <dt>ANS &middot; Article Network Score</dt><dd>Influence per article, with citations weighted by the influence of the citing journals. See <a href="#ans">Article Network Score</a>.</dd>
+        <dt>OJF2 / OJF5 &middot; Open Journal Factor</dt><dd>Citations in the selected year from Norwegian Register sources per citable item in the preceding two (OJF2) or five (OJF5) years. Shown to one decimal place. See <a href="#ojf">OJF2</a> and <a href="#ojf5">OJF5</a>.</dd>
+        <dt id="anp">ANP &middot; ANS percentile</dt><dd>An annual percentile of the Article Network Score (ANS), using the selected journal universe and percentile settings. Field and Total identify the comparison group. The table keeps the Percentiles group header and labels its ANS subheaders Field &middot; ANP and Total &middot; ANP.</dd>
+        <dt id="anp3">ANP3 &middot; Three-year average ANS percentile</dt><dd>The mean of available annual ANPs in the selected citation year and two preceding calendar years. The table labels these subheaders Field &middot; ANP3 and Total &middot; ANP3. An eligible ANP in the selected year is required; missing earlier years are ignored. ANS scores and publication and citation counts remain those of the selected year. See <a href="#advanced-settings">Advanced settings</a>.</dd>
+        <dt>Percentiles &middot; Field</dt><dd>The selected metric's percentile within its OpenAlex field. These are averages when averaging is selected; see <a href="#advanced-settings">Advanced settings</a>. They are Opindx percentiles, not official benchmark ranks.</dd>
+        <dt>Percentiles &middot; Total</dt><dd>The selected metric's percentile among all retained journals across fields. These are averages when averaging is selected; see <a href="#advanced-settings">Advanced settings</a>. They are Opindx percentiles, not official benchmark ranks.</dd>
+        <dt>General</dt><dd>A dash means that a value is unavailable; a numeric zero is a defined value. Use &times; beside a column header to hide it in the main table. Journal title always remains visible. Restore columns brings back hidden columns selected in the current percentile and Add columns settings. Hiding columns also removes them from selection downloads. It keeps the preset, sort order, filters, percentile calculation and journal popup unchanged. These display choices last for this visit. Reset or reloading the page restores the default columns.</dd>
+      </dl>
+      <h3 id="added-columns"><span id="nf" class="section-anchor">Add columns</span></h3>
+      <dl>
+        <dt>NF &middot; Network Factor</dt><dd>The journal's share of citation-network influence in the selected universe, following the citation-network method of Bergstrom, West and Wiseman (2008). Citations are weighted by the influence of the citing journal. NF sums to 100 across that universe; larger journals can receive a larger share. It uses the same five-year publication window as ANS and excludes journal self-citations. The Network Factor follows an Eigenfactor&trade;-like methodology. Available when ANS is selected; missing ANS does not imply missing NF.<p class="citation"><strong>Reference</strong><br>Bergstrom, C. T., West, J. D., &amp; Wiseman, M. A. (2008). The Eigenfactor metrics. <em>Journal of Neuroscience, 28</em>(45), 11433&ndash;11434. DOI: 10.1523/JNEUROSCI.0003-08.2008.</p></dd>
+        <dt>OJF2 / OJF5</dt><dd>Add OJF5 alongside OJF2, or OJF2 alongside OJF5. The added column shows that score only; counts, fields and percentiles continue to follow Journal metric.</dd>
+        <dt>Publication years</dt><dd>The number of years in the five years preceding the citation year in which at least one publication is recorded for the journal.</dd>
+        <dt>Publications recorded</dt><dd>All recorded articles and reviews in the preceding five years for ANS, including those not used in its scores. For OJF, Citable items recorded counts all citable items in the preceding two years for OJF2, or five years for OJF5.</dd>
+        <dt>Citable items recorded</dt><dd>For OJF: all recorded articles, reviews, data papers and software papers in the selected two-year (OJF2) or five-year (OJF5) window, including those not used in filtered OJF.</dd>
+        <dt>Citations recorded</dt><dd>For ANS: recorded citations from all available sources to the five-year publications, excluding journal self-citations, including citations not used in the selected score. For OJF: raw citations from Norwegian Register sources to the selected two-year (OJF2) or five-year (OJF5) publications, including journal self-citations.</dd>
+        <dt>OpenAlex ID</dt><dd>The OpenAlex journal ID, linked to its dedicated journal page.</dd>
+        <dt>Norwegian Register ID</dt><dd>The journal's Norwegian Register ID(s) in the selected year, linked to their dedicated journal pages.</dd>
+        <dt>Norwegian Register level</dt><dd>The journal's Norwegian Register level in that year. A dash means no approved level (1 or 2) is available in our data. See the <a href="https://kanalregister.hkdir.no/en/informasjonsartikler/levels-and-changes-in-levels" target="_blank" rel="noopener noreferrer">level explanation</a>.</dd>
+        <dt>ISSNs</dt><dd>All available journal ISSNs, separated by spaces.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="journal-info">
+      <h2 id="journal-info">Journal Info</h2>
+      <h3 id="journal-details">Details</h3>
+      <dl>
+        <dt>OpenAlex details</dt><dd>A link to the journal's dedicated OpenAlex page, with its OpenAlex data and ID.</dd>
+        <dt>Norwegian Register details</dt><dd>A link to the journal's dedicated Norwegian Register page, with its register data and ID.</dd>
+        <dt>Open access journal</dt><dd>Whether the journal is recorded as open access in the OpenAlex database.</dd>
+        <dt>Publications recorded / used</dt><dd>For ANS, Recorded counts all articles and reviews in the preceding five years; Used counts those included in the selected calculation. For OJF, Citable items recorded / used applies the same distinction to the selected two-year (OJF2) or five-year (OJF5) window.</dd>
+        <dt>Citations recorded / used</dt><dd>Used counts citations entering the selected calculation. For ANS, Recorded also includes citations from outside the chosen universe; both counts exclude journal self-citations. For OJF, Recorded is the raw citation count from Norwegian Register sources; both counts include journal self-citations.</dd>
+        <dt>Publication years</dt><dd>For ANS: the number of years with articles or reviews in the preceding five years. Not used for OJF.</dd>
+        <dt>Publications w/out references</dt><dd>The percentage without a recorded OpenAlex reference in the publication window: five years of articles and reviews for ANS, or two years of citable items for OJF2 and five for OJF5. Missing references can reflect incomplete records or publications with no references in reality. A dash means the percentage is unavailable. Calculated as 100 &times; (Raw &minus; Filtered publications) &divide; Raw publications.</dd>
+      </dl>
+      <h3 id="fields-covered">Fields covered</h3>
+      <dl>
+        <dt>OpenAlex primary fields</dt><dd>The three most frequent OpenAlex primary-topic broad fields among the journal's articles and reviews in the shown publication years: two years for OJF2, five for OJF5 and ANS. Percentages exclude unclassified publications. Other fields combines the remaining fields.</dd>
+        <dt>Norwegian Register field</dt><dd>The journal's assigned field in the selected citation year. The Norwegian Register assigns one field to each journal, reviewed annually. This is a journal classification, not a publication percentage.</dd>
+      </dl>
+      <h3 id="yearly-metrics">Metrics by year</h3>
+      <dl>
+        <dt>Citing year</dt><dd>The year citations are counted. OJF2 uses publications in the preceding two years; OJF5 and ANS use five. Smaller text shows live or frozen status and the OpenAlex snapshot month.</dd>
+        <dt>Publications used</dt><dd>For ANS: articles and reviews from the preceding five years used in the selected calculation. Filtered values include only those with recorded references.</dd>
+        <dt>Citable items used</dt><dd>For OJF: articles, reviews, data papers and software papers from the preceding two years for OJF2, or five years for OJF5. Filtered OJF uses only those with a recorded reference. Citations to other content can increase the citation count without adding to the citable-item count.</dd>
+        <dt>Citations used</dt><dd>Citations in the selected year used to calculate the metric. ANS counts citations from journals in the selected universe and excludes journal self-citations. OJF counts citations from Norwegian Register sources and includes journal self-citations and citations to other journal content, such as editorials.</dd>
+        <dt>Publications w/out references</dt><dd>The percentage without a recorded OpenAlex reference in the publication window: five years of articles and reviews for ANS, or two years of citable items for OJF2 and five for OJF5. Missing references can reflect incomplete records or publications with no references in reality. A dash means the percentage is unavailable. Calculated as 100 &times; (Raw &minus; Filtered publications) &divide; Raw publications.</dd>
+        <dt>Norwegian Reg. level</dt><dd>The journal’s <a href="https://kanalregister.hkdir.no/en/informasjonsartikler/levels-and-changes-in-levels" target="_blank" rel="noopener noreferrer">Norwegian Register level</a> in that year. A dash (—) means no approved level (1 or 2) is available in our data for that year. This may be because the journal is not approved, is not listed, or could not be matched to a register entry.</dd>
+        <dt>NF &middot; Network Factor</dt><dd>The journal's share of citation-network influence in the selected universe. See <a href="#nf">Network Factor</a>.</dd>
+        <dt>ANS &middot; Article Network Score</dt><dd>Influence per article, with citations weighted by the influence of the citing journals. See <a href="#ans">Article Network Score</a>.</dd>
+        <dt>OJF2 / OJF5 &middot; Open Journal Factor</dt><dd>Citations in the selected year from Norwegian Register sources per citable item in the preceding two (OJF2) or five (OJF5) years. Shown to one decimal place. See <a href="#ojf">OJF2</a> and <a href="#ojf5">OJF5</a>.</dd>
+        <dt>Percentiles &middot; Field / Total</dt><dd>The journal's annual percentiles for the selected metric and settings, labelled ANP for ANS and OJF2 or OJF5 for the selected OJF. These stay annual even when the main table shows ANP3 or another percentile average. See <a href="#advanced-settings">Advanced settings</a>.</dd>
+      </dl>
+    </section>
+    <section class="panel" aria-labelledby="data-versions">
+      <h2 id="data-versions">Data versions</h2>
+      <dl>
+        <dt>Score year</dt><dd>The citation year. OJF2 uses publications from the preceding two years; OJF5 and ANS use five.</dd>
+        <dt>Status</dt><dd>A live year follows the newest OpenAlex snapshot and can still change. A frozen year always comes from the same, shown OpenAlex snapshot and no longer changes, so it can be cited safely. Twelve months after the end of the score year its status changes from live to frozen. For example, 2025 is updated live with every OpenAlex snapshot until the end of 2026. At that point its status and metrics are frozen.</dd>
+        <dt>Data run</dt><dd>The archived release supplying that year's data. The link opens its files.</dd>
+        <dt>OpenAlex snapshot</dt><dd>The month of the official OpenAlex data snapshot used to calculate the metrics.</dd>
+        <dt>Norwegian Register snapshot</dt><dd>The date of the official Norwegian Register data used. Journal membership, fields and levels refer to the selected citation year.</dd>
+      </dl>
+    </section>
+    <footer class="page-footer"><p>Opindx &middot; Open Data &middot; Open Source &middot; Nonprofit &middot; Made at Vrije Universiteit Amsterdam by Utz Weitzel &middot; License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a> &middot; Opindx is independent of, and is not endorsed or sponsored by, Clarivate or the University of Washington. Metrics are calculated from OpenAlex and Norwegian Register data. No journal-level Journal Citation Reports data are displayed. <a href="about.html#independence" target="_blank" rel="noopener noreferrer">Details</a></p></footer>
+  </main>
+</body>
+</html>

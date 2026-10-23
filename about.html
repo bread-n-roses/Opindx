@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="How the open journal scores on Opindx are calculated, and the research behind them.">
+  <meta name="color-scheme" content="light">
+  <title>About · Opindx</title>
+  <link rel="icon" href="assets/favicon-round.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon-round.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css?v=9a8e392">
+  <script data-goatcounter="https://opindx.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="index.html"><img class="brand-logo" src="assets/logo.png" width="174" height="58" alt="Op__ind_x"></a>
+    <nav class="nav" aria-label="Pages"><a href="index.html">Journal metrics</a><a href="about.html" aria-current="page">About</a></nav>
+  </header>
+  <main class="about">
+    <div class="intro"><div><h1>About</h1>
+      <p class="subtitle">Open citation metrics. Openly calculated.</p>
+    </div></div>
+
+
+
+    <section class="panel" aria-labelledby="research">
+      <h2 id="research">Why Opindx?</h2>
+      <p>Journal metrics like the Journal Impact Factor&trade; and the Article Influence Score&trade; influence where researchers publish and how they are evaluated. Yet they are calculated from closed commercial data, sit behind a paywall, cover only about 22,000 journals, and cannot be independently checked.</p>
+      <p>Opindx calculates comparable metrics entirely from open data. Every score can be downloaded, checked against its source data and recalculated with our open-source code, free of charge.</p>
+      <p><strong>Does it work?</strong> Two studies compared the open metrics with the official ones for 16,000 to 20,000 journals in 2023 and 2024:</p>
+      <ul>
+        <li>The <strong>Open Journal Factor (OJF)</strong> counts how often a journal’s recent articles are cited, like the Journal Impact Factor. It ranks journals very similarly to the official metric (rank correlation 0.96, where 1 means identical rankings). OJF and JIF values should not be mixed in one comparison. Unlike the official metric, it can also score journals outside the commercial list. Many of these are small journals with few or no citations from approved scholarly sources, so their scores are at or near zero. <a href="https://doi.org/10.5281/zenodo.23437993" target="_blank" rel="noopener noreferrer">Read the OJF study</a></li>
+        <li>The <strong>Article Network Score (ANS)</strong> also counts citations but gives more weight to citations from influential journals, like the Article Influence Score. It also ranks journals very similarly to the official metric (rank correlation 0.95). <a href="https://doi.org/10.31235/osf.io/x9b8q_v1" target="_blank" rel="noopener noreferrer">Read the ANS study</a></li>
+      </ul>
+      <p>Overall rankings agree well, but individual journals can differ from their official values.</p>
+      <p>The studies also tested the practical choices behind each metric, such as which publications to count and which journals to include. In both studies, an openly licensed journal list curated by expert panels in Norway matched the official metrics almost as well as the commercial list did. The site’s current default settings follow these findings.</p>
+      <p>Note that Opindx percentiles rank journals within Opindx’s own selection. They are not official ranks or quartiles.</p>
+    </section>
+
+    <section class="panel">
+      <div class="dialog-section-heading"><h2>Score years and their data</h2><a class="table-help" href="journal-help.html#data-versions" target="_blank" rel="noopener noreferrer" aria-label="Published years and source snapshots: What is what? (new tab)">What is what?</a></div>
+      <p>Each data run recalculates score years with the OpenAlex and Norwegian Register data available at that moment. OpenAlex keeps adding and correcting references, so the same score year can differ slightly between runs.</p>
+      <p>A <strong>live</strong> year follows the newest run and can still change. A <strong>frozen</strong> year always comes from the shown run and no longer changes, so it can be cited safely. Twelve months after the end of the score year its status changes from live to frozen. For example, 2025 is updated live with every run until the end of 2026. At that point its status and metrics are frozen. Every run stays available for download.</p>
+      <div id="score-years" role="region" aria-label="Published years and source snapshots; scroll for more columns" tabindex="0">Loading the score years…</div>
+    </section>
+
+    <section class="panel">
+      <h2>Data sources</h2>
+      <p>Journal metadata, publications and citations come from <a href="https://openalex.org/" target="_blank" rel="noopener noreferrer">OpenAlex</a> (CC0 license). The Norwegian journal list and journal levels come from the <a href="https://kanalregister.hkdir.no/en" target="_blank" rel="noopener noreferrer">Norwegian Register for Scientific Journals, Series and Publishers</a>, maintained by the Norwegian Directorate for Higher Education and Skills (Norwegian Licence for Open Government Data, NLOD 2.0).</p>
+    </section>
+
+    <section class="panel" aria-labelledby="independence">
+      <h2 id="independence">Independence and trademarks</h2>
+      <p>Opindx is independent of, and is not endorsed or sponsored by, Clarivate or the University of Washington. OJF, ANS and NF are independently calculated indicators, not official benchmark values. References to established indicators identify the methods and comparisons discussed in the studies.</p>
+      <p>“Journal Impact Factor”, “JIF” and “Journal Citation Reports” are trademarks of Clarivate. “Eigenfactor” and “Article Influence” are trademarks of the University of Washington. JIF, AIS and EF refer to the official indicators.</p>
+      <p>Author-created score datasets and website text are available under CC BY 4.0; software is released under the MIT license. Source-data licenses remain those of their providers.</p>
+    </section>
+    <footer class="page-footer"><p>Opindx &middot; Open Data &middot; Open Source &middot; Nonprofit &middot; Made at Vrije Universiteit Amsterdam by Utz Weitzel &middot; License <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC-BY 4.0 International</a> &middot; Opindx is independent of, and is not endorsed or sponsored by, Clarivate or the University of Washington. Metrics are calculated from OpenAlex and Norwegian Register data. No journal-level Journal Citation Reports data are displayed. <a href="about.html#independence" target="_blank" rel="noopener noreferrer">Details</a></p></footer>
+  </main>
+  <script type="module">
+    const escape = value => String(value ?? '—').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const target = document.getElementById('score-years');
+    try {
+      const index = await (await fetch('data/index.json')).json();
+      const row = entry => `<tr><th scope="row" class="align-left">${entry.year}</th>` +
+        `<td class="align-left">${escape(entry.status)}</td>` +
+        `<td class="align-left">${entry.release_url ? `<a href="${escape(entry.release_url)}" target="_blank" rel="noopener noreferrer">${escape(entry.run)}</a>` : escape(entry.run)}</td>` +
+        `<td class="align-left">${escape(entry.openalex_snapshot?.slice(0, 7))}</td><td class="align-left">${escape(entry.norwegian_register_snapshot)}</td></tr>`;
+      target.innerHTML = index.years.length
+        ? '<table><thead><tr><th scope="col" class="align-left">Score year</th><th scope="col" class="align-left">Status</th>' +
+          '<th scope="col" class="align-left">Data run</th><th scope="col" class="align-left">OpenAlex snapshot</th>' +
+          '<th scope="col" class="align-left">Norwegian Register snapshot</th></tr></thead><tbody>' +
+          index.years.map(row).join('') + '</tbody></table>'
+        : 'No score years published yet.';
+    } catch (error) {
+      target.textContent = `The score years could not be loaded (${error.message}).`;
+    }
+  </script>
+</body>
+</html>
