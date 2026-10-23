@@ -1,0 +1,125 @@
+{
+  "date": "2026-10-23",
+  "status": "COMPLETE",
+  "website": "https://opindx.org",
+  "source_commit": "9a8e3920b1e06c62c1c9d479b35ad4b468196d40",
+  "software_tag": "software-v0.5.0",
+  "dataset_tag": "data-2026-09-v5",
+  "software": {
+    "kind": "software",
+    "version": "0.5.0",
+    "record_id": 23599868,
+    "doi": "10.5281/zenodo.23599868",
+    "url": "https://zenodo.org/records/23599868",
+    "conceptrecid": "23108423",
+    "files_verified": 6,
+    "all_remote_md5_and_sizes_match": true,
+    "public_download_sha256_verified": [
+      "release-manifest.json",
+      "opindx-replication-0.5.0.zip"
+    ],
+    "creator_and_affiliations_verified": true,
+    "licence": "mit-license",
+    "software_dataset_links_verified": true,
+    "github_receipt_verified": true
+  },
+  "dataset": {
+    "kind": "dataset",
+    "version": "2026-09-v5",
+    "record_id": 23599869,
+    "doi": "10.5281/zenodo.23599869",
+    "url": "https://zenodo.org/records/23599869",
+    "conceptrecid": "23108620",
+    "files_verified": 62,
+    "all_remote_md5_and_sizes_match": true,
+    "public_download_sha256_verified": [
+      "release-manifest.json",
+      "ojf5_scores_2025.parquet",
+      "ojf5_data_dictionary.csv"
+    ],
+    "creator_and_affiliations_verified": true,
+    "licence": "cc-by-4.0",
+    "software_dataset_links_verified": true,
+    "github_receipt_verified": true
+  },
+  "github_releases": {
+    "software": {
+      "tag": "software-v0.5.0",
+      "id": 422021595,
+      "url": "https://github.com/bread-n-roses/Opindx/releases/tag/software-v0.5.0",
+      "draft": false,
+      "files_verified": 6,
+      "target_commit": "9a8e3920b1e06c62c1c9d479b35ad4b468196d40",
+      "published_at": "2026-10-23T16:02:52Z"
+    },
+    "dataset": {
+      "tag": "data-2026-09-v5",
+      "id": 422021693,
+      "url": "https://github.com/bread-n-roses/Opindx/releases/tag/data-2026-09-v5",
+      "draft": false,
+      "files_verified": 62,
+      "target_commit": "9a8e3920b1e06c62c1c9d479b35ad4b468196d40",
+      "published_at": "2026-10-23T15:54:13Z"
+    }
+  },
+  "source_archive_files": 149,
+  "source_archive_from_immutable_tag": true,
+  "prior_nf_ans_and_ojf2_annual_files_byte_identical": 30,
+  "frozen_nf_ans_pins_unchanged": true,
+  "replication_tests_passed": 142,
+  "website_builder_tests_passed": 6,
+  "live_code_assets_verified": 11,
+  "live_annual_parquets_verified": 15,
+  "interactive_visual_browser_qa": false,
+  "sources": [
+    "OpenAlex (CC0)",
+    "Norwegian Register (NLOD 2.0)"
+  ],
+  "proprietary_inputs_or_outputs_in_release": false,
+  "workflows": [
+    {
+      "id": 39983477395,
+      "name": "Deploy website",
+      "status": "completed",
+      "conclusion": "skipped",
+      "attempt": 1,
+      "url": "https://github.com/bread-n-roses/Opindx/actions/runs/39983477395"
+    },
+    {
+      "id": 39983477339,
+      "name": "Publish finalized Opindx release to Zenodo",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "url": "https://github.com/bread-n-roses/Opindx/actions/runs/39983477339"
+    },
+    {
+      "id": 39982257038,
+      "name": "Deploy website",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "url": "https://github.com/bread-n-roses/Opindx/actions/runs/39982257038"
+    },
+    {
+      "id": 39982251515,
+      "name": "Deploy website",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "url": "https://github.com/bread-n-roses/Opindx/actions/runs/39982251515"
+    },
+    {
+      "id": 39982251342,
+      "name": "Publish finalized Opindx release to Zenodo",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 2,
+      "url": "https://github.com/bread-n-roses/Opindx/actions/runs/39982251342"
+    }
+  ],
+  "publication_recovery": "Reserved Zenodo draft metadata was initialized with exact bundle/version markers before retrying. The previous published version links did not expose the reserved draft. Existing published records were never changed.",
+  "ordinary_code_pushes_publish_zenodo": false,
+  "archive_note": "Software/data tags and release bundles are immutable. These outcome receipts were added after publication; use software-v0.5.0 to rebuild the exact software archive.",
+  "temporary_asset_copy_branch_removed": true
+}
